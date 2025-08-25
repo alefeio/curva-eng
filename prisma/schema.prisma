@@ -23,8 +23,8 @@ model Account {
   id_token          String?
   session_state     String?
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt         DateTime @default(now()) // Adicionado
-  updatedAt         DateTime @updatedAt // Adicionado
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@unique([provider, providerAccountId])
 }
@@ -35,8 +35,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now()) // Adicionado
-  updatedAt    DateTime @updatedAt // Adicionado
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model User {
@@ -48,9 +48,15 @@ model User {
   role          String?   @default("USER")
   accounts      Account[]
   sessions      Session[]
-  site          Site?     // Relacionamento com o novo model Site
-  createdAt     DateTime  @default(now()) // Adicionado
-  updatedAt     DateTime  @updatedAt // Adicionado
+  site          Site?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relações com os novos modelos
+  tasksCreated    Task[]    @relation("TaskAuthor")
+  tasksAssigned   Task[]    @relation("TaskAssignee")
+  filesUploaded   File[]
+  messagesSent    Message[]
 }
 
 model VerificationToken {
@@ -58,8 +64,8 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
-  createdAt  DateTime @default(now()) // Adicionado
-  updatedAt  DateTime @updatedAt // Adicionado
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
 }
@@ -138,22 +144,83 @@ model ColecaoItem {
   view         Int?
 }
 
-// Novo model 'Site'
 model Site {
-  id                   String    @id @default(cuid())
-  userId               String    @unique
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tag_google_ads       String?
+  id                 String    @id @default(cuid())
+  userId             String    @unique
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag_google_ads     String?
   tag_google_analytics String?
-  tag_meta             String?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  tag_meta           String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model Subscriber {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   name      String
-  email     String    @unique
+  email     String   @unique
   phone     String?
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
+}
+
+// Novos modelos para o sistema de gestão da Curva Engenharia
+
+enum TaskStatus {
+  FEITO
+  PENDENTE
+  ATRASADO
+  URGENTE
+}
+
+model Task {
+  id             String      @id @default(cuid())
+  title          String
+  description    String?
+  status         TaskStatus  @default(PENDENTE)
+  priority       Int         @default(0) // Prioridade 0, 1, 2...
+  dueDate        DateTime?
+  
+  // Relacionamento com o autor da tarefa
+  author         User        @relation("TaskAuthor", fields: [authorId], references: [id])
+  authorId       String
+
+  // Relacionamento com a pessoa designada para a tarefa
+  assignedTo     User        @relation("TaskAssignee", fields: [assignedToId], references: [id])
+  assignedToId   String
+
+  // Relacionamento com arquivos anexados à tarefa
+  files          File[]
+  
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
+}
+
+model File {
+  id             String    @id @default(cuid())
+  url            String    // URL do arquivo na Cloudinary
+  filename       String    // Nome original do arquivo
+  mimetype       String    // Tipo do arquivo (ex: 'application/pdf')
+
+  // Relacionamento com o usuário que fez o upload
+  uploadedBy     User      @relation(fields: [uploadedById], references: [id])
+  uploadedById   String
+  
+  // Relacionamento com a tarefa à qual o arquivo pertence (opcional)
+  task           Task?     @relation(fields: [taskId], references: [id])
+  taskId         String?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  content        String
+  
+  // Relacionamento com o autor da mensagem
+  sender         User      @relation(fields: [senderId], references: [id])
+  senderId       String
+
+  createdAt      DateTime  @default(now())
 }
