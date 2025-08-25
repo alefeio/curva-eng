@@ -1,0 +1,159 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now()) // Adicionado
+  updatedAt         DateTime @updatedAt // Adicionado
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now()) // Adicionado
+  updatedAt    DateTime @updatedAt // Adicionado
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          String?   @default("USER")
+  accounts      Account[]
+  sessions      Session[]
+  site          Site?     // Relacionamento com o novo model Site
+  createdAt     DateTime  @default(now()) // Adicionado
+  updatedAt     DateTime  @updatedAt // Adicionado
+}
+
+model VerificationToken {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now()) // Adicionado
+  updatedAt  DateTime @updatedAt // Adicionado
+
+  @@unique([identifier, token])
+}
+
+model Menu {
+  id      Int     @id @default(1)
+  logoUrl String?
+  links   Json
+}
+
+model Banner {
+  id      Int  @id @default(1)
+  banners Json
+}
+
+model HomepageSection {
+  id        String    @id @default(cuid())
+  type      String
+  order     Int
+  content   Json
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Testimonial {
+  id        String    @id @default(cuid())
+  name      String
+  type      String
+  content   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model FAQ {
+  id        String    @id @default(cuid())
+  pergunta  String
+  resposta  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Colecao {
+  id          String        @id @default(cuid())
+  title       String
+  subtitle    String?
+  description String?
+  bgcolor     String?
+  buttonText  String?
+  buttonUrl   String?
+  items       ColecaoItem[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+  order       Int?
+}
+
+model ColecaoItem {
+  id           String    @id @default(cuid())
+  productMark  String
+  productModel String
+  cor          String
+  img          String
+  slug         String    @unique
+  colecao      Colecao   @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
+  colecaoId    String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+  size         String?
+  price        Int?
+  price_card   Int?
+  like         Int?
+  view         Int?
+}
+
+// Novo model 'Site'
+model Site {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag_google_ads       String?
+  tag_google_analytics String?
+  tag_meta             String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model Subscriber {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  phone     String?
+  createdAt DateTime  @default(now())
+}
