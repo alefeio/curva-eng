@@ -80,15 +80,15 @@ const Footer = ({ menuData }: MenuProps) => {
                         </div>
                         <h4 className="font-bold text-white text-lg mt-6 mb-2">Siga-nos</h4>
                         <div className="flex space-x-4">
-                            <a href="#" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="text-2xl hover:text-green-500 transition-colors">
+                            <a href="https://wa.me//5591982016888?text=Gostaria de solicitar um orçamento." target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="text-2xl hover:text-green-500 transition-colors">
                                 <FaWhatsapp />
                             </a>
-                            <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-2xl hover:text-pink-500 transition-colors">
+                            <a href="https://www.instagram.com/curvaengenhariaearquitetura" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-2xl hover:text-pink-500 transition-colors">
                                 <FaInstagram />
                             </a>
-                            <a href="#" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-2xl hover:text-blue-500 transition-colors">
+                            {/* <a href="#" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-2xl hover:text-blue-500 transition-colors">
                                 <FaLinkedin />
-                            </a>
+                            </a> */}
                         </div>
                     </div>
 
