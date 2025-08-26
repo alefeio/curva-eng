@@ -17,12 +17,12 @@ interface TaskFormData {
 
 interface User {
   id: string;
-  name: string;
+  name: string | null; // Corrigido para aceitar null
 }
 
 export default function NewTaskPage() {
   const router = useRouter();
-  const { data: session } = useSession(); // Obtenha a sessão do usuário
+  const { data: session, status } = useSession(); // Obtenha a sessão do usuário e o status
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
     description: '',
@@ -107,6 +107,27 @@ export default function NewTaskPage() {
       setLoading(false);
     }
   };
+
+  if (status === 'loading') {
+    return (
+      <AdminLayout>
+        <div className="container mx-auto p-4 md:p-8 text-center text-gray-500">
+          <p>Carregando...</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <AdminLayout>
+        <div className="container mx-auto p-4 md:p-8 text-center text-red-500">
+          <p>Você precisa estar logado para acessar esta página.</p>
+          <p>Por favor, <Link href="/auth/signin" className="underline">faça login</Link>.</p>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
