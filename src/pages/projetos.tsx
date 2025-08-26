@@ -62,8 +62,23 @@ const ProjetosPage: React.FC<ProjetosPageProps> = ({ menu }) => {
     return (
         <>
             <Head>
-                <title>Portfólio de Projetos | Curva Engenharia</title>
-                <meta name="description" content="Explore o portfólio de projetos da Curva Engenharia, com cases de sucesso em projetos residenciais, comerciais e governamentais." />
+                <title>Portfólio de Projetos | Engenharia, Arquitetura e Reformas em Belém-PA</title>
+                <meta name="description" content="Explore nosso portfólio de projetos de engenharia e arquitetura em Belém-PA. Veja nossos cases de sucesso em projetos residenciais, comerciais, institucionais e de obras públicas. Experiência e qualidade comprovadas!" />
+                <meta name="keywords" content="portfólio engenharia Belém, projetos de arquitetura, cases de sucesso, projetos residenciais Belém, obras comerciais, projetos governamentais, reformas e construção, projetos concluídos, galeria de obras" />
+                
+                {/* Metas para Redes Sociais (Open Graph) */}
+                <meta property="og:title" content="Portfólio de Projetos | Curva Engenharia e Arquitetura" />
+                <meta property="og:description" content="Conheça nossos projetos em Belém-PA. Do design de interiores à gestão de obras, veja como transformamos ideias em realidade." />
+                <meta property="og:image" content="https://curva-eng.vercel.app/images/portfolio.jpg" />
+                <meta property="og:url" content="https://curva-eng.vercel.app/projetos" />
+                <meta property="og:type" content="website" />
+
+                {/* Metas para Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Portfólio de Projetos Concluídos" />
+                <meta name="twitter:description" content="Veja nossos projetos de sucesso em engenharia, arquitetura e reformas em Belém-PA." />
+                <meta name="twitter:image" content="https://curva-eng.vercel.app/images/portfolio.jpg" />
+
             </Head>
 
             <div className="min-h-screen flex flex-col">

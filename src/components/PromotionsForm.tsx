@@ -68,53 +68,53 @@ const PromotionsForm: React.FC = () => {
     return (
         <>
             <div id="fique-por-dentro">&nbsp;</div>
-            <div className="bg-primary py-12 px-4 sm:px-6 lg:px-8">
+            <div className="bg-primary py-12 px-4 sm:px-6 lg:px-8 text-white rounded-lg shadow-xl"> {/* Ajuste na cor de fundo */}
                 <div className="max-w-5xl mx-auto text-center">
-                    <h3 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-center">
-                        Fique por dentro das nossas promoções
+                    <h3 className="text-white font-serif text-2xl md:text-3xl font-bold mb-6 text-center">
+                        Receba Nossas Novidades e Insights!
                     </h3>
-                    <p className="text-lg   mb-8">
-                        Cadastre-se para receber novidades sobre nossos lançamentos e descontos exclusivos.
+                    <p className="text-white text-lg mb-8">
+                        Cadastre-se para receber conteúdos exclusivos sobre projetos, tendências em engenharia e arquitetura, e cases de sucesso da Curva.
                     </p>
-                    <form onSubmit={handleSubmit} className="flex flex-col xl:flex-row items-center justify-center gap-4">
+                    <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center gap-4">
                         <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="Nome"
+                            placeholder="Seu Nome"
                             required
-                            className="w-full sm:w-1/3 px-4 py-3 border border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
+                            className="w-full sm:w-1/3 px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500" // Ajuste de cor
                         />
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email"
+                            placeholder="Seu Melhor E-mail"
                             required
-                            className="w-full sm:w-1/3 px-4 py-3 border border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
+                            className="w-full sm:w-1/3 px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500" // Ajuste de cor
                         />
                         <input
-                            type="text" // Alterado para 'text' conforme solicitado
+                            type="text"
                             value={phone}
-                            onChange={handlePhoneChange} // Usando a nova função para aplicar a máscara
-                            placeholder="WhatsApp"
-                            className="w-full sm:w-1/3 px-4 py-3 border border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
+                            onChange={handlePhoneChange}
+                            placeholder="Seu WhatsApp (Opcional)"
+                            className="w-full sm:w-1/3 px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500" // Ajuste de cor
                         />
+                        <button
+                            type="submit"
+                            disabled={status === 'submitting'}
+                            className="mt-4 w-full sm:w-auto px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-md transition-colors duration-200 disabled:bg-gray-600 disabled:cursor-not-allowed" // Ajuste de cor
+                        >
+                            {status === 'submitting' ? 'Cadastrando...' : 'Cadastrar na Newsletter'}
+                        </button>
                     </form>
-                    <button
-                        type="submit"
-                        disabled={status === 'submitting'}
-                        className="mt-4 w-full sm:w-auto px-6 py-3 bg-[#A9876D] hover:bg-primary text-white font-semibold rounded-md transition-colors duration-200"
-                    >
-                        {status === 'submitting' ? 'Cadastrando...' : 'Cadastrar'}
-                    </button>
                     {status === 'success' && (
-                        <p className="mt-4 text-primary font-medium">
-                            Cadastro realizado com sucesso!
+                        <p className="mt-4 text-white font-medium">
+                            Cadastro realizado com sucesso! Em breve você receberá nossas novidades.
                         </p>
                     )}
                     {status === 'error' && (
-                        <p className="mt-4 text-primary font-medium">
+                        <p className="mt-4 text-white font-medium">
                             Ocorreu um erro no cadastro. Por favor, tente novamente.
                         </p>
                     )}

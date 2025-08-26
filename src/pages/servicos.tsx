@@ -63,8 +63,23 @@ const ServicosPage: React.FC<ServicosPageProps> = ({ menu }) => {
     return (
         <>
             <Head>
-                <title>Nossos Serviços | Curva Engenharia</title>
-                <meta name="description" content="Conheça a gama completa de serviços de engenharia e arquitetura da Curva Engenharia, incluindo projetos, gerenciamento de obras e consultoria." />
+                <title>Projetos e Obras em Belém-PA | Serviços de Engenharia e Arquitetura Curva</title>
+                <meta name="description" content="Conheça nossos serviços completos de engenharia civil, arquitetura, design de interiores e gerenciamento de obras em Belém-PA. Projetos residenciais, comerciais e institucionais com foco em inovação e qualidade." />
+                <meta name="keywords" content="serviços de engenharia civil, projetos de arquitetura Belém, gerenciamento de obras, reformas, construção, design de interiores Belém, laudo técnico, projetos estruturais, paisagismo, Curva Engenharia e Arquitetura" />
+                
+                {/* Metas para Redes Sociais (Open Graph) */}
+                <meta property="og:title" content="Serviços de Engenharia e Arquitetura em Belém-PA" />
+                <meta property="og:description" content="Nossa equipe oferece projetos e soluções completas em engenharia e arquitetura para projetos residenciais, comerciais e obras públicas." />
+                <meta property="og:image" content="https://curva-eng.vercel.app/images/predios.jpg" />
+                <meta property="og:url" content="https://curva-eng.vercel.app/servicos" />
+                <meta property="og:type" content="website" />
+
+                {/* Metas para Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Serviços Curva Engenharia e Arquitetura" />
+                <meta name="twitter:description" content="Projetos e soluções em engenharia, arquitetura e gestão de obras em Belém-PA. Transforme seu projeto em realidade." />
+                <meta name="twitter:image" content="https://curva-eng.vercel.app/images/predios.jpg" />
+
             </Head>
 
             <div className="min-h-screen flex flex-col">

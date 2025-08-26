@@ -105,16 +105,28 @@ export default function SobrePage({ banners, menu, testimonials, faqs, colecoes 
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
-        "name": "My Dress - Aluguel de Vestidos",
-        "image": "https://www.mydressbelem.com.br/images/logo.png",
+        "name": "Curva Engenharia e Arquitetura",
+        "image": "https://curva-eng.vercel.app/images/logo.png",
         "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Passagem Tapajós 6, Tv. da Estrela, 46, Marco",
+            "streetAddress": "Tv. da Estrela, 46, Marco",
             "addressLocality": "Belém",
             "addressRegion": "PA",
             "postalCode": "66093-065",
             "addressCountry": "BR"
-        }
+        },
+        "url": "https://curva-eng.vercel.app/sobre",
+        "telephone": "+5591985014093",
+        "hasMap": "https://www.google.com/maps/place/R.+da+Estrela,+46+-+Marco,+Bel%C3%A9m+-+PA,+66093-065/",
+        "areaServed": {
+            "@type": "City",
+            "name": "Belém"
+        },
+        "priceRange": "$$",
+        "sameAs": [
+            "https://www.instagram.com/curvaengenharia/",
+            "https://www.linkedin.com/company/curva-engenharia-e-arquitetura"
+        ]
     };
 
     const [showExitModal, setShowExitModal] = useState(false);
@@ -123,7 +135,6 @@ export default function SobrePage({ banners, menu, testimonials, faqs, colecoes 
         const modalShownInSession = sessionStorage.getItem('exitModalShown');
 
         const handleMouseLeave = (e: MouseEvent) => {
-            // CORREÇÃO: Removida a condição e.clientY <= 0 para tornar a detecção mais robusta.
             if (!modalShownInSession) {
                 setShowExitModal(true);
                 sessionStorage.setItem('exitModalShown', 'true');
@@ -144,84 +155,26 @@ export default function SobrePage({ banners, menu, testimonials, faqs, colecoes 
     return (
         <>
             <Head>
-                <Script
-                    strategy="afterInteractive"
-                    dangerouslySetInnerHTML={{
-                        __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-W4S948NS');`
-                    }}
-                />
-                <title>My Dress Belém | Aluguel de Vestidos de Festa para Madrinhas, Formandas e Convidadas | O melhor custo-benefício</title>
-                <meta name="description" content="Aluguel de vestidos de festa em Belém‑PA: madrinhas, formandas, convidadas. Atendimento por agendamento, atendimento personalizado, catálogo atualizado, agende via WhatsApp 91 98581-0208." />
-                <meta name="keywords" content="aluguel vestidos festa Belém, aluguel vestidos madrinhas Belém, vestidos formatura Belém, aluguel vestidos convidadas Belém, My Dress Belém, aluguel de trajes finos em belém, aluguel de vestidos de festa belem, aluguel de vestidos de gala belem, aluguel de vestidos de festa para madrinhas belem, aluguel de vestidos de festa para formandas belem, aluguel de vestidos de festa para convidadas belem, loja de aluguel de vestido belem, mydress, vestidos de debutantes, vestidos de festa, aluguel de roupas pedreira, aluguel de roupas marco, aluguel de roupas são brás, aluguel de roupas são braz, aluguel de roupas nazaré, aluguel de roupas umarizal, aluguel de roupas, aluguel roupa festa, aluguel vestidos festa luxo, vestido para alugar" />
-                <meta property="og:title" content="My Dress Belém | Aluguel de Vestidos de Festa" />
-                <meta property="og:description" content="Aluguel de vestidos elegantes para madrinhas, formandas e convidadas em Belém‑PA. Atendimento exclusivo por agendamento via WhatsApp." />
-                <meta property="og:image" content="https://www.mydressbelem.com.br/images/banner/banner1.jpg" />
-                <meta property="og:url" content="https://www.mydressbelem.com.br" />
+                <title>Sobre a Curva Engenharia e Arquitetura | Nossa História e Missão em Belém-PA</title>
+                <meta name="description" content="Conheça a Curva Engenharia e Arquitetura. Nossa equipe de especialistas em Belém-PA oferece soluções inovadoras em engenharia civil, arquitetura e gerenciamento de obras, transformando desafios em projetos de sucesso." />
+                <meta name="keywords" content="história Curva Engenharia, equipe de engenharia Belém, missão e valores, expertise em construção, projetos de engenharia Belém, arquitetos em Belém-PA, portfólio de obras" />
+
+                {/* Metas para Redes Sociais (Open Graph) */}
+                <meta property="og:title" content="Conheça a Curva Engenharia | História, Missão e Expertise" />
+                <meta property="og:description" content="Nossa equipe de especialistas em Belém-PA está pronta para transformar seu projeto em realidade com qualidade, inovação e confiança." />
+                <meta property="og:image" content="https://curva-eng.vercel.app/images/aperto-mao.jpg" />
+                <meta property="og:url" content="https://curva-eng.vercel.app/sobre" />
                 <meta property="og:type" content="website" />
+
+                {/* Metas para Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="My Dress Belém | Aluguel de Vestidos de Festa" />
-                <meta name="twitter:description" content="Aluguel de vestidos elegantes em Belém‑PA. Atendimento por agendamento via WhatsApp." />
-                <meta name="twitter:image" content="https://www.mydressbelem.com.br/images/banner/banner1.jpg" />
+                <meta name="twitter:title" content="Sobre a Curva Engenharia e Arquitetura" />
+                <meta name="twitter:description" content="Conheça nossa equipe de engenheiros e arquitetos em Belém-PA. Projetos personalizados com foco em inovação e qualidade." />
+                <meta name="twitter:image" content="https://curva-eng.vercel.app/images/aperto-mao.jpg" />
+
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
                 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
-                <Script id="google-ads-init" strategy="afterInteractive">
-                    {`
-                        window.dataLayer = window.dataLayer || [];
-                        function gtag(){dataLayer.push(arguments);}
-                        gtag('js', new Date());
-                        gtag('config', 'AW-17411208522');
-                    `}
-                </Script>
-
-                {/* Facebook Pixel */}
-                <Script id="facebook-pixel" strategy="afterInteractive">
-                    {`
-                        !function(f,b,e,v,n,t,s)
-                        {if(f.fbq)return;n=f.fbq=function(){
-                        n.callMethod ?
-                        n.callMethod.apply(n,arguments) : n.queue.push(arguments)};
-                        if(!f._fbq)f._fbq=n;
-                        n.push=n; n.loaded=!0; n.version='2.0';
-                        n.queue=[]; t=b.createElement(e); t.async=!0;
-                        t.src=v; s=b.getElementsByTagName(e)[0];
-                        s.parentNode.insertBefore(t,s)}
-                        (window, document,'script',
-                        'https://connect.facebook.net/en_US/fbevents.js');
-                        fbq('init', '754061187167582');
-                        fbq('track', 'PageView');
-                    `}
-                </Script>
             </Head>
-
-            {/* Google Analytics (via GTM) - Código para logo após a tag <body> */}
-            <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W4S948NS"
-                height="0" width="0" style={{ display: 'none', visibility: 'hidden' }}></iframe></noscript>
-
-            {/* JSON-LD */}
-            <Script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
-
-            {/* Google Ads */}
-            <Script
-                src="https://www.googletagmanager.com/gtag/js?id=AW-17411208522"
-                strategy="afterInteractive"
-            />
-
-            <noscript>
-                <img
-                    height="1"
-                    width="1"
-                    style={{ display: 'none' }}
-                    src="https://www.facebook.com/tr?id=754061187167582&ev=PageView&noscript=1"
-                    alt="Facebook Pixel"
-                />
-            </noscript>
 
             <div className="min-h-screen">
                 <Analytics />

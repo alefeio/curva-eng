@@ -19,18 +19,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        // Verifica se o email já está na tabela de marketing para evitar duplicatas
+        // Verifica se o email já está cadastrado para evitar duplicatas
         const existingSubscriber = await prisma.subscriber.findUnique({
             where: { email },
         });
 
         if (existingSubscriber) {
-            return res.status(409).json({ message: 'Este email já está cadastrado para promoções.' });
+            return res.status(409).json({ message: 'Este email já está cadastrado em nossa newsletter.' });
         }
 
         // Transação para garantir que os dados sejam salvos em ambas as tabelas ou em nenhuma
         await prisma.$transaction([
-            // Salva os dados na tabela de marketing
+            // Salva os dados na tabela de subscribers/marketing
             prisma.subscriber.create({
                 data: {
                     name,
@@ -38,53 +38,54 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     phone,
                 },
             }),
-            // Salva um registro básico na tabela de usuários para futuro login
+            // Salva um registro básico na tabela de usuários para futuro login (se aplicável)
             prisma.user.upsert({
                 where: { email },
-                update: {}, // Não faz nada se o usuário já existir
+                update: {},
                 create: {
                     name,
                     email,
-                    role: 'USER', // Role padrão, pode ser alterada manualmente
+                    role: 'USER',
                 },
             }),
         ]);
 
-        // Envia o email de boas-vindas
+        // Envia o email de boas-vindas com o novo conteúdo
         await resend.emails.send({
-            from: "My Dress Belém <contato@mydressbelem.com.br>", // Altere para o seu email verificado
+            from: "Curva Engenharia <contato@curvaeng.com.br>", // Altere para seu email verificado
             to: email,
-            subject: `Fique por dentro das nossas promoções, ${name}!`,
+            subject: `Bem-vindo(a) à Newsletter da Curva Engenharia, ${name}!`,
             html: `
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Bem-vinda, ${name}!</title>
+                    <title>Bem-vindo(a), ${name}!</title>
                     <style>
                         body { font-family: sans-serif; line-height: 1.6; color: #333; }
                         .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
                         .header { text-align: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
                         .header img { max-width: 150px; }
                         .content p { margin-bottom: 15px; }
-                        .cta-button { display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #A9876D; text-decoration: none; border-radius: 5px; }
+                        .cta-button { display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #3B82F6; text-decoration: none; border-radius: 5px; }
                         .footer { text-align: center; font-size: 12px; color: #777; margin-top: 20px; }
                     </style>
                 </head>
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="https://mydressbelem.com.br/images/logo.png" alt="Logo My Dress" />
+                            <img src="https://curva-eng.vercel.app/images/logo.png" alt="Logo Curva Engenharia e Arquitetura" />
                         </div>
                         <div class="content">
                             <p>Olá, ${name}!</p>
-                            <p>Seja bem-vinda à nossa lista exclusiva de promoções! A partir de agora, você será a primeira a saber sobre os nossos descontos, coleções especiais e novidades imperdíveis.</p>
-                            <p>Prepare-se para encontrar o vestido perfeito para a sua próxima ocasião especial!</p>
+                            <p>Seja bem-vindo(a) à nossa newsletter! Agradecemos o seu interesse em acompanhar os projetos e as novidades da <strong>Curva Engenharia e Arquitetura</strong>.</p>
+                            <p>A partir de agora, você receberá conteúdos exclusivos sobre nossos cases de sucesso, insights do setor e tendências em engenharia civil e arquitetura.</p>
+                            <p>Estamos prontos para transformar sua visão em realidade.</p>
                             <p>Atenciosamente,</p>
-                            <p>A equipe My Dress Belém.</p>
-                            <p><a href="https://mydressbelem.com.br/catalogo" class="cta-button">Ver nosso catálogo</a></p>
+                            <p>A equipe Curva Engenharia e Arquitetura.</p>
+                            <p><a href="https://curva-eng.vercel.app/projetos" class="cta-button">Ver nosso Portfólio de Projetos</a></p>
                         </div>
                         <div class="footer">
-                            <p>My Dress Belém - Sua melhor opção em aluguel de vestidos de festa.</p>
+                            <p>Curva Engenharia e Arquitetura - Obras e Projetos em Belém-PA.</p>
                         </div>
                     </div>
                 </body>
@@ -92,9 +93,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             `,
         });
 
-        return res.status(200).json({ success: true, message: 'Cadastro realizado com sucesso!' });
+        return res.status(200).json({ success: true, message: 'Inscrição na newsletter realizada com sucesso!' });
     } catch (error) {
-        console.error('Erro ao cadastrar para promoções:', error);
+        console.error('Erro ao cadastrar na newsletter:', error);
         return res.status(500).json({ message: 'Erro interno do servidor.' });
     }
 }
