@@ -76,7 +76,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
 
   return (
     <div
-      className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden shadow-lg mb-8"
+      className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden shadow-lg"
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onTouchStart={handleTouchStart}
@@ -92,43 +92,43 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
         >
           {/* A imagem não é mais um link */}
           <img src={slide.url} alt={slide.title || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
-
-          {/* Container para o conteúdo do banner */}
-          {(slide.title || slide.subtitle || slide.buttonText) && (
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-start justify-end md:justify-center p-6 md:p-10 text-left">
-              <div className="container flex flex-col lg:flex-row items-start lg:items-end justify-between w-full">
-                {/* Título e Subtítulo */}
-                <div className="flex-1 mb-8">
-                  {slide.title && (
-                    <h2 className="font-sans text-3xl md:text-4xl lg:text-6xl font-bold text-white drop-shadow mb-2">
-                      {slide.title}
-                    </h2>
-                  )}
-                  {slide.subtitle && (
-                    <>
-                      <div className="w-24 border-b-2 border-accent mb-4"></div>
-                      <p className="max-w-xl text-sm md:text-md lg:text-lg text-neutral-light drop-shadow mb-4 lg:mb-0">
-                        {slide.subtitle}
-                      </p>
-                    </>
-                  )}
-                  {/* Botão com Link */}
-                  {slide.buttonText && slide.link && (
-                    <div className="mt-4">
-                      <button
-                        onClick={() => router.push(slide.link || '')}
-                        className={`py-2 px-6 rounded-md font-bold transition-all duration-300 ${slide.buttonColor || "bg-accent hover:bg-accent-dark"} text-white`}
-                      >
-                        {slide.buttonText}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       ))}
+      {/* Renderiza o conteúdo do banner ativo separadamente */}
+      {slides[current] && (slides[current].title || slides[current].subtitle || slides[current].buttonText) && (
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-start justify-end md:justify-center p-6 md:p-10 text-left">
+          <div className="container flex flex-col lg:flex-row items-start lg:items-end justify-between w-full">
+            {/* Título e Subtítulo */}
+            <div className="flex-1 mb-8">
+              {slides[current].title && (
+                <h2 className="font-sans text-3xl md:text-4xl lg:text-6xl font-bold text-white drop-shadow mb-2">
+                  {slides[current].title}
+                </h2>
+              )}
+              {slides[current].subtitle && (
+                <>
+                  <div className="w-24 border-b-2 border-accent mb-4"></div>
+                  <p className="max-w-xl text-sm md:text-md lg:text-lg text-neutral-light drop-shadow mb-4 lg:mb-0">
+                    {slides[current].subtitle}
+                  </p>
+                </>
+              )}
+              {/* Botão com Link */}
+              {slides[current].buttonText && slides[current].link && (
+                <div className="mt-4">
+                  <Link href={slides[current].link} passHref>
+                    <button
+                      className={`py-2 px-6 rounded-md font-bold transition-all duration-300 ${slides[current].buttonColor || "bg-accent hover:bg-accent-dark"} text-white`}
+                    >
+                      {slides[current].buttonText}
+                    </button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navegação e Controles */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">

@@ -9,7 +9,7 @@ const SobreNos: React.FC = () => {
       <div className="container mx-auto px-4 md:px-8">
         
         {/* Seção de Título e Introdução */}
-        <div className="text-center my-16">
+        <div className="text-center">
           <h1 className="text-4xl md:text-5xl font-bold font-serif text-orange-500 mb-4">Sobre Nós</h1>
           <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-600">
             A Curva Engenharia e Arquitetura nasceu com a missão de transformar ambientes e concretizar sonhos, unindo expertise técnica, design inovador e um compromisso inabalável com a qualidade.

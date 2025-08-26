@@ -14,6 +14,7 @@ import {
 import { MenuInterno } from 'components/MenuInterno';
 import { Analytics } from '@vercel/analytics/next';
 import ParallaxBanner from 'components/ParallaxBanner';
+import Breadcrumb from 'components/Breadcrumb';
 
 const prisma = new PrismaClient();
 
@@ -66,7 +67,7 @@ const ServicosPage: React.FC<ServicosPageProps> = ({ menu }) => {
                 <title>Projetos e Obras em Belém-PA | Serviços de Engenharia e Arquitetura Curva</title>
                 <meta name="description" content="Conheça nossos serviços completos de engenharia civil, arquitetura, design de interiores e gerenciamento de obras em Belém-PA. Projetos residenciais, comerciais e institucionais com foco em inovação e qualidade." />
                 <meta name="keywords" content="serviços de engenharia civil, projetos de arquitetura Belém, gerenciamento de obras, reformas, construção, design de interiores Belém, laudo técnico, projetos estruturais, paisagismo, Curva Engenharia e Arquitetura" />
-                
+
                 {/* Metas para Redes Sociais (Open Graph) */}
                 <meta property="og:title" content="Serviços de Engenharia e Arquitetura em Belém-PA" />
                 <meta property="og:description" content="Nossa equipe oferece projetos e soluções completas em engenharia e arquitetura para projetos residenciais, comerciais e obras públicas." />
@@ -86,6 +87,7 @@ const ServicosPage: React.FC<ServicosPageProps> = ({ menu }) => {
                 <Analytics />
                 <MenuInterno menuData={menu} />
                 <main className="flex-grow">
+                    <Breadcrumb />
                     <ServicosComponent />
                     <ParallaxBanner
                         imageUrl="/images/predios.jpg"

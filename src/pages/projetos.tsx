@@ -13,6 +13,7 @@ import {
 } from '../types/index';
 import { Analytics } from '@vercel/analytics/next';
 import { MenuInterno } from 'components/MenuInterno';
+import Breadcrumb from 'components/Breadcrumb';
 
 const prisma = new PrismaClient();
 
@@ -85,6 +86,7 @@ const ProjetosPage: React.FC<ProjetosPageProps> = ({ menu }) => {
                 <Analytics />
                 <MenuInterno menuData={menu} />
                 <main className="flex-grow">
+                    <Breadcrumb />
                     <ProjetosComponent />
                 </main>
                 <Footer menuData={menu} />

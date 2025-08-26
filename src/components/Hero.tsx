@@ -11,9 +11,9 @@ export default function Hero() {
   return (
     <section className="bg-neutral-light py-12 md:py-20">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center">
           {/* Coluna da esquerda: Conteúdo de texto */}
-          <div className="flex flex-col gap-4 text-center md:text-left">
+          <div className="flex-1 flex flex-col gap-4">
             <p className="text-accent font-semibold text-lg">Sobre nós</p>
             <h2 className="text-4xl md:text-5xl font-bold text-primary leading-tight">
               História, Missão e Expertise
@@ -29,7 +29,7 @@ export default function Hero() {
           </div>
 
           {/* Coluna da direita: Imagem */}
-          <div className="relative overflow-hidden rounded-lg shadow-lg">
+          <div className="hidden md:block flex-1 relative overflow-hidden rounded-lg shadow-lg">
             <img
               src="/images/hero.jpg"
               alt="Equipe de engenheiros e arquitetos colaborando"

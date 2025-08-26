@@ -44,7 +44,7 @@ const Footer = ({ menuData }: MenuProps) => {
                     {/* Coluna 2: Links de Navegação */}
                     <div className="flex flex-col">
                         <h4 className="font-bold text-white text-lg mb-4 text-center md:text-left">Navegue</h4>
-                        <ul className="space-y-2 text-center md:text-left">
+                        <ul className="space-y-2 text-center md:text-left list-none">
                             {links.map((link: LinkItem) => (
                                 <li>
                                     <Link

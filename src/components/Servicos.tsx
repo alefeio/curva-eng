@@ -12,7 +12,7 @@ const Servicos: React.FC = () => {
       <div className="container mx-auto px-4 md:px-8">
         
         {/* Seção Principal de Título e Introdução */}
-        <div className="text-center my-16">
+        <div className="text-center">
           <h1 className="text-4xl md:text-5xl font-bold font-serif text-orange-500 mb-4">Soluções Completas para o Seu Projeto</h1>
           <p className="max-w-4xl mx-auto text-lg md:text-xl text-gray-600">
             Na Curva Engenharia e Arquitetura, unimos expertise técnica e inovação para entregar projetos que transformam ambientes e superam expectativas. Atuamos em múltiplos segmentos, garantindo soluções personalizadas e de alta qualidade para cada necessidade.

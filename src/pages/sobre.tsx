@@ -29,6 +29,7 @@ import Footer from 'components/Footer';
 import ContactForm from 'components/ContactForm';
 import SobreNos from 'components/SobreNos';
 import { MenuInterno } from 'components/MenuInterno';
+import Breadcrumb from 'components/Breadcrumb';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -177,6 +178,7 @@ export default function SobrePage({ banners, menu, testimonials, faqs, colecoes 
             </Head>
 
             <div className="min-h-screen">
+                <Breadcrumb />
                 <Analytics />
                 <MenuInterno menuData={menu} />
                 <main className="max-w-full mx-auto">
