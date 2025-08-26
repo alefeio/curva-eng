@@ -137,9 +137,9 @@ export default function MenuForm() {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-textcolor-50">Gerenciar Menu</h2>
+      <h2 className="text-2xl font-bold mb-4  ">Gerenciar Menu</h2>
       {message && (
-        <p className={`mb-4 text-center ${message.includes("sucesso") ? "text-green-600" : "text-red-600"}`}>
+        <p className={`mb-4 text-center ${message.includes("sucesso") ? "text-primary" : "text-primary"}`}>
           {message}
         </p>
       )}
@@ -153,7 +153,7 @@ export default function MenuForm() {
         <input
           type="file"
           onChange={handleLogoChange}
-          className="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+          className="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-primary"
         />
         {logoUrl && (
           <div className="mt-4">
@@ -207,7 +207,7 @@ export default function MenuForm() {
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors"
+              className="w-full bg-primary text-white p-2 rounded-md hover:bg-primary transition-colors"
             >
               Adicionar Link
             </button>
@@ -229,7 +229,7 @@ export default function MenuForm() {
                 <button
                   type="button"
                   onClick={() => handleLinkRemove(link.id)}
-                  className="p-2 text-red-500 hover:bg-red-100 rounded-full"
+                  className="p-2 text-primary hover:bg-primary rounded-full"
                   aria-label={`Remover link ${link.text}`}
                 >
                   <FaTrash />
@@ -243,7 +243,7 @@ export default function MenuForm() {
       <button
         type="button"
         onClick={handleSave}
-        className={`w-full p-3 text-white font-bold rounded-md ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+        className={`w-full p-3 text-white font-bold rounded-md ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary"
           }`}
         disabled={isButtonDisabled}
       >

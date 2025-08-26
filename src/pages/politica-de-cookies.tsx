@@ -114,7 +114,7 @@ const PoliticaDeCookies = ({ menuData }: PoliticaDeCookiesProps) => {
           Se você tiver alguma dúvida sobre nossa Política de Cookies, por favor, entre em contato conosco.
         </p>
         <p className="mt-4">
-          <Link href="/" className="text-orange-600 hover:underline">
+          <Link href="/" className="text-primary hover:underline">
             Voltar para a página inicial
           </Link>
         </p>

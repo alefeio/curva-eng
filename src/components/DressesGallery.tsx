@@ -79,7 +79,7 @@ export default function DressesGallery({ colecoes }: DressesGalleryProps) {
                     <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">
                         Conheça nossa Coleção
                     </h2>
-                    <p className="border-t-2 border-textcolor-200 text-background-700 px-4 pt-6 w-fit m-auto">
+                    <p className="border-t-2 border-primary text-primary px-4 pt-6 w-fit m-auto">
                         <strong>
                             Vestidos modernos, elegantes, acessíveis e sempre atualizados com as últimas tendências.
                         </strong>

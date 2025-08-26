@@ -113,13 +113,13 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
 
   return (
     <AdminLayout>
-      <h1 className="text-textcolor-900 text-3xl font-bold mb-6 text-textcolor-50">Gerenciar Perguntas Frequentes</h1>
+      <h1 className="  text-3xl font-bold mb-6  ">Gerenciar Perguntas Frequentes</h1>
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-lg font-semibold mb-4">{editId ? 'Editar FAQ' : 'Adicionar Nova FAQ'}</h2>
-        {error && <div className="bg-red-200 text-red-800 p-2 rounded mb-4">{error}</div>}
+        {error && <div className="bg-primary text-primary p-2 rounded mb-4">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-graytone-700">Pergunta</label>
+            <label className="block text-sm font-medium  ">Pergunta</label>
             <input
               type="text"
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
@@ -129,7 +129,7 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-graytone-700">Resposta</label>
+            <label className="block text-sm font-medium  ">Resposta</label>
             <textarea
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               value={resposta}
@@ -140,7 +140,7 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
           </div>
           <button
             type="submit"
-            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-textcolor-50 bg-background-500 hover:bg-background-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium   bg-primary hover:bg-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             disabled={loading}
           >
             {loading ? 'Salvando...' : editId ? 'Salvar Alterações' : 'Adicionar FAQ'}
@@ -153,7 +153,7 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
                 setResposta('');
                 setEditId(null);
               }}
-              className="mt-2 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-graytone-600 hover:bg-graytone-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-graytone-500"
+              className="mt-2 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-dark"
             >
               Cancelar
             </button>
@@ -166,7 +166,7 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
             <div key={faq.id} className="border-b last:border-b-0 py-4 px-6 flex justify-between items-start">
               <div className="flex-1">
                 <h3 className="text-lg font-bold">{faq.pergunta}</h3>
-                <p className="text-graytone-700 mt-1 whitespace-pre-line">{faq.resposta}</p>
+                <p className="  mt-1 whitespace-pre-line">{faq.resposta}</p>
               </div>
               <div className="flex space-x-2 ml-4">
                 <button
@@ -177,7 +177,7 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
                 </button>
                 <button
                   onClick={() => handleDelete(faq.id)}
-                  className="text-sm text-red-600 hover:text-red-800"
+                  className="text-sm text-primary hover:text-primary"
                 >
                   Excluir
                 </button>

@@ -2,13 +2,18 @@
 
 import { useState, useEffect } from "react";
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
+// Interface atualizada para corresponder ao BannerForm.tsx
 interface BannerItem {
   id: string;
   url: string;
   title?: string;
+  subtitle?: string;
   link?: string;
   target?: string;
+  buttonText?: string;
+  buttonColor?: string;
 }
 
 interface HeroSliderProps {
@@ -22,6 +27,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
   const [playing, setPlaying] = useState(true);
   const [startX, setStartX] = useState<number | null>(null);
   const slides = banners[0]?.banners || [];
+  const router = useRouter();
 
   useEffect(() => {
     if (!playing || slides.length === 0) return;
@@ -70,7 +76,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
 
   return (
     <div
-      className="relative w-full h-[200px] md:h-[250px] lg:h-[280px] xl:h-[480px] overflow-hidden shadow-lg mb-8 mt-[4.7rem] md:mt-[7.1rem]"
+      className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden shadow-lg mb-8"
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onTouchStart={handleTouchStart}
@@ -84,28 +90,52 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
           key={slide.id}
           className={`absolute inset-0 transition-opacity duration-700 ${idx === current ? "opacity-100 z-0" : "opacity-0 z-0"}`}
         >
-          {slide.link ? (
-            <Link href={slide.link} passHref legacyBehavior>
-              <a target={slide.target}>
-                <img src={slide.url} alt={slide.title || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
-              </a>
-            </Link>
-          ) : (
-            <img src={slide.url} alt={slide.title || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
-          )}
-          {slide.title && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-graytone-950/60 to-transparent p-6">
-              <h2 className="font-serif text-2xl text-textcolor-50 md:text-3xl font-bold drop-shadow">{slide.title}</h2>
+          {/* A imagem não é mais um link */}
+          <img src={slide.url} alt={slide.title || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
+
+          {/* Container para o conteúdo do banner */}
+          {(slide.title || slide.subtitle || slide.buttonText) && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-start justify-end md:justify-center p-6 md:p-10 text-left">
+              <div className="container flex flex-col lg:flex-row items-start lg:items-end justify-between w-full">
+                {/* Título e Subtítulo */}
+                <div className="flex-1 mb-8">
+                  {slide.title && (
+                    <h2 className="font-sans text-3xl md:text-4xl lg:text-6xl font-bold text-white drop-shadow mb-2">
+                      {slide.title}
+                    </h2>
+                  )}
+                  {slide.subtitle && (
+                    <>
+                      <div className="w-24 border-b-2 border-accent mb-4"></div>
+                      <p className="max-w-xl text-sm md:text-md lg:text-lg text-neutral-light drop-shadow mb-4 lg:mb-0">
+                        {slide.subtitle}
+                      </p>
+                    </>
+                  )}
+                  {/* Botão com Link */}
+                  {slide.buttonText && slide.link && (
+                    <div className="mt-4">
+                      <button
+                        onClick={() => router.push(slide.link || '')}
+                        className={`py-2 px-6 rounded-md font-bold transition-all duration-300 ${slide.buttonColor || "bg-accent hover:bg-accent-dark"} text-white`}
+                      >
+                        {slide.buttonText}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>
       ))}
 
+      {/* Navegação e Controles */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
         {slides.map((_, idx) => (
           <button
             key={idx}
-            className={`w-3 h-3 rounded-full ${idx === current ? "bg-textcolor-50" : "bg-textcolor-50/50 opacity-70"}`}
+            className={`w-3 h-3 rounded-full ${idx === current ? "bg-accent" : "bg-neutral-white/50 opacity-70"}`}
             onClick={() => setCurrent(idx)}
             aria-label={`Ir para slide ${idx + 1}`}
           />
@@ -113,18 +143,17 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
       </div>
 
       <button
-        className="absolute top-4 right-4 bg-textcolor-50/80 opacity-70 rounded-full p-2 shadow-lg hover:bg-textcolor-50 z-10"
+        className="absolute bottom-4 right-4 bg-neutral-white/80 opacity-70 rounded-full p-2 shadow-lg hover:bg-neutral-white z-10"
         onClick={() => setPlaying((p) => !p)}
         aria-label={playing ? "Pausar" : "Reproduzir"}
       >
         {playing ? (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <rect x="6" y="4" width="4" height="16" rx="1" />
-            <rect x="14" y="4" width="4" height="16" rx="1" />
+          <svg className="w-5 h-5 text-neutral-dark" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
           </svg>
         ) : (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <polygon points="5,3 19,12 5,21" />
+          <svg className="w-5 h-5 text-neutral-dark" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
           </svg>
         )}
       </button>

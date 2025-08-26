@@ -12,7 +12,7 @@ export const collections = {
                 </p>
             </>
         ),
-        bgcolor: "bg-blue-500",
+        bgcolor: "bg-primary",
         buttonText: "Solicitar Catálogo de Vestidos Azuis",
         items: [
             { id: 1, img: "/images/dresses/azul1.jpg", productMark: "Zibeline", productModel: "Ombro só/Busto Drapeado", cor: "Azul" },
@@ -51,7 +51,7 @@ export const collections = {
                 <p className="px-2 text-sm">Perfeitos para celebrações especiais ou looks casuais com charme.</p>
             </>
         ),
-        bgcolor: "bg-pink-700",
+        bgcolor: "bg-primary",
         buttonText: "Solicitar Catálogo de Vestidos Rosas",
         items: [
             { id: 1, img: "/images/dresses/rosa1.jpg", productMark: "Zibeline", productModel: "Leudy", cor: "Rosa" },
@@ -75,7 +75,7 @@ export const collections = {
                 eles são ideais para eventos ao ar livre ou produções mais ousadas e elegantes, destacando-se o verde oliva, muito requisitado para madrinhas de casamento, no momento.
             </p>
         ),
-        bgcolor: "bg-green-700",
+        bgcolor: "bg-primary",
         buttonText: "Solicitar Catálogo de Vestidos Verdes",
         items: [
             { id: 1, img: "/images/dresses/verde1.jpg", productMark: "Zibeline", productModel: "Amanda", cor: "Verde" },
@@ -93,7 +93,7 @@ export const collections = {
                 Os vestidos vermelhos são sensuais, marcantes e cheios de energia. Uma escolha poderosa para festas, encontros ou qualquer ocasião em que você queira ser lembrada.
             </p>
         ),
-        bgcolor: "bg-red-700",
+        bgcolor: "bg-primary",
         buttonText: "Solicitar Catálogo de Vestidos Vermelhos",
         items: [
             { id: 1, img: "/images/dresses/vermelho1.jpg", productMark: "Zibeline", productModel: "Maxy Laço Beatriz", cor: "Vermelho" },
@@ -111,7 +111,7 @@ export const collections = {
                 Os vestidos laranjas transmitem alegria, criatividade e espontaneidade. São perfeitos para quem deseja um visual vibrante e inesquecível em eventos diurnos, festas ao ar livre ou qualquer ocasião onde o brilho da sua energia deve ser destaque.
             </p>
         ),
-        bgcolor: "bg-orange-600",
+        bgcolor: "bg-primary",
         buttonText: "Solicitar Catálogo de Vestidos Laranjas",
         items: [
             { id: 1, img: "/images/dresses/laranja1.jpg", productMark: "", productModel: "", cor: "Laranja" },
@@ -130,7 +130,7 @@ export const collections = {
                 <p className="px-2 text-sm">Transmitem pureza, delicadeza e elegância em cada detalhe.</p>
             </>
         ),
-        bgcolor: "bg-midis-300",
+        bgcolor: "bg-primary",
         buttonText: "Solicitar Catálogo de Midis Brancos",
         items: [
             { id: 1, img: "/images/midis-brancos/01.jpg", productModel: "", cor: "Midis Brancos" },
@@ -146,7 +146,7 @@ export const collections = {
                 As clutches unem praticidade e estilo, elevando o seu look com charme e sofisticação. Modelos ideais para eventos, festas ou para transformar o básico em algo memorável.
             </p>
         ),
-        bgcolor: "bg-clutches-1",
+        bgcolor: "bg-primary",
         buttonText: "Solicitar Catálogo de Clutches",
         items: [
             { id: 1, img: "/images/clutches/amarelo1.jpg", productMark: "", productModel: "", cor: "Amarela" },

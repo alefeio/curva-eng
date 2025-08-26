@@ -185,7 +185,7 @@ export function GallerySection({
                 <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
                 <div className="relative z-10 flex flex-col justify-center items-center h-full">
                     <h2
-                        className={`font-serif text-3xl mb-4 font-bold rounded-xl ${collection.bgcolor} text-background-50 px-4 py-2 w-fit`}
+                        className={`font-serif text-3xl mb-4 font-bold rounded-xl ${collection.bgcolor} text-primary px-4 py-2 w-fit`}
                     >
                         {collection.title}
                     </h2>
@@ -194,17 +194,17 @@ export function GallerySection({
             <div className={`${collection.bgcolor} h-4`}></div>
 
             <div></div>
-            <div className="grid bg-gradient-to-b relative flex items-center justify-center overflow-hidden py-16 md:max-w-6xl mx-auto from-background-200 to-transparent md:max-w-full">
+            <div className="grid bg-gradient-to-b relative flex items-center justify-center overflow-hidden py-16 md:max-w-6xl mx-auto from-primary to-transparent md:max-w-full">
                 <div
                     className="absolute left-0 top-0 bottom-0 w-2 z-20 pointer-events-none
-                                 bg-gradient-to-r from-graytone-1000/20 to-transparent"
+                                 bg-gradient-to-r"
                 />
 
                 <div
                     className="absolute right-0 top-0 bottom-0 w-2 z-20 pointer-events-none
-                                 bg-gradient-to-l from-graytone-1000/20 to-transparent"
+                                 bg-gradient-to-l"
                 />
-                <h3 className="w-full px-2 font-semibold text-xl text-textcolor-800 text-center font-serif w-fit pb-12">
+                <h3 className="w-full px-2 font-semibold text-xl   text-center font-serif w-fit pb-12">
                     {collection.subtitle}
                 </h3>
 
@@ -272,10 +272,10 @@ export function GallerySection({
                                     </button>
                                 </div>
 
-                                <div className="absolute flex justify-between items-end gap-2 bottom-0 left-0 w-full max-w-xs bg-gradient-to-t from-graytone-950/60 to-transparent p-4">
+                                <div className="absolute flex justify-between items-end gap-2 bottom-0 left-0 w-full max-w-xs p-4">
                                     <div className="font-semibold text-sm flex-1 text-left">
-                                        <h3 className="text-textcolor-50">Tecido: {item.productMark}</h3>
-                                        <h3 className="text-textcolor-50">Modelo: {item.productModel}</h3>
+                                        <h3 className=" ">Tecido: {item.productMark}</h3>
+                                        <h3 className=" ">Modelo: {item.productModel}</h3>
                                     </div>
 
                                     <div className="flex gap-2">
@@ -283,11 +283,11 @@ export function GallerySection({
                                             href={`https://wa.me//5591985810208?text=Olá! Gostaria de reservar o modelo ${encodeURIComponent(item.productModel ?? "")} - ${encodeURIComponent(item.productMark ?? "")}. Link para a foto: ${encodeURIComponent(shareUrl)}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-textcolor-50 hover:text-textcolor-100 rounded-full shadow-lg p-2 font-bold text-xs transition-colors duration-300"
+                                            className="inline-flex items-center justify-center bg-primary hover:bg-primary   hover:  rounded-full shadow-lg p-2 font-bold text-xs transition-colors duration-300"
                                             aria-label="Reservar via WhatsApp"
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            <FaWhatsapp className="w-5 h-5 text-background-50" />
+                                            <FaWhatsapp className="w-5 h-5 text-primary" />
                                         </a>
 
                                         {canShare && (
@@ -296,11 +296,11 @@ export function GallerySection({
                                                     e.stopPropagation();
                                                     handleShare(item, shareUrl);
                                                 }}
-                                                className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg p-2 font-semibold text-sm transition-colors duration-300"
+                                                className="inline-flex items-center justify-center bg-primary hover:bg-primary text-white rounded-full shadow-lg p-2 font-semibold text-sm transition-colors duration-300"
                                                 aria-label="Compartilhar"
                                                 disabled={isSharing}
                                             >
-                                                <FaShareAlt className="w-5 h-5 text-background-50" />
+                                                <FaShareAlt className="w-5 h-5 text-primary" />
                                             </button>
                                         )}
                                     </div>
@@ -314,11 +314,11 @@ export function GallerySection({
                     <button
                         type="button"
                         onClick={prev}
-                        className="absolute left-0 z-30 bg-background-100 bg-opacity-80 hover:bg-background-200 rounded-full p-2 shadow-lg transition m-2"
+                        className="absolute left-0 z-30 bg-primary bg-opacity-80 hover:bg-primary rounded-full p-2 shadow-lg transition m-2"
                         aria-label="Anterior"
                     >
                         <svg
-                            className="w-6 h-6 text-textcolor-600"
+                            className="w-6 h-6  "
                             fill="none"
                             stroke="currentColor"
                             strokeWidth={3}
@@ -333,11 +333,11 @@ export function GallerySection({
                     <button
                         type="button"
                         onClick={next}
-                        className="absolute right-0 z-30 bg-background-100 bg-opacity-80 hover:bg-background-200 rounded-full p-2 shadow-lg transition m-2"
+                        className="absolute right-0 z-30 bg-primary bg-opacity-80 hover:bg-primary rounded-full p-2 shadow-lg transition m-2"
                         aria-label="Próximo"
                     >
                         <svg
-                            className="w-6 h-6 text-textcolor-600"
+                            className="w-6 h-6  "
                             fill="none"
                             stroke="currentColor"
                             strokeWidth={3}
@@ -357,7 +357,7 @@ export function GallerySection({
                     href={buttonHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="my-4 inline-flex items-center justify-center mx-auto mb-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-2 px-4 font-bold transition-colors duration-300"
+                    className="my-4 inline-flex items-center justify-center mx-auto mb-12 bg-primary hover:bg-primary rounded-full shadow-lg py-2 px-4 font-bold transition-colors duration-300"
                 >
                     {collection.buttonText}
                 </a>

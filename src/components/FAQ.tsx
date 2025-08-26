@@ -1,7 +1,5 @@
-// src/components/FAQ.tsx
-
 import { useState } from "react";
-import React from 'react'; // Adicione a importação de React
+import React from 'react';
 
 // Define a tipagem dos dados que serão passados para o componente
 interface FAQItem {
@@ -18,41 +16,47 @@ interface FAQPageProps {
 export default function FAQ({ faqs }: FAQPageProps) {
   const [open, setOpen] = useState<number | null>(null);
 
+  const toggleOpen = (index: number) => {
+    setOpen(open === index ? null : index);
+  };
+
   return (
-    <>
-      <div id="faq">&nbsp;</div>
-      <section className="my-16 md:max-w-7xl mx-auto px-4">
-        <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-center">
-          Perguntas Frequentes
-        </h2>
-        <p className="text-center mb-6 border-t-2 border-textcolor-200 py-6 w-fit m-auto">
-          Confira as principais dúvidas de nossas clientes e saiba mais sobre o processo de aluguel de vestidos.
-        </p>
-        <div className="max-w-5xl mx-auto">
+    <section className="bg-white py-12 md:py-20">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="text-center mb-12">
+          <p className="text-orange-500 font-semibold text-lg">Dúvidas Frequentes</p>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight">
+            Perguntas & Respostas
+          </h2>
+        </div>
+
+        <div className="max-w-4xl mx-auto flex flex-col gap-4">
           {faqs.map((faq, idx) => (
-            <div key={faq.id} className="mb-4 border-b border-background-1000/20 bg-background-100 px-4 rounded-xl">
+            <div key={faq.id} className="rounded-lg overflow-hidden border border-gray-200">
               <button
-                className="w-full flex justify-between items-center py-4 text-left font-semibold text-lg focus:outline-none"
-                onClick={() => setOpen(open === idx ? null : idx)}
-                aria-expanded={open === idx}
-                aria-controls={`faq-answer-${idx}`}
-                id={`faq-question-${idx}`}
+                className="w-full text-left p-6 bg-white hover:bg-gray-50 transition-colors flex justify-between items-center"
+                onClick={() => toggleOpen(idx)}
               >
-                {faq.pergunta}
-                <span>{open === idx ? "−" : "+"}</span>
+                <span className="text-lg font-semibold text-gray-800">
+                  {faq.pergunta}
+                </span>
+                <span className="text-2xl font-bold text-orange-500">
+                  {open === idx ? '−' : '+'}
+                </span>
               </button>
               <div
-                id={`faq-answer-${idx}`}
-                role="region"
-                aria-labelledby={`faq-question-${idx}`}
-                className={`overflow-hidden transition-all duration-300 ${open === idx ? "max-h-40" : "max-h-0"}`}
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                  open === idx ? 'max-h-96 opacity-100 p-6 pt-0' : 'max-h-0 opacity-0'
+                }`}
               >
-                <p className="px-2 pb-4">{faq.resposta}</p>
+                <p className="text-gray-600">
+                  {faq.resposta}
+                </p>
               </div>
             </div>
           ))}
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

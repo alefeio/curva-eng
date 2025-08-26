@@ -61,12 +61,12 @@ const RegistrationForm: React.FC = () => {
                     </button>
                 </form>
                 {status === 'success' && (
-                    <p className="mt-4 text-green-600 font-medium">
+                    <p className="mt-4 text-primary font-medium">
                         Link de acesso enviado para o seu e-mail. Por favor, verifique sua caixa de entrada.
                     </p>
                 )}
                 {status === 'error' && (
-                    <p className="mt-4 text-red-600 font-medium">
+                    <p className="mt-4 text-primary font-medium">
                         Ocorreu um erro. Por favor, tente novamente mais tarde.
                     </p>
                 )}

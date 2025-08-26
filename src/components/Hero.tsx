@@ -9,35 +9,35 @@ export default function Hero() {
   };
 
   return (
-    <header className="my-16 text-center max-w-xs md:max-w-7xl mx-auto">
-      <h1 className="font-serif text-4xl md:text-5xl font-bold mb-6">
-        Alugue seu vestido na My Dress
-      </h1>
-      <p className="px-2 border-t-2 border-textcolor-200 mb-4 w-fit m-auto pt-6">
-        <strong>Na My Dress</strong>, você encontra muito mais do que uma vitrine física — <strong>temos um catálogo digital completo e sempre atualizado</strong>.
-      </p>
-      <p className="px-2">
-        Aqui você pode <strong>visualizar os modelos disponíveis, explorar por cores, tamanhos e estilos</strong> antes mesmo de vir até a loja.
-      </p>
-      <a
-        href="https://wa.me//5591985810208?text=Olá! Gostaria de solicitar o catálogo."
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center justify-center mx-auto mt-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-3 px-8 font-bold text-lg transition-colors duration-300"
-        onClick={() => handleClick('/agendar-visita')}
-        aria-label="Solicitar catálogo"
-      >
-        Solicite nosso Catálogo
-      </a>
-      <div>
-        E <Link
-          href="#fique-por-dentro"
-          className="inline-flex mt-12 font-bold transition-colors duration-300"
-          aria-label="Fique por dentro"
-        >
-          Cadastre-se
-        </Link> para receber novidades sobre nossos lançamentos e descontos exclusivos.
+    <section className="bg-neutral-light py-12 md:py-20">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+          {/* Coluna da esquerda: Conteúdo de texto */}
+          <div className="flex flex-col gap-4 text-center md:text-left">
+            <p className="text-accent font-semibold text-lg">Sobre nós</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-primary leading-tight">
+              História, Missão e Expertise
+            </h2>
+            <p className="text-neutral-dark text-lg leading-relaxed">
+              Há mais de uma década, a Curva Engenharia e Arquitetura transforma projetos em realidade. Nossa missão é ir além da construção, unindo a precisão da engenharia com a criatividade da arquitetura para entregar soluções completas e de alta qualidade. Somos movidos pela paixão por construir, reformar e projetar, criando espaços que geram impacto positivo para nossos clientes e para a comunidade.
+            </p>
+            <div className="mt-4 w-fit mx-auto md:mx-0">
+              <a href="/sobre" className="bg-accent text-white font-bold py-3 px-6 rounded-md shadow-lg hover:bg-accent-dark transition-colors">
+                Leia a história completa
+              </a>
+            </div>
+          </div>
+
+          {/* Coluna da direita: Imagem */}
+          <div className="relative overflow-hidden rounded-lg shadow-lg">
+            <img
+              src="/images/hero.jpg"
+              alt="Equipe de engenheiros e arquitetos colaborando"
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        </div>
       </div>
-    </header>
+    </section>
   )
 }

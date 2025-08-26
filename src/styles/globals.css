@@ -2,10 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Global Styles */
+/* Estilos Globais */
 
 body {
-  @apply font-sans bg-background-50 text-textcolor-900;
+  /* Aplica a fonte padrão, fundo principal e cor de texto */
+  @apply font-sans bg-primary-light text-neutral-dark;
 }
 
 html {
@@ -13,37 +14,45 @@ html {
   @apply text-base antialiased;
 }
 
-h1, h2, h3 {
-  @apply font-bold text-textcolor-800 leading-snug;
+h1, h2, h3, h4, h5, h6 {
+  /* Estilo para títulos: negrito, cor principal e espaçamento de linha */
+  @apply font-bold text-primary leading-snug;
 }
 
 p {
-  @apply text-graytone-800 mb-2;
+  /* Cor padrão para parágrafos */
+  @apply text-neutral-dark mb-2;
 }
 
 a {
-  @apply text-textcolor-600 no-underline transition-colors duration-300;
+  /* Estilo base para links: cor de destaque, sem sublinhado, transição suave */
+  @apply text-accent no-underline transition-colors duration-300;
 }
 
 a:hover {
-  @apply text-textcolor-400;
+  /* Cor mais clara no hover */
+  @apply text-accent-light;
 }
 
 .container {
+  /* Container responsivo centralizado */
   @apply max-w-screen-xl mx-auto px-4;
 }
 
 /* Botões */
 
 .btn {
-  @apply inline-block px-6 py-2 rounded-md font-semibold text-white bg-textcolor-500 hover:bg-textcolor-600 transition duration-300;
+  /* Botão principal com cor de fundo primária e texto branco */
+  @apply inline-block px-6 py-2 rounded-md font-semibold text-white bg-primary hover:bg-primary-dark transition duration-300;
 }
 
 .btn-outline {
-  @apply inline-block px-6 py-2 rounded-md font-semibold border border-textcolor-500 text-textcolor-500 bg-transparent hover:bg-textcolor-500 hover:text-white transition duration-300;
+  /* Botão com contorno, transparente no fundo, com preenchimento no hover */
+  @apply inline-block px-6 py-2 rounded-md font-semibold border border-primary text-primary bg-transparent hover:bg-primary hover:text-white transition duration-300;
 }
 
 .btn-disabled {
+  /* Estilo para botões desabilitados */
   @apply cursor-not-allowed opacity-50;
 }
 
@@ -54,43 +63,51 @@ input[type="email"],
 input[type="password"],
 textarea,
 select {
-  @apply w-full px-4 py-2 border border-graytone-300 rounded-md bg-background-100 text-textcolor-900 placeholder-graytone-500 focus:outline-none focus:ring-2 focus:ring-textcolor-400 focus:border-textcolor-400 transition duration-200;
+  /* Estilo para campos de formulário com foco na cor primária */
+  @apply w-full px-4 py-2 border rounded-md bg-neutral-light text-neutral-dark focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-200;
 }
 
 label {
-  @apply block mb-1 text-sm font-medium text-textcolor-700;
+  /* Estilo para rótulos */
+  @apply block mb-1 text-sm font-medium text-neutral-dark;
 }
 
 /* Cards */
 
 .card {
-  @apply bg-background-100 shadow-lg rounded-xl p-6;
+  /* Estilo para cards */
+  @apply bg-neutral-light shadow-lg rounded-xl p-6;
 }
 
 /* Títulos de seção */
 
 .section-title {
-  @apply text-3xl md:text-4xl font-bold text-textcolor-600 mb-6 text-center;
+  /* Títulos de seção centralizados */
+  @apply text-3xl md:text-4xl font-bold text-primary mb-6 text-center;
 }
 
 /* Listas */
 
 ul {
-  @apply list-disc list-inside text-textcolor-300;
+  /* Listas não ordenadas */
+  @apply list-disc list-inside text-neutral-dark;
 }
 
 ol {
-  @apply list-decimal list-inside text-textcolor-300;
+  /* Listas ordenadas */
+  @apply list-decimal list-inside text-neutral-dark;
 }
 
 /* Imagens */
 
 img {
+  /* Imagens responsivas */
   @apply max-w-full h-auto;
 }
 
-/* SVGs com cor herdada do tema */
+/* SVGs */
 
 svg {
-  @apply text-textcolor-500;
+  /* SVGs herdam a cor do texto do elemento pai */
+  @apply text-current;
 }

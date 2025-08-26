@@ -257,27 +257,27 @@ export default function AdminColecoes() {
           <section className="bg-white p-8 rounded-xl shadow-lg mb-10 border border-gray-200">
             <h2 className="text-2xl font-bold mb-6 text-gray-700">{form.id ? "Editar Coleção" : "Adicionar Nova Coleção"}</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <input type="text" name="title" value={form.title} onChange={handleFormChange} placeholder="Título" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-              <input type="text" name="subtitle" value={form.subtitle} onChange={handleFormChange} placeholder="Subtítulo" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-              <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="Descrição" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-              <input type="text" name="bgcolor" value={form.bgcolor} onChange={handleFormChange} placeholder="Cor de Fundo (Ex: #F4F1DE)" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-              <input type="text" name="buttonText" value={form.buttonText} onChange={handleFormChange} placeholder="Texto do Botão" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-              <input type="url" name="buttonUrl" value={form.buttonUrl} onChange={handleFormChange} placeholder="URL do Botão" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-              <input type="number" name="order" value={form.order} onChange={handleFormChange} placeholder="Ordem" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+              <input type="text" name="title" value={form.title} onChange={handleFormChange} placeholder="Título" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
+              <input type="text" name="subtitle" value={form.subtitle} onChange={handleFormChange} placeholder="Subtítulo" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
+              <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="Descrição" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
+              <input type="text" name="bgcolor" value={form.bgcolor} onChange={handleFormChange} placeholder="Cor de Fundo (Ex: #F4F1DE)" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
+              <input type="text" name="buttonText" value={form.buttonText} onChange={handleFormChange} placeholder="Texto do Botão" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
+              <input type="url" name="buttonUrl" value={form.buttonUrl} onChange={handleFormChange} placeholder="URL do Botão" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
+              <input type="number" name="order" value={form.order} onChange={handleFormChange} placeholder="Ordem" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
               
               <h3 className="text-xl font-bold mt-6 text-gray-700">Itens da Coleção</h3>
               {form.items.map((item, index) => (
                 <div key={index} className="flex flex-col md:flex-row gap-4 p-4 border border-dashed border-gray-300 rounded-lg relative">
-                  <button type="button" onClick={() => handleRemoveItem(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition duration-200">
+                  <button type="button" onClick={() => handleRemoveItem(index)} className="absolute top-2 right-2 text-primary hover:text-primary transition duration-200">
                     <MdDelete size={24} />
                   </button>
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" name="productMark" value={item.productMark} onChange={(e) => handleItemChange(e, index)} placeholder="Marca" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-                    <input type="text" name="productModel" value={item.productModel} onChange={(e) => handleItemChange(e, index)} placeholder="Modelo" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-                    <input type="text" name="cor" value={item.cor} onChange={(e) => handleItemChange(e, index)} placeholder="Cor" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-                    <input type="text" name="size" value={item.size || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Tamanho" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-                    <input type="number" name="price" value={item.price || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Preço" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-                    <input type="number" name="price_card" value={item.price_card || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Preço a prazo" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+                    <input type="text" name="productMark" value={item.productMark} onChange={(e) => handleItemChange(e, index)} placeholder="Marca" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
+                    <input type="text" name="productModel" value={item.productModel} onChange={(e) => handleItemChange(e, index)} placeholder="Modelo" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
+                    <input type="text" name="cor" value={item.cor} onChange={(e) => handleItemChange(e, index)} placeholder="Cor" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
+                    <input type="text" name="size" value={item.size || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Tamanho" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
+                    <input type="number" name="price" value={item.price || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Preço" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
+                    <input type="number" name="price_card" value={item.price_card || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Preço a prazo" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition duration-200 text-gray-900" />
                   </div>
                   
                   <div className="flex-1 w-full flex flex-col items-center gap-2 border border-gray-300 rounded-lg p-3">
@@ -306,17 +306,17 @@ export default function AdminColecoes() {
               </button>
               
               <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                <button type="submit" disabled={loading} className="bg-blue-600 text-white p-4 rounded-lg flex-1 font-bold shadow-md hover:bg-blue-700 transition duration-200 disabled:bg-gray-400">
+                <button type="submit" disabled={loading} className="bg-primary text-white p-4 rounded-lg flex-1 font-bold shadow-md hover:bg-primary transition duration-200 disabled:bg-gray-400">
                   {loading ? (form.id ? "Atualizando..." : "Salvando...") : (form.id ? "Atualizar Coleção" : "Salvar Coleção")}
                 </button>
                 {form.id && (
-                  <button type="button" onClick={resetForm} className="bg-red-500 text-white p-4 rounded-lg flex-1 font-bold shadow-md hover:bg-red-600 transition duration-200">
+                  <button type="button" onClick={resetForm} className="bg-primary text-white p-4 rounded-lg flex-1 font-bold shadow-md hover:bg-primary transition duration-200">
                     Cancelar Edição
                   </button>
                 )}
               </div>
             </form>
-            {error && <p className="text-red-500 mt-4 font-medium">{error}</p>}
+            {error && <p className="text-primary mt-4 font-medium">{error}</p>}
           </section>
 
           {/* Lista de Coleções */}
@@ -335,10 +335,10 @@ export default function AdminColecoes() {
                       <p className="text-sm text-gray-500">{colecao.subtitle}</p>
                     </div>
                     <div className="flex gap-2 mt-4 md:mt-0">
-                      <button onClick={() => handleEdit(colecao)} className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition duration-200">
+                      <button onClick={() => handleEdit(colecao)} className="bg-primary text-white p-2 rounded-lg hover:bg-primary transition duration-200">
                         <MdEdit size={20} />
                       </button>
-                      <button onClick={() => handleDelete(colecao.id)} className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition duration-200">
+                      <button onClick={() => handleDelete(colecao.id)} className="bg-primary text-white p-2 rounded-lg hover:bg-primary transition duration-200">
                         <MdDelete size={20} />
                       </button>
                     </div>
@@ -353,7 +353,7 @@ export default function AdminColecoes() {
                             Tamanho: {item.size || 'N/A'} | Preço: R${item.price || 'N/A'} | A prazo: R${item.price_card || 'N/A'}
                           </p>
                         </div>
-                        <button onClick={() => handleDelete(item.id as string, true)} className="bg-red-400 text-white p-2 rounded-lg text-sm hover:bg-red-500 transition duration-200">Excluir</button>
+                        <button onClick={() => handleDelete(item.id as string, true)} className="bg-primary text-white p-2 rounded-lg text-sm hover:bg-primary transition duration-200">Excluir</button>
                       </div>
                     ))}
                   </div>

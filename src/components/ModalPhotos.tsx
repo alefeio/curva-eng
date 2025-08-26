@@ -148,9 +148,9 @@ export default function ModalPhotos({
                     {/* Botão de fechar: reduz a margem para ficar mais próximo da borda em mobile */}
                     <button
                         onClick={onClose}
-                        className="absolute top-2 right-2 text-background-100 z-50 p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
+                        className="absolute top-2 right-2 text-primary z-50 p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
                     >
-                        <AiOutlineClose size={24} className="text-background-100" />
+                        <AiOutlineClose size={24} className="text-primary" />
                     </button>
 
                     {/* Container da imagem: remove a margem vertical para maximizar o espaço */}
@@ -167,18 +167,18 @@ export default function ModalPhotos({
                             onClick={prevItem}
                             className="p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
                         >
-                            <SlArrowLeft size={24} className="text-background-100" />
+                            <SlArrowLeft size={24} className="text-primary" />
                         </button>
                         <button
                             onClick={nextItem}
                             className="p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
                         >
-                            <SlArrowRight size={24} className="text-background-100" />
+                            <SlArrowRight size={24} className="text-primary" />
                         </button>
                     </div>
 
                     {/* Informações e Botões */}
-                    <div className="flex flex-col items-center text-background-100 text-center w-full">
+                    <div className="flex flex-col items-center text-primary text-center w-full">
                         <ModalHeaderFooter
                             productMark={itemAtual.productMark}
                             productModel={itemAtual.productModel}

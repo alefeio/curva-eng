@@ -1,5 +1,3 @@
-// src/components/Testimonials.tsx
-
 import React from 'react';
 
 // Define a tipagem dos dados que serão passados para o componente
@@ -17,38 +15,52 @@ interface TestimonialsPageProps {
 
 export default function Testimonials({ testimonials }: TestimonialsPageProps) {
   return (
-    <>
-      <div id="depoimentos">&nbsp;</div>
-      <section
-        className="my-16 md:max-w-5xl mx-auto px-4"
-      >
-        <h3 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-center">
-          Depoimentos
-        </h3>
-        <p className="text-center mb-6 border-t-2 border-textcolor-200 py-6 w-fit m-auto">
-          Já é nossa cliente?{" "}
+    <section className="bg-gray-50 py-12 md:py-20">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="text-center mb-12">
+          <p className="text-orange-500 font-semibold text-lg">O que nossos clientes dizem</p>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight">
+            Depoimentos
+          </h2>
+        </div>
+        
+        {/* Carrossel de depoimentos com rolagem horizontal */}
+        <div className="flex overflow-x-auto gap-6 pb-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          {testimonials.map((t) => (
+            <article
+              key={t.id}
+              className="flex-shrink-0 w-80 md:w-96 bg-white rounded-lg shadow-lg p-6 border border-gray-100"
+              aria-label={`Depoimento de ${t.name}`}
+            >
+              <div className="flex items-start mb-4">
+                <span className="text-orange-500 text-3xl leading-none">“</span>
+                <p className="text-gray-600 text-lg italic ml-2 leading-relaxed">
+                  {t.content}
+                </p>
+                <span className="text-orange-500 text-3xl leading-none">”</span>
+              </div>
+              <div className="text-right mt-4">
+                <span className="block font-semibold text-gray-800">
+                  — {t.name}
+                </span>
+              </div>
+            </article>
+          ))}
+        </div>
+        
+        <p className="text-center text-gray-600 mt-12">
+          Já é nosso cliente?{' '}
           <a
             target="_blank"
             rel="noopener noreferrer"
             href="https://g.page/r/CSDAOXMfoxIIEBM/review"
-            className="text-textcolor-600 underline hover:text-textcolor-800 transition-colors"
+            className="text-orange-500 underline hover:text-orange-600 transition-colors font-semibold"
           >
             Conte-nos como foi sua experiência
-          </a>.
+          </a>
+          .
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials.map((t) => (
-            <article
-              key={t.id}
-              className="bg-background-100 rounded-xl shadow-lg p-6"
-              aria-label={`Depoimento de ${t.name}`}
-            >
-              <p className="text-lg italic mb-4 text-textcolor-700">"{t.content}"</p>
-              <span className="block text-right font-semibold text-textcolor-800">{t.name}</span>
-            </article>
-          ))}
-        </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

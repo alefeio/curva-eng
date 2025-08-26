@@ -23,8 +23,8 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({ colecoes }) => {
                     aria-label={showButtons ? "Ocultar botões" : "Mostrar botões"}
                 >
                     {/* Ícone de menu (três pontos) */}
-                    {!showButtons ? <FaExpandArrowsAlt className="w-4 h-4 text-background-500" />
-                    : <FaCompressArrowsAlt className="w-4 h-4 text-background-500" />}
+                    {!showButtons ? <FaExpandArrowsAlt className="w-4 h-4 text-primary" />
+                    : <FaCompressArrowsAlt className="w-4 h-4 text-primary" />}
                 </button>
                 {showButtons && colecoes.map((colecao) => (
                     <a

@@ -22,6 +22,10 @@ import PromotionsForm from 'components/PromotionsForm';
 import FloatingButtons from 'components/FloatingButtons';
 import { useState, useEffect } from 'react';
 import { AiOutlineClose } from 'react-icons/ai';
+import ParallaxBanner from 'components/ParallaxBanner';
+import TimelineSection from 'components/TimelineSection';
+import ServicesSection from 'components/ServicesSection';
+import Footer from 'components/Footer';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -109,7 +113,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
             "addressCountry": "BR"
         }
     };
-    
+
     const [showExitModal, setShowExitModal] = useState(false);
 
     useEffect(() => {
@@ -222,19 +226,38 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <HeroSlider banners={banners} />
                 <main className="max-w-full mx-auto">
                     <Hero />
-                    <DressesGallery colecoes={colecoes} />
+                    {/* <DressesGallery colecoes={colecoes} /> */}
                     <Header />
+                    <ParallaxBanner
+                        imageUrl="/images/predios.jpg"
+                        title="Vamos iniciar o seu projeto?"
+                        subtitle="Estamos lhe esperando!"
+                        linkUrl="/contato"
+                        buttonText="Entre em contato"
+                        position="center"
+                    />
+                    {/* <TimelineSection /> */}
+                    <ServicesSection />
+                    <ParallaxBanner
+                        imageUrl="/images/aperto-mao.jpg"
+                        title="Vamos construir algo incrível juntos?"
+                        subtitle="Entre em contato e descubra como podemos transformar seu projeto em realidade com inovação e qualidade."
+                        linkUrl="/fale-conosco"
+                        buttonText="Fale conosco"
+                        position="left"
+                    />
                     <PromotionsForm />
                     <Testimonials testimonials={testimonials} />
                     <FAQ faqs={faqs} />
-                    <LocationMap />
+                    {/* <LocationMap /> */}
+                    <Footer menuData={menu} />
                 </main>
                 <WhatsAppButton />
             </div>
 
             {/* Modal de Saída */}
             {showExitModal && (
-                <div 
+                <div
                     className="fixed inset-0 z-[110] flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm"
                     onClick={(e) => {
                         if (e.target === e.currentTarget) {
@@ -242,8 +265,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         }
                     }}
                 >
-                    <div 
-                        className="bg-background-200 relative rounded-lg shadow-xl p-6 m-4 max-w-lg w-full transform transition-all duration-300 scale-100"
+                    <div
+                        className="bg-primary relative rounded-lg shadow-xl p-6 m-4 max-w-lg w-full transform transition-all duration-300 scale-100"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Botão de fechar */}
@@ -254,7 +277,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         >
                             <AiOutlineClose size={24} />
                         </button>
-                        
+
                         <PromotionsForm />
                     </div>
                 </div>

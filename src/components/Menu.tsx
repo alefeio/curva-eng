@@ -45,53 +45,51 @@ export function Menu({ menuData }: MenuProps) {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-30 transition-all duration-300 shadow-lg ${
-        isScrolled
-          ? "bg-background-100/50 backdrop-blur-sm pt-2 pb-1"
-          : "bg-background-100 pt-4 pb-2"
-      }`}
+      className={`fixed left-0 w-full z-30 transition-all duration-300 ${isScrolled
+          ? "top-0 bg-primary/90 backdrop-blur-sm py-4 shadow-lg"
+          : "top-6 py-4"
+        }`}
     >
-      <div className="mx-auto flex items-center justify-between px-4 md:px-8">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">
         <Link href="/">
           <img
             src={logoUrl || "/images/logo.png"}
-            alt="Logomarca My Dress"
-            className={`transition-all duration-300 ${
-              isScrolled ? "w-14 md:w-20" : "w-16 md:w-24"
-            }`}
+            alt="Logomarca Curva Engenharia"
+            className={`transition-all duration-300 h-auto ${isScrolled ? "w-28 md:w-40" : "w-40 md:w-48"
+              }`}
           />
         </Link>
 
-        <nav className="hidden md:flex gap-8 font-semibold font-serif text-lg">
+        <nav className="hidden md:flex gap-8 font-semibold">
           {links.map(({ text, url, target }) => (
             <Link
               key={url}
               href={url}
-              className="hover:text-textcolor-400 transition-colors"
+              className="text-primary-light hover:text-accent transition-colors"
               onClick={() => setMenuOpen(false)}
               target={target}
             >
               {text}
             </Link>
           ))}
-          {session ? (
+          {/* {session ? (
             <>
-              <Link href="/admin" className="hover:text-textcolor-400 transition-colors">Minha conta</Link>
+              <Link href="/admin" className="hover:transition-colors">Minha conta</Link>
               <button
                 onClick={() => signOut({ callbackUrl: '/' })}
-                className="hover:text-textcolor-400 transition-colors"
+                className="hover:transition-colors"
               >
                 Sair
               </button>
             </>
           ) : (
             <button
-              className="hover:text-textcolor-400 transition-colors"
+              className="hover:transition-colors"
               onClick={handleSignIn}
             >
               Entrar
             </button>
-          )}
+          )} */}
         </nav>
 
         <button
@@ -102,19 +100,16 @@ export function Menu({ menuData }: MenuProps) {
           aria-controls="mobile-menu"
         >
           <span
-            className={`block h-0.5 w-6 bg-textcolor-700 transition-transform ${
-              menuOpen ? "rotate-45 translate-y-2" : ""
-            }`}
+            className={`block h-0.5 w-6 bg-accent transition-transform ${menuOpen ? "rotate-45 translate-y-2" : ""
+              }`}
           />
           <span
-            className={`block h-0.5 w-6 bg-textcolor-700 transition-opacity ${
-              menuOpen ? "opacity-0" : "opacity-100"
-            }`}
+            className={`block h-0.5 w-6 bg-accent transition-opacity ${menuOpen ? "opacity-0" : "opacity-100"
+              }`}
           />
           <span
-            className={`block h-0.5 w-6 bg-textcolor-700 transition-transform ${
-              menuOpen ? "-rotate-45 -translate-y-2" : ""
-            }`}
+            className={`block h-0.5 w-6 bg-accent transition-transform ${menuOpen ? "-rotate-45 -translate-y-2" : ""
+              }`}
           />
         </button>
       </div>
@@ -122,13 +117,13 @@ export function Menu({ menuData }: MenuProps) {
       {menuOpen && (
         <nav
           id="mobile-menu"
-          className="md:hidden py-4 flex flex-col gap-4 font-semibold bg-background-100/95 px-4"
+          className="md:hidden py-4 flex flex-col gap-4 font-semibold bg-primary/95 px-4"
         >
           {links.map(({ text, url, target }) => (
             <Link
               key={url}
               href={url}
-              className="hover:text-textcolor-400 border-t border-background-200 transition-colors pt-4"
+              className="text-primary-light border-t border-primary transition-colors pt-4"
               onClick={() => setMenuOpen(false)}
               target={target}
             >
