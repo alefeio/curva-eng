@@ -224,3 +224,26 @@ model Message {
 
   createdAt      DateTime  @default(now())
 }
+
+model Projetos {
+  id          String       @id @default(uuid())
+  title       String
+  subtitle    String?
+  description String?
+  order       Int          @default(0)
+  items       ProjetoFoto[] // Define a relação com as fotos
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model ProjetoFoto {
+  id          String    @id @default(uuid())
+  local       String
+  tipo        String
+  detalhes    String?
+  img         String
+  projetoId   String
+  projeto     Projetos  @relation(fields: [projetoId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}

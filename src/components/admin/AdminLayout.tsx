@@ -76,9 +76,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </h3>
             <ul className="space-y-1 list-none">
               <li>
-                <Link href="/admin/colecoes" className="text-gray-900 dark:text-white flex items-center p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 group">
+                <Link href="/admin/projetos" className="text-gray-900 dark:text-white flex items-center p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 group">
                   <MdPalette className="mr-3 text-xl text-gray-500 group-hover:text-primary transition-colors" />
-                  <span className="text-sm font-medium">Coleções</span>
+                  <span className="text-sm font-medium">Projetos</span>
                 </Link>
               </li>
             </ul>

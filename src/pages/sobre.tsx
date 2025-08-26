@@ -28,6 +28,7 @@ import ServicesSection from 'components/ServicesSection';
 import Footer from 'components/Footer';
 import ContactForm from 'components/ContactForm';
 import SobreNos from 'components/SobreNos';
+import { MenuInterno } from 'components/MenuInterno';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -224,10 +225,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
             <div className="min-h-screen">
                 <Analytics />
-                <MenuComponent menuData={menu} />
-                <HeroSlider banners={banners} />
+                <MenuInterno menuData={menu} />
                 <main className="max-w-full mx-auto">
                     <SobreNos />
+                    <Testimonials testimonials={testimonials} />
+                    <ParallaxBanner
+                        imageUrl="/images/aperto-mao.jpg"
+                        title="Vamos construir algo incrível juntos?"
+                        subtitle="Entre em contato e descubra como podemos transformar seu projeto em realidade com inovação e qualidade."
+                        linkUrl="/fale-conosco"
+                        buttonText="Fale conosco"
+                        position="left"
+                    />
                     <Footer menuData={menu} />
                 </main>
                 <WhatsAppButton />
