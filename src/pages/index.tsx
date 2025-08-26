@@ -267,8 +267,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         position="left"
                     />
                     {/* <PromotionsForm /> */}
-                    <ContactForm />
                     <Testimonials testimonials={testimonials} />
+                    <ContactForm />
                     <FAQ faqs={faqs} />
                     {/* <LocationMap /> */}
                     <Footer menuData={menu} />
