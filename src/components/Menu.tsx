@@ -4,14 +4,10 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+// Removido a importação de MenuProps para evitar conflito de tipos
+import { LinkItem } from '../types/index'; 
 
-interface LinkItem {
-  id: string;
-  text: string;
-  url: string;
-  target?: string;
-}
-
+// A interface MenuProps está definida aqui, como é a única a usá-la
 interface MenuProps {
   menuData: {
     logoUrl: string;
@@ -73,23 +69,23 @@ export function Menu({ menuData }: MenuProps) {
             </Link>
           ))}
           {/* {session ? (
-            <>
-              <Link href="/admin" className="hover:transition-colors">Minha conta</Link>
+              <>
+                <Link href="/admin" className="hover:transition-colors">Minha conta</Link>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="hover:transition-colors"
+                >
+                  Sair
+                </button>
+              </>
+            ) : (
               <button
-                onClick={() => signOut({ callbackUrl: '/' })}
                 className="hover:transition-colors"
+                onClick={handleSignIn}
               >
-                Sair
+                Entrar
               </button>
-            </>
-          ) : (
-            <button
-              className="hover:transition-colors"
-              onClick={handleSignIn}
-            >
-              Entrar
-            </button>
-          )} */}
+            )} */}
         </nav>
 
         <button

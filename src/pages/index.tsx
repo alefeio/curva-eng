@@ -16,7 +16,10 @@ import { Analytics } from "@vercel/analytics/next";
 import {
     HomePageProps,
     ColecaoProps,
-    ColecaoItem
+    ColecaoItem,
+    MenuData,
+    // Importa apenas LinkItem, não o tipo MenuProps da página
+    LinkItem
 } from '../types/index';
 import PromotionsForm from 'components/PromotionsForm';
 import FloatingButtons from 'components/FloatingButtons';
@@ -72,12 +75,28 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
             }))
         }));
 
-        const menu: any | null = menus.length > 0 ? menus[0] : null;
+        const rawMenu: any | null = menus.length > 0 ? menus[0] : null;
 
+        // O tipo do formattedMenu agora corresponde à estrutura esperada
+        let formattedMenu: MenuData | null = null;
+        if (rawMenu && rawMenu.links && Array.isArray(rawMenu.links)) {
+            const links: LinkItem[] = rawMenu.links.map((link: any) => ({
+                id: link.id,
+                text: link.text,
+                url: link.url,
+            }));
+
+            formattedMenu = {
+                logoUrl: rawMenu.logoUrl || '/images/logo.png',
+                links: links,
+            };
+        }
+        
         return {
             props: {
                 banners: JSON.parse(JSON.stringify(banners)),
-                menu: JSON.parse(JSON.stringify(menu)),
+                // Passa o objeto formatado diretamente para a prop 'menu'
+                menu: JSON.parse(JSON.stringify(formattedMenu)), 
                 testimonials: JSON.parse(JSON.stringify(testimonials)),
                 faqs: JSON.parse(JSON.stringify(faqs)),
                 colecoes: JSON.parse(JSON.stringify(colecoesComSlugs)),
@@ -121,7 +140,6 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
         const modalShownInSession = sessionStorage.getItem('exitModalShown');
 
         const handleMouseLeave = (e: MouseEvent) => {
-            // CORREÇÃO: Removida a condição e.clientY <= 0 para tornar a detecção mais robusta.
             if (!modalShownInSession) {
                 setShowExitModal(true);
                 sessionStorage.setItem('exitModalShown', 'true');
@@ -223,7 +241,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
             <div className="min-h-screen">
                 <Analytics />
-                <MenuComponent menuData={menu} />
+                {/* O componente espera menuData={...}, e a prop 'menu' já tem essa estrutura */}
+                <MenuComponent menuData={menu} /> 
                 <HeroSlider banners={banners} />
                 <main className="max-w-full mx-auto">
                     <Hero />

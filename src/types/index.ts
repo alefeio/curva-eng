@@ -11,17 +11,31 @@ export interface Banner {
     }[];
 }
 
-// Tipo de dados para os links do menu
 export interface LinkItem {
-    id: string;
-    label: string;
-    href: string;
+  id: string;
+  text: string;
+  url: string;
+  target?: string;
 }
 
-// Tipo de dados que o componente Menu espera
+// Este tipo representa a estrutura dos dados do menu.
+export interface MenuData {
+  logoUrl: string;
+  links: LinkItem[];
+}
+
+// Este tipo representa as props que o componente Menu espera.
 export interface MenuProps {
-    logoUrl: string;
-    links: LinkItem[];
+  menuData: MenuData | null;
+}
+
+// Este tipo representa as props da sua página inicial.
+export interface HomePageProps {
+  banners: any[];
+  menu: MenuData | null; // Note a mudança aqui para MenuData
+  testimonials: any[];
+  faqs: any[];
+  colecoes: any[];
 }
 
 export interface TestimonialItem {
@@ -74,15 +88,6 @@ export interface ColecaoProps {
     order: number | null;
     slug: string; 
     items: ColecaoItem[];
-}
-
-// O tipo de dados que a sua página inicial espera
-export interface HomePageProps {
-    banners: Banner[];
-    menu: MenuProps | null;
-    testimonials: TestimonialItem[];
-    faqs: FaqItem[];
-    colecoes: ColecaoProps[];
 }
 
 // O tipo de dados que a sua função getServerSideProps na página inicial retorna
