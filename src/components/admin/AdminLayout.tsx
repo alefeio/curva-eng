@@ -1,5 +1,5 @@
+import { useState, ReactNode } from "react";
 import Link from "next/link";
-import { ReactNode } from "react";
 import { signOut } from "next-auth/react";
 import {
   MdDashboard,
@@ -9,7 +9,10 @@ import {
   MdReviews,
   MdHelpOutline,
   MdLogout,
-  MdPalette, // Adicionando um ícone para Coleções
+  MdPalette,
+  MdAssignment,
+  MdAddCircle,
+  MdClose, // Adicionando o ícone de fechar
 } from 'react-icons/md';
 
 interface AdminLayoutProps {
@@ -17,12 +20,48 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  // Estado para controlar a visibilidade da barra lateral em dispositivos móveis
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+      {/* Botão para abrir/fechar a barra lateral em telas pequenas */}
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 shadow-lg focus:outline-none focus:ring-2 focus:ring-accent"
+          aria-label="Toggle sidebar"
+        >
+          {isSidebarOpen ? (
+            <MdClose className="text-2xl" />
+          ) : (
+            <MdMenu className="text-2xl" />
+          )}
+        </button>
+      </div>
+
+      {/* Camada de sobreposição para o modo mobile quando a barra lateral está aberta */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
       {/* Sidebar de Navegação */}
-      <aside className="w-64 z-30 shadow-lg p-6 bg-white dark:bg-gray-800 transition-colors duration-300">
-        <h2 className="text-2xl font-bold mb-8 text-gray-900 dark:text-white">Painel Admin</h2>
-        
+      <aside
+        className={`fixed inset-y-0 left-0 w-64 z-30 shadow-lg p-6 bg-white dark:bg-gray-800 transition-transform duration-300 ease-in-out transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } md:relative md:translate-x-0 md:w-64`}
+      > 
+        <Link href="/">
+          <img
+            src="/images/logo.png"
+            alt="Logomarca Curva Engenharia"
+            className="mt-10 md:mt-2 mb-4 transition-all duration-300 h-auto w-40 md:w-48"
+          />
+        </Link>
+        <h2 className="text-2xl mb-8 font-bold text-gray-900 dark:text-white">Painel Admin</h2>
+
         <nav className="space-y-6">
           {/* Grupo 1: Conteúdo da Landing Page */}
           <div>
@@ -83,8 +122,29 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </li>
             </ul>
           </div>
-          
-          {/* Grupo 3: Autenticação */}
+
+          {/* Grupo 3: Gerenciamento de Tarefas - NOVO */}
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+              Gerenciamento de Tarefas
+            </h3>
+            <ul className="space-y-1 list-none">
+              <li>
+                <Link href="/admin/tasks" className="text-gray-900 dark:text-white flex items-center p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 group">
+                  <MdAssignment className="mr-3 text-xl text-gray-500 group-hover:text-primary transition-colors" />
+                  <span className="text-sm font-medium">Gerenciar Tarefas</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/admin/tasks/new" className="text-gray-900 dark:text-white flex items-center p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 group">
+                  <MdAddCircle className="mr-3 text-xl text-gray-500 group-hover:text-primary transition-colors" />
+                  <span className="text-sm font-medium">Nova Tarefa</span>
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Grupo 4: Autenticação */}
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
               Conta
@@ -105,7 +165,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Conteúdo Principal */}
-      <main className="flex-1 p-8 bg-gray-100 dark:bg-gray-900">
+      <main className="flex-1 p-8 bg-gray-100 dark:bg-gray-900 transition-all duration-300 md:ml-64">
         {children}
       </main>
     </div>

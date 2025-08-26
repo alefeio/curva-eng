@@ -23,7 +23,7 @@ export default function Hero() {
             </p>
             <div className="mt-4 w-fit mx-auto md:mx-0">
               <a href="/sobre" className="bg-accent text-white font-bold py-3 px-6 rounded-md shadow-lg hover:bg-accent-dark transition-colors">
-                Leia a história completa
+                Leia mais
               </a>
             </div>
           </div>
