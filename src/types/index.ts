@@ -1,3 +1,5 @@
+// src/types/index.ts
+
 export interface Banner {
     id: number;
     banners: {
@@ -9,15 +11,17 @@ export interface Banner {
     }[];
 }
 
-export interface MenuItem {
-    id: number;
+// Tipo de dados para os links do menu
+export interface LinkItem {
+    id: string;
+    label: string;
+    href: string;
+}
+
+// Tipo de dados que o componente Menu espera
+export interface MenuProps {
     logoUrl: string;
-    links: {
-        id: string;
-        url: string;
-        text: string;
-        target: string;
-    }[];
+    links: LinkItem[];
 }
 
 export interface TestimonialItem {
@@ -72,10 +76,18 @@ export interface ColecaoProps {
     items: ColecaoItem[];
 }
 
+// O tipo de dados que a sua página inicial espera
 export interface HomePageProps {
     banners: Banner[];
-    menu: MenuItem | null;
+    menu: MenuProps | null;
     testimonials: TestimonialItem[];
     faqs: FaqItem[];
     colecoes: ColecaoProps[];
+}
+
+// O tipo de dados que a sua função getServerSideProps na página inicial retorna
+export interface RawMenuData {
+    id: string;
+    name: string;
+    links: LinkItem[];
 }

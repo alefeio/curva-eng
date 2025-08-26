@@ -27,6 +27,7 @@ import TimelineSection from 'components/TimelineSection';
 import ServicesSection from 'components/ServicesSection';
 import Footer from 'components/Footer';
 import ContactForm from 'components/ContactForm';
+import SobreNos from 'components/SobreNos';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -99,7 +100,7 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
     }
 };
 
-export default function Home({ banners, menu, testimonials, faqs, colecoes }: HomePageProps) {
+export default function SobrePage({ banners, menu, testimonials, faqs, colecoes }: HomePageProps) {
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
@@ -226,32 +227,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <MenuComponent menuData={menu} />
                 <HeroSlider banners={banners} />
                 <main className="max-w-full mx-auto">
-                    <Hero />
-                    {/* <DressesGallery colecoes={colecoes} /> */}
-                    <Header />
-                    <ParallaxBanner
-                        imageUrl="/images/predios.jpg"
-                        title="Vamos iniciar o seu projeto?"
-                        subtitle="Estamos lhe esperando!"
-                        linkUrl="/contato"
-                        buttonText="Entre em contato"
-                        position="center"
-                    />
-                    {/* <TimelineSection /> */}
-                    <ServicesSection />
-                    <ParallaxBanner
-                        imageUrl="/images/aperto-mao.jpg"
-                        title="Vamos construir algo incrível juntos?"
-                        subtitle="Entre em contato e descubra como podemos transformar seu projeto em realidade com inovação e qualidade."
-                        linkUrl="/fale-conosco"
-                        buttonText="Fale conosco"
-                        position="left"
-                    />
-                    {/* <PromotionsForm /> */}
-                    <ContactForm />
-                    <Testimonials testimonials={testimonials} />
-                    <FAQ faqs={faqs} />
-                    {/* <LocationMap /> */}
+                    <SobreNos />
                     <Footer menuData={menu} />
                 </main>
                 <WhatsAppButton />
