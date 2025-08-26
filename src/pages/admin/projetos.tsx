@@ -30,6 +30,18 @@ interface FormState {
   items: ProjetoFoto[];
 }
 
+// Tipos de projeto permitidos
+const TIPOS_DE_PROJETO = [
+  "Residencial",
+  "Comercial",
+  "Saúde",
+  "Corporativo",
+  "Interiores",
+  "Reforma",
+  "Paisagismo",
+  "Público"
+];
+
 export default function AdminProjetos() {
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [form, setForm] = useState<FormState>({
@@ -39,7 +51,7 @@ export default function AdminProjetos() {
     order: 0,
     items: [{
       local: "",
-      tipo: "",
+      tipo: TIPOS_DE_PROJETO[0], // Define o primeiro tipo como padrão
       detalhes: "",
       img: ""
     }],
@@ -79,7 +91,7 @@ export default function AdminProjetos() {
       order: 0,
       items: [{
         local: "",
-        tipo: "",
+        tipo: TIPOS_DE_PROJETO[0],
         detalhes: "",
         img: ""
       }],
@@ -95,7 +107,7 @@ export default function AdminProjetos() {
     }
   };
 
-  const handleItemChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
+  const handleItemChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, index: number) => {
     const { name, value } = e.target;
     const newItems = [...form.items];
   
@@ -112,7 +124,7 @@ export default function AdminProjetos() {
   const handleAddItem = () => {
     setForm({
       ...form,
-      items: [...form.items, { local: "", tipo: "", detalhes: "", img: "" }],
+      items: [...form.items, { local: "", tipo: TIPOS_DE_PROJETO[0], detalhes: "", img: "" }],
     });
   };
 
@@ -132,7 +144,7 @@ export default function AdminProjetos() {
         ...item, 
         img: item.img as string,
         local: item.local || '',
-        tipo: item.tipo || '',
+        tipo: item.tipo || TIPOS_DE_PROJETO[0], // Define um valor padrão se for nulo
         detalhes: item.detalhes || '',
       }))
     });
@@ -238,7 +250,13 @@ export default function AdminProjetos() {
                   </button>
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input type="text" name="local" value={item.local} onChange={(e) => handleItemChange(e, index)} placeholder="Localização (Ex: Belém/PA)" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
-                    <input type="text" name="tipo" value={item.tipo} onChange={(e) => handleItemChange(e, index)} placeholder="Tipo (Ex: Residencial)" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
+                    <select name="tipo" value={item.tipo} onChange={(e) => handleItemChange(e, index)} required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900">
+                      {TIPOS_DE_PROJETO.map(tipo => (
+                        <option key={tipo} value={tipo}>
+                          {tipo}
+                        </option>
+                      ))}
+                    </select>
                     <textarea name="detalhes" value={item.detalhes} onChange={(e) => handleItemChange(e, index)} placeholder="Detalhes da foto" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900 col-span-1 md:col-span-2" />
                   </div>
                   

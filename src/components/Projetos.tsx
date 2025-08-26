@@ -1,91 +1,104 @@
 // src/components/Projetos.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FaBuilding, FaHome, FaRegBuilding } from 'react-icons/fa';
-import { AiOutlineClose } from 'react-icons/ai'; // Ícone para o botão de fechar
+import { AiOutlineClose } from 'react-icons/ai'; 
+import { MdOutlineArrowBackIos, MdOutlineArrowForwardIos } from "react-icons/md";
 
-// Observação: Se ainda não tiver, você precisa instalar a biblioteca de ícones:
-// npm install react-icons
-
-interface Projeto {
-  id: number;
-  title: string;
-  description: string;
-  category: 'residencial' | 'comercial' | 'governamental';
-  imageUrl: string;
-  // Adicionando um campo de descrição mais detalhada para o modal
-  fullDescription: string;
+// Definições de tipo com base no seu schema.prisma e na API
+interface ProjetoFoto {
+  id: string;
+  local: string;
+  tipo: string;
+  detalhes: string;
+  img: string; // URL da imagem
 }
 
-const projectsData: Projeto[] = [
-  {
-    id: 1,
-    title: 'Residência Moderna Belém',
-    description: 'Um projeto residencial que integra design contemporâneo com a vegetação local.',
-    fullDescription: 'Este projeto residencial em Belém, Pará, foi concebido para se harmonizar com a paisagem natural da região. A arquitetura moderna valoriza o uso de materiais locais e a iluminação natural, criando um ambiente aberto e arejado. O design de interiores integra o exterior com o interior, com grandes janelas e áreas de convivência que se abrem para o jardim, proporcionando conforto e bem-estar para os moradores.',
-    category: 'residencial',
-    imageUrl: 'https://images.unsplash.com/photo-1613545325278-f24b0cae1224?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-  {
-    id: 2,
-    title: 'Edifício Comercial Rio de Janeiro',
-    description: 'Um edifício corporativo com fachada de vidro e estrutura metálica.',
-    fullDescription: 'Com uma arquitetura arrojada e contemporânea, este edifício no Rio de Janeiro foi projetado para ser um novo polo de negócios. A fachada de vidro maximiza a entrada de luz natural e oferece vistas panorâmicas da cidade. O projeto estrutural otimizou o espaço interno, permitindo flexibilidade para a configuração de escritórios, e as soluções de eficiência energética garantem um baixo custo operacional.',
-    category: 'comercial',
-    imageUrl: 'https://images.unsplash.com/photo-1594950328224-118e7c2e9a59?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-  {
-    id: 3,
-    title: 'Reforma de Escola Pública',
-    description: 'Reforma completa de uma escola pública para modernizar a infraestrutura.',
-    fullDescription: 'Este projeto foi uma reforma abrangente em uma escola pública para proporcionar um ambiente de aprendizado mais seguro e moderno. A reestruturação incluiu a reforma das salas de aula, a construção de uma nova quadra poliesportiva e a readequação da área externa. Nossa equipe trabalhou em estreita colaboração com as autoridades para garantir que a obra fosse concluída dentro do prazo e do orçamento, sem comprometer a qualidade e a segurança.',
-    category: 'governamental',
-    imageUrl: 'https://images.unsplash.com/photo-1543269829-2d58546b12a8?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-  {
-    id: 4,
-    title: 'Residência Urbana Curitiba',
-    description: 'Projeto de uma casa em lote estreito, focado em otimizar o espaço.',
-    fullDescription: 'Projetada para um lote urbano estreito em Curitiba, esta casa é um exemplo de como a arquitetura inteligente pode maximizar o espaço e a funcionalidade. O design minimalista e as soluções de iluminação estratégica criam uma sensação de amplitude. A integração das áreas sociais e a otimização dos ambientes internos resultam em um lar confortável e moderno, perfeito para a vida urbana.',
-    category: 'residencial',
-    imageUrl: 'https://images.unsplash.com/photo-1560518883-ce0972591603?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-  {
-    id: 5,
-    title: 'Sede de Startup de Tecnologia',
-    description: 'Criação de um ambiente de trabalho moderno e colaborativo.',
-    fullDescription: 'A sede desta startup de tecnologia foi pensada para refletir sua cultura jovem e inovadora. O projeto de interiores criou espaços abertos, áreas de descompressão e salas de reunião modulares, incentivando a colaboração e a criatividade. A infraestrutura tecnológica foi completamente modernizada, garantindo um ambiente de trabalho de alta performance e bem-estar para os colaboradores.',
-    category: 'comercial',
-    imageUrl: 'https://images.unsplash.com/photo-1517048676732-d65bc9c55421?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-  {
-    id: 6,
-    title: 'Posto de Saúde Comunitário',
-    description: 'Projeto e construção de um novo posto de saúde para a comunidade.',
-    fullDescription: 'Com foco na saúde e no bem-estar da população, este posto de saúde foi construído com base em princípios de sustentabilidade e acessibilidade. O design funcional facilita o fluxo de pacientes e equipe, e os materiais utilizados garantem durabilidade e baixa manutenção. A obra, executada com transparência e eficiência, contribuiu para a melhoria da infraestrutura de saúde local.',
-    category: 'governamental',
-    imageUrl: 'https://images.unsplash.com/photo-1579684385153-61b4632b6e15?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-];
+interface Projeto {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  order: number;
+  items: ProjetoFoto[];
+}
 
 const Projetos: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState<'todos' | 'residencial' | 'comercial' | 'governamental'>('todos');
+  const [projects, setProjects] = useState<Projeto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<string>('todos');
   const [showModal, setShowModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Projeto | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const filteredProjects = activeCategory === 'todos'
-    ? projectsData
-    : projectsData.filter(projeto => projeto.category === activeCategory);
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/crud/projetos", { method: "GET" });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setProjects(data.projetos.sort((a: Projeto, b: Projeto) => a.order - b.order));
+      } else {
+        console.error("Erro ao carregar projetos:", data.message);
+      }
+    } catch (e) {
+      console.error("Erro ao conectar com a API de projetos.", e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openModal = (project: Projeto) => {
     setSelectedProject(project);
     setShowModal(true);
+    setCurrentImageIndex(0); // Reinicia o slider
   };
 
   const closeModal = () => {
     setShowModal(false);
     setSelectedProject(null);
+  };
+  
+  const handleNextImage = () => {
+    if (selectedProject) {
+        setCurrentImageIndex((prevIndex) => 
+            (prevIndex + 1) % selectedProject.items.length
+        );
+    }
+  };
+
+  const handlePrevImage = () => {
+    if (selectedProject) {
+        setCurrentImageIndex((prevIndex) => 
+            (prevIndex - 1 + selectedProject.items.length) % selectedProject.items.length
+        );
+    }
+  };
+
+  // Extrai todas as categorias únicas do banco de dados para os botões de filtro
+  const allCategories = Array.from(new Set(projects.flatMap(p => p.items.map(i => i.tipo))));
+
+  const filteredProjects = activeCategory === 'todos'
+    ? projects
+    : projects.filter(projeto => projeto.items.some(item => item.tipo === activeCategory));
+
+  // Função para mapear tipo para um ícone
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'Residencial':
+        return <FaHome size={20} className="mr-2" />;
+      case 'Comercial':
+        return <FaBuilding size={20} className="mr-2" />;
+      case 'Público':
+        return <FaRegBuilding size={20} className="mr-2" />;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -104,64 +117,55 @@ const Projetos: React.FC = () => {
         <div className="flex flex-wrap justify-center gap-4 mb-12">
           <button
             onClick={() => setActiveCategory('todos')}
-            className={`px-6 py-2 rounded-full font-semibold transition-colors duration-300 ${
+            className={`px-6 py-2 rounded-full font-semibold transition-colors duration-300 flex items-center ${
               activeCategory === 'todos' ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
             Todos
           </button>
-          <button
-            onClick={() => setActiveCategory('residencial')}
-            className={`px-6 py-2 rounded-full font-semibold transition-colors duration-300 ${
-              activeCategory === 'residencial' ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Residenciais
-          </button>
-          <button
-            onClick={() => setActiveCategory('comercial')}
-            className={`px-6 py-2 rounded-full font-semibold transition-colors duration-300 ${
-              activeCategory === 'comercial' ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Comerciais
-          </button>
-          <button
-            onClick={() => setActiveCategory('governamental')}
-            className={`px-6 py-2 rounded-full font-semibold transition-colors duration-300 ${
-              activeCategory === 'governamental' ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Governamentais
-          </button>
+          {allCategories.map(category => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={`px-6 py-2 rounded-full font-semibold transition-colors duration-300 flex items-center ${
+                activeCategory === category ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {getCategoryIcon(category)} {category}s
+            </button>
+          ))}
         </div>
 
         {/* Galeria de Projetos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProjects.map((projeto) => (
-            <div key={projeto.id} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform hover:scale-105 duration-300">
-              <div className="relative h-60 w-full">
-                <Image
-                  src={projeto.imageUrl}
-                  alt={projeto.title}
-                  layout="fill"
-                  objectFit="cover"
-                  className="transition-transform duration-500 hover:scale-110"
-                />
+        {loading ? (
+          <p className="text-center text-gray-600 text-xl">Carregando projetos...</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredProjects.map((projeto) => (
+              <div key={projeto.id} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform hover:scale-105 duration-300">
+                <div className="relative h-60 w-full">
+                  <Image
+                    src={projeto.items[0].img} // Mostra a primeira foto
+                    alt={projeto.title}
+                    layout="fill"
+                    objectFit="cover"
+                    className="transition-transform duration-500 hover:scale-110"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mb-2 text-gray-800">{projeto.title}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed mb-4">{projeto.subtitle}</p>
+                  <button 
+                    onClick={() => openModal(projeto)} 
+                    className="text-orange-500 font-semibold hover:underline"
+                  >
+                    Ver Projeto <span aria-hidden="true">&rarr;</span>
+                  </button>
+                </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2 text-gray-800">{projeto.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">{projeto.description}</p>
-                <button 
-                  onClick={() => openModal(projeto)} 
-                  className="text-orange-500 font-semibold hover:underline"
-                >
-                  Ver Projeto <span aria-hidden="true">&rarr;</span>
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
         
         {/* Chamada para Ação (Call to Action) */}
         <div className="text-center mt-16">
@@ -181,7 +185,7 @@ const Projetos: React.FC = () => {
       {/* Modal do Projeto */}
       {showModal && selectedProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4" onClick={closeModal}>
-          <div className="bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-4xl w-full max-h-[95vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
             
             {/* Botão de fechar */}
             <button 
@@ -192,21 +196,54 @@ const Projetos: React.FC = () => {
               <AiOutlineClose size={24} />
             </button>
             
-            <div className="relative w-full h-64 md:h-80 mb-6 rounded-lg overflow-hidden">
+            {/* Slider de Imagens */}
+            <div className="relative w-full h-80 md:h-96 mb-6 rounded-lg overflow-hidden flex items-center justify-center">
               <Image 
-                src={selectedProject.imageUrl} 
-                alt={selectedProject.title} 
+                src={selectedProject.items[currentImageIndex].img} 
+                alt={selectedProject.items[currentImageIndex].detalhes} 
                 layout="fill" 
                 objectFit="cover" 
+                className='h-[100px]'
               />
+              
+              {/* Botões do slider */}
+              <button
+                onClick={handlePrevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/50 text-gray-800 p-2 rounded-full hover:bg-white transition-colors z-10"
+              >
+                <MdOutlineArrowBackIos size={24} />
+              </button>
+              <button
+                onClick={handleNextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/50 text-gray-800 p-2 rounded-full hover:bg-white transition-colors z-10"
+              >
+                <MdOutlineArrowForwardIos size={24} />
+              </button>
             </div>
             
+            {/* Detalhes do Projeto */}
             <h2 className="text-2xl md:text-3xl font-bold text-orange-500 mb-2">
               {selectedProject.title}
             </h2>
-            <p className="text-sm md:text-base text-gray-700 leading-relaxed">
-              {selectedProject.fullDescription}
+            <p className="text-md md:text-lg text-gray-700 mb-4 font-semibold">
+              {selectedProject.subtitle}
             </p>
+            <p className="text-sm md:text-base text-gray-700 leading-relaxed mb-4">
+              {selectedProject.description}
+            </p>
+
+            {/* Detalhes da Foto Atual */}
+            <div className="bg-gray-100 p-4 rounded-lg">
+                <p className="text-gray-800 font-semibold mb-1">
+                    Tipo: <span className="font-normal">{selectedProject.items[currentImageIndex].tipo}</span>
+                </p>
+                <p className="text-gray-800 font-semibold mb-1">
+                    Local: <span className="font-normal">{selectedProject.items[currentImageIndex].local}</span>
+                </p>
+                <p className="text-gray-800 font-semibold">
+                    Detalhes: <span className="font-normal">{selectedProject.items[currentImageIndex].detalhes}</span>
+                </p>
+            </div>
             
           </div>
         </div>
