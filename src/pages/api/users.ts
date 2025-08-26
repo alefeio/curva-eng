@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // Defina a interface para o usuário, correspondente ao que o frontend espera
 interface User {
   id: string;
-  name: string;
+  name: string | null; // A interface foi corrigida para aceitar null
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
