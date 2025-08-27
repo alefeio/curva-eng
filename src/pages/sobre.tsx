@@ -219,8 +219,6 @@ export default function SobrePage({ banners, menu, testimonials, faqs, colecoes 
                         >
                             <AiOutlineClose size={24} />
                         </button>
-
-                        <PromotionsForm />
                     </div>
                 </div>
             )}

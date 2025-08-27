@@ -220,7 +220,6 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                         buttonText="Fale conosco"
                         position="left"
                     />
-                    {/* <PromotionsForm /> */}
                     <Testimonials testimonials={testimonials} />
                     <ContactForm />
                     <FAQ faqs={faqs} />
@@ -252,8 +251,6 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                         >
                             <AiOutlineClose size={24} />
                         </button>
-
-                        <PromotionsForm />
                     </div>
                 </div>
             )}

@@ -1,6 +1,4 @@
-// src/components/PromotionsForm.tsx
-
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 
 // Função para aplicar a máscara no número de telefone
 const formatPhoneNumber = (value: string): string => {
@@ -25,10 +23,42 @@ const formatPhoneNumber = (value: string): string => {
 };
 
 const PromotionsForm: React.FC = () => {
+    const [showModal, setShowModal] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [status, setStatus] = useState(''); // 'success', 'error', 'submitting'
+
+    // UseEffect para adicionar o event listener de "exit intent"
+    useEffect(() => {
+        const modalShown = localStorage.getItem('modalShown');
+        if (modalShown) {
+            return; // Se o modal já foi exibido, não faz nada
+        }
+
+        const handleMouseOut = (e: MouseEvent) => {
+            // Verifica se o cursor está saindo da área superior da janela
+            if (e.clientY <= 0) {
+                setShowModal(true);
+                // Registra a exibição no localStorage para que não apareça novamente
+                localStorage.setItem('modalShown', 'true');
+                // Remove o event listener após a primeira exibição
+                document.removeEventListener('mouseout', handleMouseOut);
+            }
+        };
+
+        // Adiciona o event listener ao documento para detectar a saída do mouse
+        document.addEventListener('mouseout', handleMouseOut);
+
+        // Função de limpeza para remover o listener quando o componente for desmontado
+        return () => {
+            document.removeEventListener('mouseout', handleMouseOut);
+        };
+    }, []);
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+    };
 
     const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
         const formattedPhoneNumber = formatPhoneNumber(e.target.value);
@@ -65,13 +95,20 @@ const PromotionsForm: React.FC = () => {
         }
     };
 
+    // A visibilidade do modal é controlada por classes CSS e o estado showModal.
     return (
-        <>
-            <div id="fique-por-dentro">&nbsp;</div>
-            <div className="bg-primary py-12 px-4 sm:px-6 lg:px-8 text-white rounded-lg shadow-xl"> {/* Ajuste na cor de fundo */}
-                <div className="max-w-5xl mx-auto text-center">
-                    <h3 className="text-white font-serif text-2xl md:text-3xl font-bold mb-6 text-center">
-                        Receba Nossas Novidades e Insights!
+        <div className={`fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50 transition-opacity duration-300 ${showModal ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <div id="fique-por-dentro" className="m-4 relative p-8 max-w-lg bg-primary rounded-lg shadow-xl text-white">
+                <button
+                    onClick={handleCloseModal}
+                    className="absolute top-4 right-4 text-white text-2xl font-bold leading-none hover:text-gray-300"
+                    aria-label="Close"
+                >
+                    &times;
+                </button>
+                <div className="text-center">
+                    <h3 className="text-white font-serif text-2xl md:text-3xl font-bold mb-6">
+                        Receba Nossas Novidades
                     </h3>
                     <p className="text-white text-lg mb-8">
                         Cadastre-se para receber conteúdos exclusivos sobre projetos, tendências em engenharia e arquitetura, e cases de sucesso da Curva.
@@ -83,7 +120,7 @@ const PromotionsForm: React.FC = () => {
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Seu Nome"
                             required
-                            className="w-full sm:w-1/3 px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500" // Ajuste de cor
+                            className="w-full px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500"
                         />
                         <input
                             type="email"
@@ -91,19 +128,19 @@ const PromotionsForm: React.FC = () => {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Seu Melhor E-mail"
                             required
-                            className="w-full sm:w-1/3 px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500" // Ajuste de cor
+                            className="w-full px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500"
                         />
                         <input
                             type="text"
                             value={phone}
                             onChange={handlePhoneChange}
                             placeholder="Seu WhatsApp (Opcional)"
-                            className="w-full sm:w-1/3 px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500" // Ajuste de cor
+                            className="w-full px-4 py-3 border border-primary-dark rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-900 placeholder-gray-500"
                         />
                         <button
                             type="submit"
                             disabled={status === 'submitting'}
-                            className="mt-4 w-full sm:w-auto px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-md transition-colors duration-200 disabled:bg-gray-600 disabled:cursor-not-allowed" // Ajuste de cor
+                            className="mt-4 w-full px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-md transition-colors duration-200 disabled:bg-gray-600 disabled:cursor-not-allowed"
                         >
                             {status === 'submitting' ? 'Cadastrando...' : 'Cadastrar na Newsletter'}
                         </button>
@@ -120,7 +157,7 @@ const PromotionsForm: React.FC = () => {
                     )}
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

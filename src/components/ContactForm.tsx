@@ -86,7 +86,7 @@ const ContactForm: React.FC = () => {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Seu Nome Completo"
+            placeholder="Seu Nome"
             required
             className="w-full px-4 py-3 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-700 text-white placeholder-gray-400"
           />
@@ -94,7 +94,7 @@ const ContactForm: React.FC = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Seu Melhor E-mail"
+            placeholder="Seu Email"
             required
             className="w-full px-4 py-3 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-700 text-white placeholder-gray-400"
           />
@@ -102,7 +102,7 @@ const ContactForm: React.FC = () => {
             type="text"
             value={phone}
             onChange={handlePhoneChange}
-            placeholder="Seu WhatsApp (Ex: (91) 98765-4321)"
+            placeholder="Celular/WhatsApp"
             className="w-full px-4 py-3 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-700 text-white placeholder-gray-400"
           />
           <select

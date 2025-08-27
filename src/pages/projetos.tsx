@@ -4,7 +4,6 @@ import React from 'react';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { PrismaClient } from '@prisma/client';
-import { Menu as MenuComponent } from 'components/Menu';
 import Footer from 'components/Footer';
 import ProjetosComponent from '../components/Projetos';
 import {
