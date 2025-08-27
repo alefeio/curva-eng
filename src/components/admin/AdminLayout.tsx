@@ -165,7 +165,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Conteúdo Principal */}
-      <main className="flex-1 p-8 bg-gray-100 dark:bg-gray-900 transition-all duration-300 md:ml-64">
+      <main className="flex-1 p-8 bg-gray-100 dark:bg-gray-900 transition-all duration-300">
         {children}
       </main>
     </div>

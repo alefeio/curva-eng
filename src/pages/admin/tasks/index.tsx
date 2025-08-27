@@ -20,6 +20,7 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -44,14 +45,46 @@ export default function TasksPage() {
   const getStatusColor = (status: Task['status']) => {
     switch (status) {
       case 'PENDENTE':
-        return 'bg-red-200 text-red-800';
+        return 'bg-red-100 text-red-800';
       case 'EM_ANDAMENTO':
-        return 'bg-yellow-200 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800';
       case 'CONCLUIDA':
-        return 'bg-green-200 text-green-800';
+        return 'bg-green-100 text-green-800';
       default:
-        return 'bg-gray-200 text-gray-800';
+        return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getPriorityColor = (priority: number) => {
+    switch (priority) {
+      case 2:
+        return 'bg-red-500 text-white'; // Alta
+      case 1:
+        return 'bg-yellow-500 text-white'; // Normal
+      case 0:
+        return 'bg-blue-500 text-white'; // Baixa
+      default:
+        return 'bg-gray-500 text-white';
+    }
+  };
+
+  const getPriorityText = (priority: number) => {
+    switch (priority) {
+      case 2:
+        return 'Alta';
+      case 1:
+        return 'Normal';
+      case 0:
+        return 'Baixa';
+      default:
+        return 'N/A';
+    }
+  };
+
+  const kanbanColumns = {
+    'PENDENTE': tasks.filter(task => task.status === 'PENDENTE'),
+    'EM_ANDAMENTO': tasks.filter(task => task.status === 'EM_ANDAMENTO'),
+    'CONCLUIDA': tasks.filter(task => task.status === 'CONCLUIDA'),
   };
 
   if (loading) {
@@ -81,47 +114,143 @@ export default function TasksPage() {
           <title>Gerenciador de Tarefas</title>
         </Head>
 
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Minhas Tarefas</h1>
-          <Link href="/admin/tasks/new" className="bg-accent hover:bg-accent-dark text-white font-bold py-2 px-4 rounded-md transition duration-300">
-            + Nova Tarefa
-          </Link>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Minhas Tarefas</h1>
+          <div className="flex space-x-4">
+            <button
+              onClick={() => setViewMode('table')}
+              className={`py-2 px-4 rounded-md font-bold transition duration-300 shadow-md ${
+                viewMode === 'table' ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Tabela
+            </button>
+            <button
+              onClick={() => setViewMode('kanban')}
+              className={`py-2 px-4 rounded-md font-bold transition duration-300 shadow-md ${
+                viewMode === 'kanban' ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Kanban
+            </button>
+            <Link href="/admin/tasks/new" className="bg-accent hover:bg-accent-dark text-white font-bold py-2 px-4 rounded-md transition duration-300 shadow-md">
+              + Nova Tarefa
+            </Link>
+          </div>
         </div>
 
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          {tasks.length === 0 ? (
-            <p className="p-6 text-gray-500 text-center">Nenhuma tarefa encontrada.</p>
-          ) : (
-            <ul className="divide-y divide-gray-200">
-              {tasks.map((task) => (
-                <li key={task.id} className="p-4 md:p-6 hover:bg-gray-50 transition duration-150 ease-in-out">
-                  <Link href={`/tasks/${task.id}`}>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-                      <div className="flex-1 min-w-0">
-                        <div className="text-lg font-semibold text-gray-900 truncate">
-                          {task.title}
-                        </div>
-                        <div className="text-sm text-gray-500 truncate mt-1">
-                          Responsável: {task.assignedTo.name}
-                        </div>
-                      </div>
-                      <div className="mt-2 md:mt-0 md:ml-4 flex items-center space-x-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.status)}`}>
-                          {task.status.replace(/_/g, ' ')}
-                        </span>
-                        {task.dueDate && (
-                          <span className="text-sm text-gray-500">
-                            Vencimento: {new Date(task.dueDate).toLocaleDateString()}
+        {viewMode === 'table' ? (
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            {tasks.length === 0 ? (
+              <p className="p-6 text-gray-500 text-center">Nenhuma tarefa encontrada.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Título
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Prioridade
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Responsável
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Vencimento
+                      </th>
+                      <th scope="col" className="relative px-6 py-3">
+                        <span className="sr-only">Ações</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {tasks.map((task) => (
+                      <tr key={task.id} className="hover:bg-gray-100 transition duration-150 ease-in-out">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                              {task.title}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(task.status)}`}>
+                            {task.status.replace(/_/g, ' ')}
                           </span>
-                        )}
-                      </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityColor(task.priority)}`}>
+                            {getPriorityText(task.priority)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {task.assignedTo.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <Link href={`/admin/tasks/${task.id}`} className="text-indigo-600 hover:text-indigo-900 mr-4">
+                            Ver Detalhes
+                          </Link>
+                          <Link href={`/admin/tasks/edit/${task.id}`} className="text-accent hover:text-accent-dark">
+                            Editar
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {Object.entries(kanbanColumns).map(([status, tasksForColumn]) => (
+              <div key={status} className="bg-gray-100 p-4 rounded-lg shadow-md">
+                <h2 className="text-lg font-bold text-gray-700 mb-4">{status.replace(/_/g, ' ')} ({tasksForColumn.length})</h2>
+                <div className="space-y-4">
+                  {tasksForColumn.length === 0 ? (
+                    <div className="text-center text-gray-500">
+                      Nenhuma tarefa nesta coluna.
                     </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                  ) : (
+                    tasksForColumn.map(task => (
+                      <div key={task.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+                        <h3 className="text-base font-semibold text-gray-900 truncate">{task.title}</h3>
+                        <p className="text-sm text-gray-500 mt-1">Responsável: {task.assignedTo.name}</p>
+                        {task.dueDate && (
+                          <p className="text-xs text-gray-400 mt-1">Vencimento: {new Date(task.dueDate).toLocaleDateString()}</p>
+                        )}
+                        <div className="flex flex-wrap items-center mt-2 space-x-2">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.status)}`}>
+                            {task.status.replace(/_/g, ' ')}
+                          </span>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getPriorityColor(task.priority)}`}>
+                            {getPriorityText(task.priority)}
+                          </span>
+                        </div>
+                        <div className="flex justify-end mt-4 space-x-2">
+                          <Link href={`/admin/tasks/${task.id}`} className="text-sm text-indigo-600 hover:text-indigo-900">
+                            Detalhes
+                          </Link>
+                          <Link href={`/admin/tasks/edit/${task.id}`} className="text-sm text-accent hover:text-accent-dark">
+                            Editar
+                          </Link>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

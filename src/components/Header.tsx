@@ -35,15 +35,15 @@ export default function Header() {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <section className="py-12 md:py-20 bg-gray-50">
+    <section className="py-12 md:py-20 bg-primary">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
           {/* Coluna da esquerda: Conteúdo de texto e números */}
           <div className="flex flex-col gap-6">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-orange-500 leading-tight">
               Soluções completas para seu empreendimento
             </h2>
-            <p className="text-gray-600 text-lg leading-relaxed">
+            <p className="text-white text-lg leading-relaxed">
               Da concepção à execução, oferecemos projetos inteligentes, gestão eficiente e construção de alto padrão. Combinamos inovação, tecnologia e experiência para entregar soluções personalizadas que agregam valor, qualidade e sustentabilidade ao seu empreendimento.
             </p>
 
@@ -52,7 +52,7 @@ export default function Header() {
               {stats.map((stat, index) => (
                 <div key={index} className="flex flex-col items-center sm:items-start text-center sm:text-left">
                   <span className="text-4xl font-bold text-orange-500">{stat.value}</span>
-                  <span className="text-gray-600 text-lg">{stat.label}</span>
+                  <span className="text-white text-lg">{stat.label}</span>
                 </div>
               ))}
             </div>

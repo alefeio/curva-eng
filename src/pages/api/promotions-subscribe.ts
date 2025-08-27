@@ -28,29 +28,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(409).json({ message: 'Este email já está cadastrado em nossa newsletter.' });
         }
 
-        // Transação para garantir que os dados sejam salvos em ambas as tabelas ou em nenhuma
-        await prisma.$transaction([
-            // Salva os dados na tabela de subscribers/marketing
-            prisma.subscriber.create({
-                data: {
-                    name,
-                    email,
-                    phone,
-                },
-            }),
-            // Salva um registro básico na tabela de usuários para futuro login (se aplicável)
-            prisma.user.upsert({
-                where: { email },
-                update: {},
-                create: {
-                    name,
-                    email,
-                    role: 'USER',
-                },
-            }),
-        ]);
+        // Salva os dados na tabela de subscribers/marketing
+        await prisma.subscriber.create({
+            data: {
+                name,
+                email,
+                phone,
+            },
+        });
 
-        // Envia o email de boas-vindas com o novo conteúdo
+        // Envia o email de boas-vindas
         await resend.emails.send({
             from: "Curva Engenharia <contato@curvaeng.com.br>", // Altere para seu email verificado
             to: email,
@@ -73,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="https://curva-eng.vercel.app/images/logo.png" alt="Logo Curva Engenharia e Arquitetura" />
+                            <img src="https://res.cloudinary.com/dacvhzjxb/image/upload/v1756158564/dresses/xmwkqh4agbzztujfz3x7.png" alt="Logo Curva Engenharia e Arquitetura" />
                         </div>
                         <div class="content">
                             <p>Olá, ${name}!</p>
