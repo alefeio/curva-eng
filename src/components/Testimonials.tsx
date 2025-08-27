@@ -53,7 +53,7 @@ export default function Testimonials({ testimonials }: TestimonialsPageProps) {
           <a
             target="_blank"
             rel="noopener noreferrer"
-            href="https://g.page/r/CSDAOXMfoxIIEBM/review"
+            href="https://g.page/r/Cb0i7CwI5XQuEBM/review"
             className="text-orange-500 underline hover:text-orange-600 transition-colors font-semibold"
           >
             Conte-nos como foi sua experiência
