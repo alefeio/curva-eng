@@ -114,7 +114,7 @@ const Projetos: React.FC = () => {
         </div>
 
         {/* Botões de Filtro */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
+        <div className="flex flex-wrap justify-center gap-4 my-12">
           <button
             onClick={() => setActiveCategory('todos')}
             className={`px-6 py-2 rounded-full font-semibold transition-colors duration-300 flex items-center ${
@@ -131,7 +131,7 @@ const Projetos: React.FC = () => {
                 activeCategory === category ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              {getCategoryIcon(category)} {category}s
+              {getCategoryIcon(category)} {category}
             </button>
           ))}
         </div>

@@ -30,6 +30,7 @@ import TimelineSection from 'components/TimelineSection';
 import ServicesSection from 'components/ServicesSection';
 import Footer from 'components/Footer';
 import ContactForm from 'components/ContactForm';
+import Projetos from 'components/Projetos';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -202,6 +203,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     <Hero />
                     {/* <DressesGallery colecoes={colecoes} /> */}
                     <Header />
+                    <Projetos />
                     <ParallaxBanner
                         imageUrl="/images/predios.jpg"
                         title="Vamos iniciar o seu projeto?"
