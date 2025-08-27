@@ -203,7 +203,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     <Hero />
                     {/* <DressesGallery colecoes={colecoes} /> */}
                     <Header />
-                    <Projetos />
+                    <ServicesSection />
                     <ParallaxBanner
                         imageUrl="/images/predios.jpg"
                         title="Vamos iniciar o seu projeto?"
@@ -213,17 +213,17 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                         position="center"
                     />
                     {/* <TimelineSection /> */}
-                    <ServicesSection />
+                    <Projetos />
+                    <Testimonials testimonials={testimonials} />
+                    <ContactForm />
                     <ParallaxBanner
                         imageUrl="/images/aperto-mao.jpg"
                         title="Vamos construir algo incrível juntos?"
                         subtitle="Entre em contato e descubra como podemos transformar seu projeto em realidade com inovação e qualidade."
-                        linkUrl="/fale-conosco"
+                        linkUrl="/contato"
                         buttonText="Fale conosco"
                         position="left"
                     />
-                    <Testimonials testimonials={testimonials} />
-                    <ContactForm />
                     <FAQ faqs={faqs} />
                     {/* <LocationMap /> */}
                     <Footer menuData={menu} />

@@ -42,8 +42,8 @@ export function MenuInterno({ menuData }: MenuProps) {
   return (
     <header
       className={`fixed left-0 w-full z-30 transition-all duration-300 top-0 backdrop-blur-sm py-4 shadow-lg ${isScrolled
-          ? "bg-primary/90"
-          : "bg-primary"
+          ? "bg-gray-800/90"
+          : "bg-gray-800"
         }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">

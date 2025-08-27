@@ -71,10 +71,10 @@ const ContactForm: React.FC = () => {
         <section id='contato' className="py-12 md:py-20 px-4 text-white bg-white">
             <div className="mx-auto rounded-xl py-12 md:py-20 bg-gray-800 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center">
-                    <p className="text-orange-400 font-semibold text-lg">Faça um orçamento</p>
                     <h2 className="text-white text-4xl md:text-5xl font-bold leading-tight mb-4 max-w-xs md:max-w-5xl mx-auto">
                         Transforme seu Projeto em Realidade
                     </h2>
+                    <p className="text-orange-400 font-semibold text-lg">Faça um orçamento</p>
                     <p className="text-lg text-gray-300 mb-8 max-w-xs md:max-w-5xl mx-auto">
                         Compartilhe suas ideias e necessidades. Nossa equipe está pronta para oferecer as melhores soluções em engenharia, arquitetura e design.
                     </p>

@@ -42,7 +42,7 @@ export function Menu({ menuData }: MenuProps) {
   return (
     <header
       className={`fixed left-0 w-full z-30 transition-all duration-300 ${isScrolled
-          ? "top-0 bg-primary/90 backdrop-blur-sm py-4 shadow-lg"
+          ? "top-0 bg-gray-800/90 backdrop-blur-sm py-4 shadow-lg"
           : "top-6 py-4"
         }`}
     >

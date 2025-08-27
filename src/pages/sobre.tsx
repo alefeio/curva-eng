@@ -188,7 +188,7 @@ export default function SobrePage({ banners, menu, testimonials, faqs, colecoes 
                         imageUrl="/images/aperto-mao.jpg"
                         title="Vamos construir algo incrível juntos?"
                         subtitle="Entre em contato e descubra como podemos transformar seu projeto em realidade com inovação e qualidade."
-                        linkUrl="/fale-conosco"
+                        linkUrl="/contato"
                         buttonText="Fale conosco"
                         position="left"
                     />

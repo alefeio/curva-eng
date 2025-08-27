@@ -15,13 +15,13 @@ interface TestimonialsPageProps {
 
 export default function Testimonials({ testimonials }: TestimonialsPageProps) {
   return (
-    <section className="py-12 md:py-20">
+    <section className="bg-gray-800 py-12 md:py-20">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="text-center mb-12">
-          <p className="text-orange-500 font-semibold text-lg">O que nossos clientes dizem</p>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight">
+        <div className="text-center mb-8">
+          <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
             Depoimentos
           </h2>
+          <p className="text-orange-500 font-semibold text-lg mt-4">O que nossos clientes dizem</p>
         </div>
         
         {/* Carrossel de depoimentos com rolagem horizontal */}
