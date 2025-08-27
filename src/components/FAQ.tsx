@@ -21,7 +21,7 @@ export default function FAQ({ faqs }: FAQPageProps) {
   };
 
   return (
-    <section className="bg-white py-12 md:py-20">
+    <section className="py-12 md:py-20">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="text-center mb-12">
           <p className="text-orange-500 font-semibold text-lg">Dúvidas Frequentes</p>

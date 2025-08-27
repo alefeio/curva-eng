@@ -35,15 +35,15 @@ export default function Header() {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <section className="py-12 md:py-20 bg-primary">
+    <section className="py-12 md:py-20 bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
           {/* Coluna da esquerda: Conteúdo de texto e números */}
           <div className="flex flex-col gap-6">
-            <h2 className="text-4xl md:text-5xl font-bold text-orange-500 leading-tight">
-              Soluções completas para seu empreendimento
+            <h2 className="w-full text-4xl md:text-5xl font-bold text-orange-500 leading-tight max-w-xs md:max-w-full mx-auto">
+              Soluções completas<br /><small className="text-gray-400">para seu empreendimento</small>
             </h2>
-            <p className="text-white text-lg leading-relaxed">
+            <p className="text-white text-lg leading-relaxed max-w-xs md:max-w-full mx-auto">
               Da concepção à execução, oferecemos projetos inteligentes, gestão eficiente e construção de alto padrão. Combinamos inovação, tecnologia e experiência para entregar soluções personalizadas que agregam valor, qualidade e sustentabilidade ao seu empreendimento.
             </p>
 
@@ -59,7 +59,7 @@ export default function Header() {
           </div>
 
           {/* Coluna da direita: Lista de serviços em formato de "acordeão" */}
-          <div className="flex flex-col gap-4 mt-8 md:mt-0">
+          <div className="flex flex-col gap-4 mt-8 md:mt-0 max-w-xs md:max-w-full mx-auto">
             {servicesList.map((service, index) => (
               <div key={index} className="rounded-lg shadow-md overflow-hidden transition-all duration-300">
                 <button

@@ -33,7 +33,7 @@ const services = [
 
 const TimelineSection: React.FC = () => {
   return (
-    <section className="bg-white py-12 md:py-20">
+    <section className="bg-gray-50 white py-12 md:py-20">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <h2 className="text-4xl md:text-5xl font-bold text-center text-gray-800 mb-12">Nossa atuação</h2>
 
@@ -46,7 +46,7 @@ const TimelineSection: React.FC = () => {
               const isEven = index % 2 === 0;
 
               return (
-                <div key={index} className={`flex flex-col md:flex-row items-center relative md:space-x-12 ${isEven ? 'md:flex-row-reverse' : ''}`}>
+                <div key={index} className={`bg-white flex flex-col md:flex-row items-center relative md:space-x-12 ${isEven ? 'md:flex-row-reverse' : ''}`}>
                   
                   {/* Container do Card */}
                   <div className={`w-full md:w-1/2 relative z-10 p-4 ${isEven ? 'md:pr-12' : 'md:pl-12'}`}>

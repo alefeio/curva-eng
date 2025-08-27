@@ -15,10 +15,10 @@ export default function Hero() {
           {/* Coluna da esquerda: Conteúdo de texto */}
           <div className="flex-1 flex flex-col gap-4">
             <p className="text-accent font-semibold text-lg">Sobre nós</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-primary leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-primary leading-tight max-w-xs md:max-w-5xl mx-auto">
               História, Missão e Expertise
             </h2>
-            <p className="text-neutral-dark text-lg leading-relaxed">
+            <p className="text-neutral-dark text-lg leading-relaxed max-w-xs md:max-w-5xl mx-auto">
               Há mais de uma década, a Curva Engenharia e Arquitetura transforma projetos em realidade. Nossa missão é ir além da construção, unindo a precisão da engenharia com a criatividade da arquitetura para entregar soluções completas e de alta qualidade. Somos movidos pela paixão por construir, reformar e projetar, criando espaços que geram impacto positivo para nossos clientes e para a comunidade.
             </p>
             <div className="mt-4 w-fit mx-auto md:mx-0">

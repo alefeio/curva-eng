@@ -106,9 +106,9 @@ const Projetos: React.FC = () => {
       <div className="container mx-auto px-4 md:px-8">
         
         {/* Título e Introdução */}
-        <div className="text-center">
-          <h1 className="text-4xl md:text-5xl font-bold font-serif text-orange-500 mb-4">Portfólio de Projetos</h1>
-          <p className="max-w-4xl mx-auto text-lg md:text-xl text-gray-600">
+        <div className="md:text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-orange-500 mb-4 max-w-xs md:max-w-full mx-auto">Portfólio de Projetos</h1>
+          <p className="max-w-4xl mx-auto text-lg md:text-xl text-gray-600 max-w-xs md:max-w-full mx-auto">
             Cada projeto é uma história de sucesso. Explore nossa galeria de trabalhos e veja como a Curva Engenharia e Arquitetura transforma ideias em realidade, com excelência e inovação.
           </p>
         </div>

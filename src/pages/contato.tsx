@@ -7,8 +7,8 @@ import { Analytics } from '@vercel/analytics/next';
 import { PrismaClient } from '@prisma/client';
 import { LinkItem, MenuData } from '../types';
 import { GetServerSideProps } from 'next';
+import ContactForm from '../components/ContactForm';
 import { MenuInterno } from 'components/MenuInterno';
-import ContactForm from 'components/ContactForm';
 
 const prisma = new PrismaClient();
 
@@ -67,6 +67,12 @@ const ContactPage: React.FC<ContactPageProps> = ({ menu }) => {
                 <MenuInterno menuData={menu} />
                 <main className="flex-grow">
                     <Breadcrumb />
+                    <div className="text-center bg-white pt-16 md:pt-24 pb-2">
+                        <h1 className="text-4xl md:text-5xl font-bold text-orange-500 mb-4">Contato</h1>
+                        <p className="max-w-4xl mx-auto text-lg md:text-xl text-gray-600 max-w-xs md:max-w-5xl">
+                            Agradecemos sua visita. Estamos aqui para ajudar você a transformar suas ideias em projetos de engenharia e arquitetura com excelência e inovação. Sinta-se à vontade para entrar em contato.
+                        </p>
+                    </div>
                     <ContactForm />
                     <ContactSection />
                 </main>

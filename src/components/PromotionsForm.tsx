@@ -107,7 +107,7 @@ const PromotionsForm: React.FC = () => {
                     &times;
                 </button>
                 <div className="text-center">
-                    <h3 className="text-white font-serif text-2xl md:text-3xl font-bold mb-6">
+                    <h3 className="text-white text-2xl md:text-3xl font-bold mb-6">
                         Receba Nossas Novidades
                     </h3>
                     <p className="text-white text-lg mb-8">

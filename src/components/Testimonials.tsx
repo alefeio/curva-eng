@@ -15,7 +15,7 @@ interface TestimonialsPageProps {
 
 export default function Testimonials({ testimonials }: TestimonialsPageProps) {
   return (
-    <section className="bg-gray-50 py-12 md:py-20">
+    <section className="py-12 md:py-20">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="text-center mb-12">
           <p className="text-orange-500 font-semibold text-lg">O que nossos clientes dizem</p>
