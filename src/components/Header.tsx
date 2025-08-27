@@ -73,7 +73,7 @@ export default function Header() {
                 </button>
                 <div
                   className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                    open === index ? 'max-h-96 opacity-100 p-6 pt-0' : 'max-h-0 opacity-0'
+                    open === index ? 'max-h-96 opacity-100 p-6 pt-0 bg-white' : 'max-h-0 opacity-0'
                   }`}
                 >
                   <p className="text-gray-600">
