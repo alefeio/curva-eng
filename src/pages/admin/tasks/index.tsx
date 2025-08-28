@@ -18,18 +18,35 @@ export default function TasksPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
+  // LOG PARA DEPURAR A SESSAO NO NAVEGADOR (CLIENT-SIDE)
+  useEffect(() => {
+    console.log("[TasksPage CLIENT] Sessão:", session, "Status:", status);
+    if (session) {
+      console.log("[TasksPage CLIENT] User ID:", session.user?.id);
+      console.log("[TasksPage CLIENT] User Role:", (session.user as any)?.role);
+    }
+  }, [session, status]);
+
+
   const fetchTasks = useCallback(async () => {
     if (status !== 'authenticated') {
       setLoading(false);
-      return; // Não busca tarefas se não estiver autenticado
+      setError('Você precisa estar autenticado para visualizar as tarefas.');
+      return; 
     }
+    // Verifica a role ANTES de fazer a requisição, dando feedback imediato ao cliente
+    if ((session.user as any)?.role !== 'ADMIN') {
+        setLoading(false);
+        setError('Acesso negado. Apenas administradores podem visualizar as tarefas.');
+        return;
+    }
+
 
     try {
       setLoading(true);
       const response = await fetch('/api/tasks');
       if (!response.ok) {
-        // Se a resposta não for OK, pode ser 401 (Unauthorized) ou outro erro
-        const errorText = await response.text(); // Pega o texto da resposta para depuração
+        const errorText = await response.text(); 
         throw new Error(`Falha ao buscar as tarefas: ${response.status} ${response.statusText} - ${errorText}`);
       }
       const data: Task[] = await response.json(); 
@@ -39,7 +56,8 @@ export default function TasksPage() {
     } finally {
       setLoading(false);
     }
-  }, [status]); // Adicione status como dependência
+  }, [status, session]); // Adicione session como dependência
+
 
   useEffect(() => {
     fetchTasks();
@@ -67,7 +85,7 @@ export default function TasksPage() {
 
   const handleTaskUpdated = (updatedTask: Task) => {
     setTasks(prevTasks => prevTasks.map(task => 
-      task.id === updatedTask.id ? { ...updatedTask, assignedTo: updatedTask.assignedTo } : task 
+      task.id === updatedTask.id ? { ...updatedTask, assignedTo: updatedTask.assignedTo, author: updatedTask.author } : task 
     ));
     closeEditModal(); 
   };
@@ -127,19 +145,22 @@ export default function TasksPage() {
     );
   }
 
-  if (status === 'unauthenticated') {
+  if (status === 'unauthenticated' || (status === 'authenticated' && (session.user as any)?.role !== 'ADMIN')) {
     return (
       <AdminLayout>
-        <div className="flex justify-center items-center h-screen">
-          <p className="text-red-500 text-xl">Você precisa estar logado para ver as tarefas.</p>
-          <p className="text-gray-600 mt-2">
-            Por favor, <Link href="/api/auth/signin" className="text-orange-500 hover:underline">faça login</Link>.
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] text-center text-red-500 p-4">
+          <p className="text-2xl font-bold mb-4">Acesso Não Autorizado!</p>
+          <p className="text-lg">Você não tem permissão para visualizar ou gerenciar tarefas.</p>
+          <p className="text-gray-600 mt-4">
+            Por favor, verifique suas credenciais ou entre em contato com o administrador.
           </p>
+          <Link href="/api/auth/signin" className="mt-6 inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 shadow-md">
+              Fazer Login
+          </Link>
         </div>
       </AdminLayout>
     );
   }
-
 
   if (error) {
     return (
@@ -151,7 +172,7 @@ export default function TasksPage() {
     );
   }
 
-  if (loading) { // Removido para o final da renderização condicional
+  if (loading) { 
     return (
         <AdminLayout>
             <div className="flex justify-center items-center h-screen">

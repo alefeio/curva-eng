@@ -15,24 +15,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (session) {
     console.log(`[API /api/tasks/${id}] User ID na sessão:`, session.user?.id);
     console.log(`[API /api/tasks/${id}] User Role na sessão:`, (session.user as any)?.role);
+  } else {
+    console.log(`[API /api/tasks/${id}] Sessão vazia para a requisição.`);
   }
   // FIM DOS LOGS DE DEPURACAO
 
-  // Exemplo de autenticação/autorização: apenas ADMINs podem editar/deletar
-  if (!session || session.user?.role !== 'ADMIN') { 
-    if (req.method === 'GET') {
-        // Permitir GET para qualquer usuário autenticado (ou até não autenticado se a tarefa for pública)
-        // Por enquanto, manteremos a necessidade de sessão para todas as tarefas do admin
-        // No entanto, para GET, o erro 401 só será retornado se a sessão for nula, mas não se a role for diferente de ADMIN.
-        // Se desejar restringir GET para ADMIN também, mude esta lógica.
-        if (!session) { // Apenas um exemplo de restrição para GET
-             return res.status(401).json({ message: 'Não autorizado para visualização sem autenticação.' });
-        }
-    } else {
-      // Esta é a linha que está disparando o erro para PUT (e DELETE)
-      console.warn(`[API /api/tasks/${id}] Acesso negado. Sessão: ${session ? 'presente' : 'ausente'}, Role: ${(session?.user as any)?.role}`);
+  // Autorização genérica: exige ADMIN para PUT/DELETE
+  // GET permite qualquer usuário autenticado (ou não, se a tarefa for pública, o que não é o caso aqui)
+  if (req.method !== 'GET') { // Para PUT e DELETE
+    if (!session || (session.user as any)?.role !== 'ADMIN') { 
+      console.warn(`[API /api/tasks/${id}] Acesso negado para ${req.method}. Sessão: ${session ? 'presente' : 'ausente'}, Role: ${(session?.user as any)?.role}`);
       return res.status(401).json({ message: 'Não autorizado. Apenas administradores podem realizar esta operação.' });
     }
+  } else { // Para GET
+      if (!session) { // Para GET, se não houver sessão, também não autoriza (já que as tarefas não são públicas)
+           console.warn(`[API /api/tasks/${id}] Acesso negado para GET. Sessão ausente.`);
+           return res.status(401).json({ message: 'Não autorizado para visualização sem autenticação.' });
+      }
   }
 
   if (typeof id !== 'string') {
@@ -48,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             assignedTo: { 
               select: { id: true, name: true },
             },
-            author: { // Incluindo o autor também para consistência se necessário
+            author: { 
               select: { id: true, name: true },
             }
           },
@@ -87,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             assignedTo: {
               select: { id: true, name: true },
             },
-            author: { // Incluindo autor no retorno da atualização
+            author: { 
                 select: { id: true, name: true },
             }
           },

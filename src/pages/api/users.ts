@@ -29,5 +29,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
-  await prisma.$disconnect(); // Desconecta o Prisma no final
+  await prisma.$disconnect(); 
 }

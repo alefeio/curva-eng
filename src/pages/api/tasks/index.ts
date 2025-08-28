@@ -8,10 +8,31 @@ const prisma = new PrismaClient();
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getSession({ req });
 
-  // Apenas usuários autenticados (e talvez ADMINs) podem ver a lista de tarefas
-  if (!session) { // || session.user?.role !== 'ADMIN' se quiser restringir mais
-    return res.status(401).json({ message: 'Não autorizado.' });
+  // LOGS DE DEPURACAO DA SESSAO NO SERVIDOR
+  console.log(`[API /api/tasks/index] Método: ${req.method}`);
+  console.log(`[API /api/tasks/index] Sessão recebida:`, session ? 'Presente' : 'Ausente');
+  if (session) {
+    console.log(`[API /api/tasks/index] User ID na sessão:`, session.user?.id);
+    console.log(`[API /api/tasks/index] User Role na sessão:`, (session.user as any)?.role);
+  } else {
+    console.log(`[API /api/tasks/index] Sessão vazia para a requisição.`);
   }
+  // FIM DOS LOGS DE DEPURACAO
+
+
+  // Autorização genérica: exige ADMIN para POST, e sessão para GET
+  if (req.method === 'POST') {
+    if (!session || (session.user as any)?.role !== 'ADMIN') { 
+      console.warn(`[API /api/tasks/index] Acesso negado para POST. Sessão: ${session ? 'presente' : 'ausente'}, Role: ${(session?.user as any)?.role}`);
+      return res.status(401).json({ message: 'Não autorizado. Apenas administradores podem realizar esta operação.' });
+    }
+  } else if (req.method === 'GET') {
+      if (!session) { // Para GET, se não houver sessão, não autoriza (tarefas do admin não são públicas)
+          console.warn(`[API /api/tasks/index] Acesso negado para GET. Sessão ausente.`);
+          return res.status(401).json({ message: 'Não autorizado para visualização sem autenticação.' });
+      }
+  }
+
 
   if (req.method === 'GET') {
     try {
@@ -30,14 +51,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
       res.status(200).json(tasks);
     } catch (e: any) {
-      console.error('Erro ao buscar tarefas:', e);
+      console.error(`[API /api/tasks/index] Erro ao buscar tarefas:`, e);
       res.status(500).json({ message: 'Erro interno do servidor ao buscar as tarefas.' });
     }
-  } else if (req.method === 'POST') { // Lógica para criar nova tarefa
+  } else if (req.method === 'POST') { 
     try {
-      if (session.user?.role !== 'ADMIN') { // Apenas ADMIN pode criar
-        return res.status(403).json({ message: 'Proibido. Apenas administradores podem criar tarefas.' });
-      }
       const { title, description, status, priority, dueDate, assignedToId, authorId } = req.body;
 
       if (!title || !status || priority === undefined || !dueDate || !assignedToId || !authorId) {
@@ -65,7 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
       res.status(201).json(newTask);
     } catch (e: any) {
-      console.error('Erro ao criar tarefa:', e);
+      console.error(`[API /api/tasks/index] Erro ao criar tarefa:`, e);
       res.status(500).json({ message: 'Erro interno do servidor ao criar a tarefa.' });
     }
   }

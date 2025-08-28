@@ -32,12 +32,12 @@ export default function NewTaskPage() {
   const [error, setError] = useState<string | null>(null);
   const [usersLoading, setUsersLoading] = useState(true);
 
-  // LOG PARA DEPURAR A SESSÃO
+  // LOG PARA DEPURAR A SESSAO NO NAVEGADOR (CLIENT-SIDE)
   useEffect(() => {
-    console.log("Sessão em NewTaskPage:", session, "Status:", status);
+    console.log("[NewTaskPage CLIENT] Sessão:", session, "Status:", status);
     if (session) {
-      console.log("ID do Usuário na sessão (NewTaskPage):", session.user?.id);
-      console.log("Role do Usuário na sessão (NewTaskPage):", (session.user as any)?.role); // Casting para 'any' para acessar a role
+      console.log("[NewTaskPage CLIENT] User ID:", session.user?.id);
+      console.log("[NewTaskPage CLIENT] User Role:", (session.user as any)?.role);
     }
   }, [session, status]);
 
@@ -80,11 +80,9 @@ export default function NewTaskPage() {
     // Obter o autorId da sessão
     const authorId = session?.user?.id;
     if (status !== 'authenticated' || !authorId) {
-      setError('Não foi possível obter o ID do autor autenticado. Por favor, faça login novamente.');
+      setError('Você precisa estar logado e ser um administrador para criar tarefas.');
       return;
     }
-
-    // Verificar a role antes de enviar (redundante, mas útil para feedback imediato)
     if ((session.user as any)?.role !== 'ADMIN') {
         setError('Acesso negado. Apenas administradores podem criar tarefas.');
         setLoading(false);

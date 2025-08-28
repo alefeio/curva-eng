@@ -1,7 +1,8 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { MdClose } from 'react-icons/md';
 import { useSession } from 'next-auth/react';
-import { Task, User } from 'types/task';
+import { Task } from 'types/task';
+import { User } from '@prisma/client';
 
 interface TaskEditFormProps {
   taskId: string;
@@ -10,16 +11,20 @@ interface TaskEditFormProps {
 }
 
 const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpdated }) => {
-  const { data: session, status } = useSession(); // Obtenha o status da sessão
+  const { data: session, status } = useSession(); 
   const [formData, setFormData] = useState<Task | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // LOG PARA DEPURAR A SESSÃO
+  // LOG PARA DEPURAR A SESSÃO NO NAVEGADOR (CLIENT-SIDE)
   useEffect(() => {
-    console.log("Sessão em TaskEditForm:", session, "Status:", status);
+    console.log("[TaskEditForm CLIENT] Sessão:", session, "Status:", status);
+    if (session) {
+      console.log("[TaskEditForm CLIENT] User ID:", session.user?.id);
+      console.log("[TaskEditForm CLIENT] User Role:", (session.user as any)?.role);
+    }
   }, [session, status]);
 
 
@@ -32,12 +37,12 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
         // Busca a tarefa existente
         const taskRes = await fetch(`/api/tasks/${taskId}`);
         if (!taskRes.ok) {
-          throw new Error('Falha ao carregar a tarefa.');
+          const errorText = await taskRes.text();
+          throw new Error(`Falha ao carregar a tarefa: ${taskRes.status} ${taskRes.statusText} - ${errorText}`);
         }
         const taskData: Task = await taskRes.json();
         setFormData({ 
           ...taskData,
-          // Formata a data para o input[type="date"]
           dueDate: taskData.dueDate ? new Date(taskData.dueDate).toISOString().split('T')[0] : ''
         });
 
@@ -73,11 +78,15 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
     e.preventDefault();
     if (!formData) return;
 
-    // Verifica o status da sessão antes de tentar obter o ID
     if (status !== 'authenticated' || !session?.user?.id) {
-        setError('Não foi possível obter o ID do usuário autenticado. Por favor, faça login novamente.');
+        setError('Você precisa estar logado e ser um administrador para editar tarefas.');
         return;
     }
+    if ((session.user as any)?.role !== 'ADMIN') {
+        setError('Acesso negado. Apenas administradores podem editar tarefas.');
+        return;
+    }
+
 
     setSubmitting(true);
     setError(null);
@@ -116,6 +125,7 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
     );
   }
 
+  // Se houver um erro, exibe-o no modal
   if (error) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4" onClick={onClose}>
@@ -127,7 +137,7 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
           >
             <MdClose size={28} />
           </button>
-          <p className="text-red-600 text-lg">{error}</p>
+          <p className="text-red-600 text-lg mb-4">{error}</p>
           <button onClick={onClose} className="mt-4 px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">Entendido</button>
         </div>
       </div>
@@ -249,8 +259,8 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
             </button>
             <button
               type="submit"
-              disabled={submitting || status === 'loading' || status === 'unauthenticated'} // Desabilita se não autenticado
-              className={`py-2 px-4 rounded-md font-bold transition duration-300 ${submitting || status === 'loading' || status === 'unauthenticated' ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
+              disabled={submitting || status === 'loading' || status === 'unauthenticated' || (session && (session.user as any)?.role !== 'ADMIN')} 
+              className={`py-2 px-4 rounded-md font-bold transition duration-300 ${submitting || status === 'loading' || status === 'unauthenticated' || (session && (session.user as any)?.role !== 'ADMIN') ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
             >
               {submitting ? 'Salvando...' : 'Salvar Alterações'}
             </button>
