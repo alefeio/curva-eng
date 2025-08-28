@@ -1,9 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
 import { getSession } from 'next-auth/react';
-import { Task } from '../../../types/task'; // Importa a interface Task do arquivo central
-
-const prisma = new PrismaClient();
+import prisma from '../../../../lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query; 

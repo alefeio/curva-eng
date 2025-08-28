@@ -4,14 +4,15 @@ import NextAuth, { NextAuthOptions } from "next-auth"
 import EmailProvider from "next-auth/providers/email"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { Resend } from 'resend';
-import prisma from "../../../../lib/prisma"; // Seu import do Prisma
+import prisma from "../../../../lib/prisma"; // Ajuste este caminho se seu lib/prisma.ts estiver em outro lugar
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // LOGS DE DEPURACAO PARA VARIAVEIS DE AMBIENTE DENTRO DA CONFIGURACAO NEXTAUTH
 console.log("--- NEXTAUTH CONFIG LOADED ---");
 console.log("process.env.NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
-console.log("process.env.NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET ? "DEFINIDO" : "NÃO DEFINIDO");
+// Log do NEXTAUTH_SECRET truncado para segurança, mas indicando se está presente e tem um valor esperado
+console.log("process.env.NEXTAUTH_SECRET (início/fim):", process.env.NEXTAUTH_SECRET ? `${process.env.NEXTAUTH_SECRET.substring(0, 5)}...${process.env.NEXTAUTH_SECRET.slice(-5)}` : "NÃO DEFINIDO");
 console.log("process.env.NODE_ENV:", process.env.NODE_ENV);
 console.log("process.env.EMAIL_FROM:", process.env.EMAIL_FROM);
 console.log("--- END NEXTAUTH CONFIG LOGS ---");
@@ -38,15 +39,11 @@ export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
     },
-    // Removendo a propriedade 'jwt' aqui, pois NextAuth 4+ gerencia isso automaticamente
-    // e ter um 'jwt' de nível superior com 'secret' pode causar conflitos ou ser redundante
-    // se o 'secret' principal já estiver definido.
-    // next-auth configura o secret do JWT com o 'secret' da configuração principal.
-
     callbacks: {
         async jwt({ token, user }) {
             // Adiciona o role e o id do usuário ao token
             if (user) {
+                // Use a instância global do prisma
                 const userFromDb = await prisma.user.findUnique({
                     where: { id: user.id },
                     select: { role: true },
@@ -66,7 +63,7 @@ export const authOptions: NextAuthOptions = {
         }
     },
     secret: process.env.NEXTAUTH_SECRET,
-    // debug: process.env.NODE_ENV === "development", // Você pode ativar isso para mais logs de NextAuth
+    // debug: process.env.NODE_ENV === "development", // Ative isso para mais logs internos do NextAuth se necessário
 };
 
 export default NextAuth(authOptions);
