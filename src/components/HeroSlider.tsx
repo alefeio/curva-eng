@@ -1,8 +1,7 @@
-// src/components/HeroSlider.tsx
-
 import { useState, useEffect } from "react";
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { MdPlayArrow, MdPause } from 'react-icons/md'; // Importa os ícones de play/pause
 
 // Interface atualizada para corresponder ao BannerForm.tsx
 interface BannerItem {
@@ -31,7 +30,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
 
   useEffect(() => {
     if (!playing || slides.length === 0) return;
-    const timer = setTimeout(() => setCurrent((c) => (c + 1) % slides.length), 10000);
+    const timer = setTimeout(() => setCurrent((c) => (c + 1) % slides.length), 8000); // Tempo de transição ajustado
     return () => clearTimeout(timer);
   }, [current, playing, slides.length]);
 
@@ -76,7 +75,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
 
   return (
     <div
-      className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden shadow-lg"
+      className="relative w-full h-[70vh] md:h-[60vh] lg:h-[70vh] overflow-hidden shadow-2xl" // Sombra mais forte
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onTouchStart={handleTouchStart}
@@ -90,25 +89,25 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
           key={slide.id}
           className={`absolute inset-0 transition-opacity duration-700 ${idx === current ? "opacity-100 z-0" : "opacity-0 z-0"}`}
         >
-          {/* A imagem não é mais um link */}
           <img src={slide.url} alt={slide.title || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
         </div>
       ))}
+      
       {/* Renderiza o conteúdo do banner ativo separadamente */}
       {slides[current] && (slides[current].title || slides[current].subtitle || slides[current].buttonText) && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-start justify-end md:justify-center p-6 md:p-10 text-left">
-          <div className="container flex flex-col lg:flex-row items-start lg:items-end justify-between w-full">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col items-center justify-end p-6 md:p-10 text-center"> {/* Alinhamento centralizado */}
+          <div className="container flex flex-col items-center justify-end w-full max-w-4xl"> {/* Ajusta container para centralizar */}
             {/* Título e Subtítulo */}
             <div className="flex-1 mb-8">
               {slides[current].title && (
-                <h2 className="font-sans text-3xl md:text-4xl lg:text-6xl font-bold text-white drop-shadow mb-2">
+                <h2 className="font-sans text-4xl md:text-5xl lg:text-7xl font-extrabold text-white drop-shadow-lg mb-4 leading-tight"> {/* Título maior e mais impactante */}
                   {slides[current].title}
                 </h2>
               )}
               {slides[current].subtitle && (
                 <>
-                  <div className="w-24 border-b-2 border-accent mb-4"></div>
-                  <p className="max-w-xl text-sm md:text-md lg:text-lg text-neutral-light drop-shadow mb-4 lg:mb-0">
+                  <div className="w-24 border-b-2 border-accent mx-auto mb-6"></div> {/* Linha mais próxima do título, centralizada */}
+                  <p className="text-lg md:text-xl lg:text-2xl text-gray-100 drop-shadow mb-8"> {/* Subtítulo mais destacado */}
                     {slides[current].subtitle}
                   </p>
                 </>
@@ -118,7 +117,7 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
                 <div className="mt-4">
                   <Link href={slides[current].link} passHref>
                     <button
-                      className={`py-2 px-6 rounded-md font-bold transition-all duration-300 ${slides[current].buttonColor || "bg-accent hover:bg-accent-dark"} text-white`}
+                      className={`inline-block py-3 px-8 rounded-full font-bold transition-all duration-300 transform hover:-translate-y-1 shadow-xl hover:shadow-2xl ${slides[current].buttonColor || "bg-orange-500 hover:bg-orange-600"} text-white`}
                     >
                       {slides[current].buttonText}
                     </button>
@@ -131,11 +130,11 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
       )}
 
       {/* Navegação e Controles */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3"> {/* Ajusta bottom e gap */}
         {slides.map((_, idx) => (
           <button
             key={idx}
-            className={`w-3 h-3 rounded-full ${idx === current ? "bg-accent" : "bg-neutral-white/50 opacity-70"}`}
+            className={`w-4 h-4 rounded-full transition-colors duration-300 ${idx === current ? "bg-orange-500" : "bg-gray-400 hover:bg-gray-200"}`} // Cores e tamanho ajustados
             onClick={() => setCurrent(idx)}
             aria-label={`Ir para slide ${idx + 1}`}
           />
@@ -143,18 +142,14 @@ export default function HeroSlider({ banners }: HeroSliderProps) {
       </div>
 
       <button
-        className="absolute bottom-4 right-4 bg-neutral-white/80 opacity-70 rounded-full p-2 shadow-lg hover:bg-neutral-white z-10"
+        className="absolute bottom-6 right-6 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white z-10 transition-colors duration-300" // Cor de fundo e hover ajustados
         onClick={() => setPlaying((p) => !p)}
         aria-label={playing ? "Pausar" : "Reproduzir"}
       >
         {playing ? (
-          <svg className="w-5 h-5 text-neutral-dark" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-          </svg>
+          <MdPause className="w-5 h-5 text-gray-700" /> // Usando ícone de react-icons/md
         ) : (
-          <svg className="w-5 h-5 text-neutral-dark" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
+          <MdPlayArrow className="w-5 h-5 text-gray-700" /> // Usando ícone de react-icons/md
         )}
       </button>
     </div>

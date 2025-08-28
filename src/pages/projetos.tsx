@@ -1,18 +1,16 @@
-// pages/projetos.tsx
-
 import React from 'react';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { PrismaClient } from '@prisma/client';
-import Footer from 'components/Footer';
+import Footer from '../components/Footer'; // Ajuste o caminho se necessário
 import ProjetosComponent from '../components/Projetos';
 import {
     MenuData,
     LinkItem
-} from '../types/index';
+} from '../types/index'; // Ajuste o caminho se necessário
 import { Analytics } from '@vercel/analytics/next';
+import Breadcrumb from '../components/Breadcrumb'; // Ajuste o caminho se necessário
 import { MenuInterno } from 'components/MenuInterno';
-import Breadcrumb from 'components/Breadcrumb';
 
 const prisma = new PrismaClient();
 

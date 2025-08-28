@@ -65,16 +65,30 @@ const ContactPage: React.FC<ContactPageProps> = ({ menu }) => {
             <div className="min-h-screen flex flex-col">
                 <Analytics />
                 <MenuInterno menuData={menu} />
-                <main className="flex-grow">
+                <main className="flex-grow bg-gray-50"> {/* Overall light background for main content */}
                     <Breadcrumb />
-                    <div className="text-center bg-white pt-16 md:pt-24 pb-2">
-                        <h1 className="text-4xl md:text-5xl font-bold text-orange-500 mb-4">Contato</h1>
-                        <p className="max-w-4xl mx-auto text-lg md:text-xl text-gray-600 max-w-xs md:max-w-5xl">
-                            Agradecemos sua visita. Estamos aqui para ajudar você a transformar suas ideias em projetos de engenharia e arquitetura com excelência e inovação. Sinta-se à vontade para entrar em contato.
+                    
+                    {/* Hero Section / Introduction */}
+                    <div className="py-20 md:py-28 bg-white text-center shadow-sm">
+                        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 px-4">
+                            Entre em Contato Conosco
+                        </h1>
+                        <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-600 px-4">
+                            Estamos aqui para transformar suas ideias em realidade. Preencha o formulário ou use nossos contatos diretos abaixo para dar o próximo passo no seu projeto.
                         </p>
                     </div>
-                    <ContactForm />
-                    <ContactSection />
+
+                    {/* Contact Form Section */}
+                    <div className="py-16 md:py-24 px-4 sm:px-6 lg:px-8">
+                        {/* The ContactForm component will now have its own clean card styling */}
+                        <ContactForm />
+                    </div>
+
+                    {/* Contact Details Section */}
+                    <div className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-gray-100"> {/* Slightly different background for visual separation */}
+                        {/* The ContactSection component will now have its own clean card styling */}
+                        <ContactSection />
+                    </div>
                 </main>
                 <Footer menuData={menu} />
             </div>

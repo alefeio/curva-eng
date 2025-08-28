@@ -1,11 +1,9 @@
-// src/components/Menu.tsx
-
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-// Removido a importação de MenuProps para evitar conflito de tipos
 import { LinkItem } from '../types/index'; 
+import { MdMenu, MdClose } from 'react-icons/md'; // Importa ícones de menu e fechar
 
 // A interface MenuProps está definida aqui, como é a única a usá-la
 interface MenuProps {
@@ -27,7 +25,7 @@ export function Menu({ menuData }: MenuProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 350);
+      setIsScrolled(window.scrollY > 50); // Mudei para 50px para um efeito mais rápido
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -41,93 +39,96 @@ export function Menu({ menuData }: MenuProps) {
 
   return (
     <header
-      className={`fixed left-0 w-full z-30 transition-all duration-300 ${isScrolled
-          ? "top-0 bg-gray-800/90 backdrop-blur-sm py-4 shadow-lg"
-          : "top-6 py-4"
-        }`}
+      className={`fixed top-0 left-0 w-full z-40 transition-all duration-300 ${
+        isScrolled
+          ? "bg-gray-900/95 backdrop-blur-sm py-3 shadow-lg" // Fundo mais escuro e sólido, py um pouco menor
+          : "bg-gray-900/10 backdrop-blur-sm py-4" // Fundo mais transparente, sem shadow no topo
+      }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">
         <Link href="/">
           <img
             src={logoUrl || "/images/logo.png"}
             alt="Logomarca Curva Engenharia"
-            className={`transition-all duration-300 h-auto ${isScrolled ? "w-28 md:w-40" : "w-40 md:w-48"
-              }`}
+            className={`transition-all duration-300 h-auto ${
+              isScrolled ? "w-28 md:w-36" : "w-36 md:w-44" // Ajusta tamanhos para um logo mais compacto ao rolar
+            }`}
           />
         </Link>
 
+        {/* Navegação Desktop */}
         <nav className="hidden md:flex gap-8 font-semibold">
           {links.map(({ text, url, target }) => (
             <Link
               key={url}
               href={url}
-              className="text-primary-light hover:text-accent transition-colors"
+              className="relative text-gray-100 hover:text-orange-500 transition-colors duration-300 group" // Cor de texto ajustada, adiciona group
               onClick={() => setMenuOpen(false)}
               target={target}
             >
               {text}
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span> {/* Sublinhado sutil no hover */}
             </Link>
           ))}
-          {/* {session ? (
-              <>
-                <Link href="/admin" className="hover:transition-colors">Minha conta</Link>
-                <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  className="hover:transition-colors"
-                >
-                  Sair
-                </button>
-              </>
-            ) : (
-              <button
-                className="hover:transition-colors"
-                onClick={handleSignIn}
-              >
-                Entrar
-              </button>
-            )} */}
+          {/* Opcionais de autenticação, mantidos comentados */}
         </nav>
 
+        {/* Botão Hamburger para Mobile */}
         <button
-          className="md:hidden flex flex-col gap-1.5"
+          className="md:hidden flex items-center justify-center p-2 rounded-md bg-gray-800/70 text-orange-500 hover:bg-gray-700/80 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
           onClick={() => setMenuOpen((v) => !v)}
           aria-label="Abrir menu"
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
         >
-          <span
-            className={`block h-0.5 w-6 bg-accent transition-transform ${menuOpen ? "rotate-45 translate-y-2" : ""
-              }`}
-          />
-          <span
-            className={`block h-0.5 w-6 bg-accent transition-opacity ${menuOpen ? "opacity-0" : "opacity-100"
-              }`}
-          />
-          <span
-            className={`block h-0.5 w-6 bg-accent transition-transform ${menuOpen ? "-rotate-45 -translate-y-2" : ""
-              }`}
-          />
+          {menuOpen ? (
+            <MdClose className="w-6 h-6" /> // Ícone de fechar
+          ) : (
+            <MdMenu className="w-6 h-6" /> // Ícone de menu
+          )}
         </button>
       </div>
 
+      {/* Overlay para mobile quando o menu está aberto */}
       {menuOpen && (
-        <nav
-          id="mobile-menu"
-          className="md:hidden py-4 flex flex-col gap-4 font-semibold bg-primary/95 px-4"
-        >
-          {links.map(({ text, url, target }) => (
-            <Link
-              key={url}
-              href={url}
-              className="text-primary-light border-t border-primary transition-colors pt-4"
-              onClick={() => setMenuOpen(false)}
-              target={target}
-            >
-              {text}
-            </Link>
-          ))}
-        </nav>
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-60 z-30 md:hidden"
+          onClick={() => setMenuOpen(false)} // Fecha o menu ao clicar no overlay
+        ></div>
       )}
+
+      {/* Menu Mobile */}
+      <nav
+        id="mobile-menu"
+        className={`fixed inset-y-0 right-0 w-64 bg-gray-900 z-40 md:hidden flex flex-col p-6 shadow-xl transform transition-transform duration-300 ease-in-out ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex justify-end mb-8">
+          <button
+            onClick={() => setMenuOpen(false)}
+            className="p-2 rounded-md text-gray-100 hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+            aria-label="Fechar menu"
+          >
+            <MdClose className="w-6 h-6" />
+          </button>
+        </div>
+        <ul className="flex flex-col gap-4 font-semibold text-gray-100">
+          {links.map(({ text, url, target }) => (
+            <li key={url}>
+              <Link
+                href={url}
+                className="block py-2 hover:text-orange-500 transition-colors border-b border-gray-700 last:border-b-0"
+                onClick={() => setMenuOpen(false)} // Fecha o menu ao clicar no link
+                target={target}
+              >
+                {text}
+              </Link>
+            </li>
+          ))}
+          {/* Opcionais de autenticação para mobile, se forem reativados */}
+        </ul>
+      </nav>
     </header>
   );
 }

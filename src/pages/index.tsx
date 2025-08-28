@@ -215,7 +215,6 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     {/* <TimelineSection /> */}
                     <Projetos />
                     <Testimonials testimonials={testimonials} />
-                    <ContactForm />
                     <ParallaxBanner
                         imageUrl="/images/aperto-mao.jpg"
                         title="Vamos construir algo incrível juntos?"

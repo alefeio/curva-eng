@@ -8,11 +8,11 @@ import { FaBuilding, FaHome, FaRegBuilding, FaHardHat } from 'react-icons/fa';
 
 const Servicos: React.FC = () => {
   return (
-    <div className="bg-white text-gray-800 py-16 md:py-24">
-      <div className="container mx-auto px-4 md:px-8">
+    <div className="bg-white text-gray-800 py-24 md:py-32">
+      <div className="container mx-auto px-4 md:px-8 max-w-xs md:max-w-7xl mx-auto">
         
         {/* Seção Principal de Título e Introdução */}
-        <div className="text-center">
+        <div className="text-left md:text-center mb-16 max-w-xs md:max-w-7xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-orange-500 mb-4">Soluções Completas para o Seu Projeto</h1>
           <p className="max-w-4xl mx-auto text-lg md:text-xl text-gray-600">
             Na Curva Engenharia e Arquitetura, unimos expertise técnica e inovação para entregar projetos que transformam ambientes e superam expectativas. Atuamos em múltiplos segmentos, garantindo soluções personalizadas e de alta qualidade para cada necessidade.
@@ -20,7 +20,7 @@ const Servicos: React.FC = () => {
         </div>
 
         {/* Serviços Residenciais */}
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-16 md:mb-24">
+        <div className="grid md:grid-cols-2 gap-12 items-center mb-16 md:mb-24 max-w-xs md:max-w-7xl mx-auto">
           <div className="order-2 md:order-1">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 flex items-center">
               <FaHome className="text-orange-500 mr-4" /> Projetos Residenciais
@@ -52,7 +52,7 @@ const Servicos: React.FC = () => {
         </div>
 
         {/* Serviços Comerciais */}
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-16 md:mb-24">
+        <div className="grid md:grid-cols-2 gap-12 items-center mb-16 md:mb-24 max-w-xs md:max-w-7xl mx-auto">
           <div>
             <div className="bg-gray-200 rounded-lg shadow-lg overflow-hidden">
               <img
@@ -84,7 +84,7 @@ const Servicos: React.FC = () => {
         </div>
 
         {/* Serviços Públicos */}
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-12 items-center max-w-xs md:max-w-7xl mx-auto">
           <div className="order-2 md:order-1">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 flex items-center">
               <FaBuilding className="text-orange-500 mr-4" /> Obras Governamentais e Públicas

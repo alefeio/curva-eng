@@ -32,8 +32,10 @@ const PromotionsForm: React.FC = () => {
     // UseEffect para adicionar o event listener de "exit intent"
     useEffect(() => {
         const modalShown = localStorage.getItem('modalShown');
+        
+        // Se o modal já foi exibido, não configuramos o listener e o modal não será mostrado.
         if (modalShown) {
-            return; // Se o modal já foi exibido, não faz nada
+            return;
         }
 
         const handleMouseOut = (e: MouseEvent) => {
@@ -54,7 +56,7 @@ const PromotionsForm: React.FC = () => {
         return () => {
             document.removeEventListener('mouseout', handleMouseOut);
         };
-    }, []);
+    }, []); // O array de dependências vazio garante que o useEffect rode apenas uma vez na montagem
 
     const handleCloseModal = () => {
         setShowModal(false);
@@ -95,9 +97,14 @@ const PromotionsForm: React.FC = () => {
         }
     };
 
-    // A visibilidade do modal é controlada por classes CSS e o estado showModal.
+    // Renderiza o modal APENAS se showModal for verdadeiro.
+    // Isso impede que o div do modal vazio seja renderizado no DOM.
+    if (!showModal) {
+        return null;
+    }
+
     return (
-        <div className={`fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50 transition-opacity duration-300 ${showModal ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50 transition-opacity duration-300 opacity-100">
             <div id="fique-por-dentro" className="m-4 relative p-8 max-w-lg bg-primary rounded-lg shadow-xl text-white">
                 <button
                     onClick={handleCloseModal}
