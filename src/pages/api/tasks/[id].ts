@@ -4,7 +4,8 @@ import { Task } from '../../../types/task'; // Importa a interface Task do arqui
 import prisma from '../../../../lib/prisma'; // ATENÇÃO: Ajuste este caminho se seu lib/prisma.ts estiver em outro lugar
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { id } = req.query; 
+  const { id } = req.query;
+  // Removido 'secret' de getSession, pois não existe mais em versões recentes
   const session = await getSession({ req });
 
   // LOGS DE DEPURACAO DA SESSAO NO SERVIDOR (MAIS DETALHADOS)
@@ -29,21 +30,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Autorização genérica: exige ADMIN para PUT/DELETE. GET exige sessão para tarefas do admin.
   if (req.method !== 'GET') { // Para PUT e DELETE
-    if (!session || (session.user as any)?.role !== 'ADMIN') { 
+    if (!session || (session.user as any)?.role !== 'ADMIN') {
       console.warn(`[API /api/tasks/${id}] Acesso NEGADO para ${req.method}. Motivo: ${!session ? 'Sessão Ausente' : `Role: ${(session?.user as any)?.role} (não é ADMIN)`}`);
       return res.status(401).json({ message: 'Não autorizado. Apenas administradores podem realizar esta operação.' });
     }
   } else { // Para GET
-      // Para GET, se não houver sessão, não autoriza (já que as tarefas não são públicas neste contexto de admin)
-      if (!session) { 
-           console.warn(`[API /api/tasks/${id}] Acesso NEGADO para GET. Motivo: Sessão Ausente.`);
-           return res.status(401).json({ message: 'Não autorizado para visualização sem autenticação.' });
-      }
-      // Se quiser que APENAS ADMIN veja QUALQUER tarefa, adicione:
-      // if ((session.user as any)?.role !== 'ADMIN') {
-      //   console.warn(`[API /api/tasks/${id}] Acesso NEGADO para GET. Role: ${(session?.user as any)?.role}`);
-      //   return res.status(403).json({ message: 'Proibido. Apenas administradores podem visualizar todas as tarefas.' });
-      // }
+    // Para GET, se não houver sessão, não autoriza (já que as tarefas não são públicas neste contexto de admin)
+    if (!session) {
+      console.warn(`[API /api/tasks/${id}] Acesso NEGADO para GET. Motivo: Sessão Ausente.`);
+      return res.status(401).json({ message: 'Não autorizado para visualização sem autenticação.' });
+    }
+    // Se quiser que APENAS ADMIN veja QUALQUER tarefa, adicione:
+    // if ((session.user as any)?.role !== 'ADMIN') {
+    //   console.warn(`[API /api/tasks/${id}] Acesso NEGADO para GET. Role: ${(session?.user as any)?.role}`);
+    //   return res.status(403).json({ message: 'Proibido. Apenas administradores podem visualizar todas as tarefas.' });
+    // }
   }
 
 
@@ -57,10 +58,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const task = await prisma.task.findUnique({
           where: { id },
           include: {
-            assignedTo: { 
+            assignedTo: {
               select: { id: true, name: true },
             },
-            author: { 
+            author: {
               select: { id: true, name: true },
             }
           },
@@ -91,15 +92,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             description,
             status,
             priority,
-            dueDate: new Date(dueDate), 
+            dueDate: new Date(dueDate),
             assignedToId,
-            updatedAt: new Date(), 
+            updatedAt: new Date(),
           },
           include: {
             assignedTo: {
               select: { id: true, name: true },
             },
-            author: { 
+            author: {
                 select: { id: true, name: true },
             }
           },
@@ -116,7 +117,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         await prisma.task.delete({
           where: { id },
         });
-        res.status(204).end(); 
+        res.status(204).end();
       } catch (e: any) {
         console.error(`[API /api/tasks/${id}] Erro ao deletar tarefa:`, e);
         res.status(500).json({ message: 'Erro interno do servidor ao deletar a tarefa.' });

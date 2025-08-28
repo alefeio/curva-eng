@@ -1,11 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
-import { Task } from '../../../types/task'; 
+import { Task } from '../../../types/task';
 import prisma from '../../../../lib/prisma'; // ATENÇÃO: Ajuste este caminho se seu lib/prisma.ts estiver em outro lugar
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // ATENÇÃO: getSession() é assíncrono e pode levar um tempo para resolver.
-  // Certifique-se de que a variável NEXTAUTH_SECRET está consistente entre todos os ambientes.
+  // Removido 'secret' de getSession, pois não existe mais em versões recentes
   const session = await getSession({ req });
 
   // LOGS DE DEPURACAO DA SESSAO NO SERVIDOR (MAIS DETALHADOS)
@@ -30,20 +29,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Autorização genérica: exige ADMIN para POST. GET exige sessão para tarefas do admin.
   if (req.method === 'POST') {
-    if (!session || (session.user as any)?.role !== 'ADMIN') { 
+    if (!session || (session.user as any)?.role !== 'ADMIN') {
       console.warn(`[API /api/tasks/index] Acesso NEGADO para POST. Motivo: ${!session ? 'Sessão Ausente' : `Role: ${(session?.user as any)?.role} (não é ADMIN)`}`);
       return res.status(401).json({ message: 'Não autorizado. Apenas administradores podem realizar esta operação.' });
     }
   } else if (req.method === 'GET') {
-      if (!session) { 
-          console.warn(`[API /api/tasks/index] Acesso NEGADO para GET. Motivo: Sessão Ausente.`);
-          return res.status(401).json({ message: 'Não autorizado para visualização sem autenticação.' });
-      }
-      // Se quiser que APENAS ADMIN veja todas as tarefas na lista, adicione:
-      // if ((session.user as any)?.role !== 'ADMIN') {
-      //   console.warn(`[API /api/tasks/index] Acesso NEGADO para GET. Role: ${(session?.user as any)?.role}`);
-      //   return res.status(403).json({ message: 'Proibido. Apenas administradores podem visualizar todas as tarefas.' });
-      // }
+    // Para GET, se não houver sessão, não autoriza (já que as tarefas não são públicas neste contexto de admin)
+    if (!session) {
+      console.warn(`[API /api/tasks/index] Acesso NEGADO para GET. Motivo: Sessão Ausente.`);
+      return res.status(401).json({ message: 'Não autorizado para visualização sem autenticação.' });
+    }
+    // Se quiser que APENAS ADMIN veja todas as tarefas na lista, adicione:
+    // if ((session.user as any)?.role !== 'ADMIN') {
+    //   console.warn(`[API /api/tasks/index] Acesso NEGADO para GET. Role: ${(session?.user as any)?.role}`);
+    //   return res.status(403).json({ message: 'Proibido. Apenas administradores podem visualizar todas as tarefas.' });
+    // }
   }
 
 
@@ -59,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
         },
         orderBy: {
-          createdAt: 'desc', 
+          createdAt: 'desc',
         },
       });
       res.status(200).json(tasks);
@@ -67,7 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error(`[API /api/tasks/index] Erro ao buscar tarefas:`, e);
       res.status(500).json({ message: 'Erro interno do servidor ao buscar as tarefas.' });
     }
-  } else if (req.method === 'POST') { 
+  } else if (req.method === 'POST') {
     try {
       const { title, description, status, priority, dueDate, assignedToId, authorId } = req.body;
 
