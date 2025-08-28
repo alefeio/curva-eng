@@ -1,14 +1,16 @@
 import React from 'react';
-import ContactSection from '../components/ContactSection';
 import Head from 'next/head';
-import Breadcrumb from '../components/Breadcrumb';
-import Footer from '../components/Footer';
-import { Analytics } from '@vercel/analytics/next';
-import { PrismaClient } from '@prisma/client';
-import { LinkItem, MenuData } from '../types';
 import { GetServerSideProps } from 'next';
+import { PrismaClient } from '@prisma/client';
+import Footer from '../components/Footer';
+import { LinkItem, MenuData } from '../types';
 import ContactForm from '../components/ContactForm';
+import ContactSection from '../components/ContactSection';
+import HeroBannerInternal from '../components/HeroBannerInternal';
+import Breadcrumb from '../components/Breadcrumb';
+import { Analytics } from '@vercel/analytics/next';
 import { MenuInterno } from 'components/MenuInterno';
+
 
 const prisma = new PrismaClient();
 
@@ -58,36 +60,44 @@ const ContactPage: React.FC<ContactPageProps> = ({ menu }) => {
     return (
         <>
             <Head>
-                <title>Contato - Curva Engenharia e Arquitetura</title>
+                <title>Contato | Curva Engenharia e Arquitetura</title>
                 <meta name="description" content="Entre em contato com a Curva Engenharia e Arquitetura para agendar uma consulta, obter um orçamento ou saber mais sobre nossos serviços." />
+                <meta name="keywords" content="contato engenharia Belém, orçamento arquitetura, falar com engenheiro, consultoria engenharia, telefone construtora, email Curva Engenharia, endereço Belém-PA" />
+
+                {/* Metas para Redes Sociais (Open Graph) */}
+                <meta property="og:title" content="Contato | Curva Engenharia e Arquitetura" />
+                <meta property="og:description" content="Entre em contato e vamos construir seu futuro juntos." />
+                <meta property="og:image" content="https://curva-eng.vercel.app/images/contato-og.jpg" />
+                <meta property="og:url" content="https://curva-eng.vercel.app/contato" />
+                <meta property="og:type" content="website" />
+
+                {/* Metas para Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Entre em Contato | Curva Engenharia" />
+                <meta name="twitter:description" content="Tire suas dúvidas e solicite um orçamento." />
+                <meta name="twitter:image" content="https://curva-eng.vercel.app/images/contato-og.jpg" />
             </Head>
 
             <div className="min-h-screen flex flex-col">
                 <Analytics />
                 <MenuInterno menuData={menu} />
-                <main className="flex-grow bg-gray-50"> {/* Overall light background for main content */}
+                <main className="flex-grow bg-gray-50">
                     <Breadcrumb />
-                    
-                    {/* Hero Section / Introduction */}
-                    <div className="py-20 md:py-28 bg-white text-center shadow-sm">
-                        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 px-4">
-                            Entre em Contato Conosco
-                        </h1>
-                        <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-600 px-4">
-                            Estamos aqui para transformar suas ideias em realidade. Preencha o formulário ou use nossos contatos diretos abaixo para dar o próximo passo no seu projeto.
-                        </p>
-                    </div>
-
-                    {/* Contact Form Section */}
-                    <div className="py-16 md:py-24 px-4 sm:px-6 lg:px-8">
-                        {/* The ContactForm component will now have its own clean card styling */}
-                        <ContactForm />
-                    </div>
-
-                    {/* Contact Details Section */}
-                    <div className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-gray-100"> {/* Slightly different background for visual separation */}
-                        {/* The ContactSection component will now have its own clean card styling */}
-                        <ContactSection />
+                    <HeroBannerInternal
+                        imageUrl="/images/aperto-mao.jpg" // Imagem gerada ou sua própria imagem
+                        title="Entre em Contato Conosco"
+                        subtitle="Estamos aqui para transformar suas ideias em realidade. Preencha o formulário ou use nossos contatos diretos abaixo para dar o próximo passo no seu projeto."
+                    />
+                    {/* Container principal para o formulário e detalhes de contato */}
+                    <div className="container mx-auto px-4 md:px-8 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 items-start">
+                        {/* Formulário de Contato */}
+                        <div>
+                            <ContactForm />
+                        </div>
+                        {/* Detalhes de Contato */}
+                        <div>
+                            <ContactSection />
+                        </div>
                     </div>
                 </main>
                 <Footer menuData={menu} />

@@ -18,14 +18,14 @@ const SobreNos: React.FC = () => {
       <div className="container mx-auto px-4 md:px-8">
         
         {/* Seção de Título e Introdução */}
-        <div className="text-center mb-16 md:mb-20 max-w-5xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-extrabold text-gray-800 mb-4 leading-tight"> {/* Título mais impactante */}
+        {/* <div className="text-center mb-16 md:mb-20 max-w-5xl mx-auto">
+          <h1 className="text-4xl md:text-6xl font-extrabold text-gray-800 mb-4 leading-tight">
             Conheça a Curva Engenharia e Arquitetura
           </h1>
-          <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-700 leading-relaxed"> {/* Texto mais legível */}
+          <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-700 leading-relaxed">
             Nascemos com a missão de transformar ambientes e concretizar sonhos, unindo expertise técnica, design inovador e um compromisso inabalável com a qualidade e a satisfação do cliente.
           </p>
-        </div>
+        </div> */}
 
         {/* Seção de História */}
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center mb-20 md:mb-32 max-w-7xl mx-auto">
@@ -40,7 +40,7 @@ const SobreNos: React.FC = () => {
           </div>
           <div className="order-1 md:order-2">
             <Image
-              src="/images/empresa.jpg"
+              src="https://res.cloudinary.com/dacvhzjxb/image/upload/v1756187489/dresses/argn3tvqnxrumkbycf9h.jpg"
               alt="Equipe de engenharia e arquitetura em reunião"
               width={600}
               height={400}
@@ -55,21 +55,21 @@ const SobreNos: React.FC = () => {
         <div className="bg-gray-800 rounded-xl shadow-xl p-8 md:p-12 mb-20 md:mb-32 max-w-7xl mx-auto">
           <h2 className="text-center text-4xl font-extrabold text-white mb-10 md:mb-16">Nossos Pilares</h2>
           <div className="flex flex-col md:flex-row items-start justify-between gap-10"> {/* Alinhamento e espaçamento */}
-            <div className='flex-1 text-center md:text-left'>
+            <div className='flex-1 text-center md:text-left w-full'>
               <FaBullseye className="text-orange-500 text-5xl mx-auto md:mx-0 mb-4" /> {/* Ícone */}
               <h3 className="text-2xl font-bold text-orange-500 mb-3">Missão</h3>
               <p className="text-gray-200 leading-relaxed">
                 Oferecer soluções inovadoras e personalizadas em engenharia e arquitetura, garantindo qualidade, segurança e satisfação total do cliente em cada etapa do projeto.
               </p>
             </div>
-            <div className='flex-1 text-center md:text-left'>
+            <div className='flex-1 text-center md:text-left w-full'>
               <FaEye className="text-orange-500 text-5xl mx-auto md:mx-0 mb-4" /> {/* Ícone */}
               <h3 className="text-2xl font-bold text-orange-500 mb-3">Visão</h3>
               <p className="text-gray-200 leading-relaxed">
                 Ser a empresa de referência no mercado, reconhecida pela excelência técnica, ética profissional e capacidade de transformar ideias em realidade.
               </p>
             </div>
-            <div className='flex-1 text-center md:text-left'>
+            <div className='flex-1 text-center md:text-left w-full'>
               <FaHandshake className="text-orange-500 text-5xl mx-auto md:mx-0 mb-4" /> {/* Ícone */}
               <h3 className="text-2xl font-bold text-orange-500 mb-3">Valores</h3>
               <ul className="list-none text-gray-200 space-y-2 leading-relaxed"> {/* Removido list-disc */}
@@ -119,7 +119,7 @@ const SobreNos: React.FC = () => {
         </div>
 
         {/* Nova Seção: Nossos Clientes */}
-        <div className="bg-gray-100 rounded-xl shadow-lg p-8 md:p-12 text-center max-w-7xl mx-auto">
+        {/* <div className="bg-gray-100 rounded-xl shadow-lg p-8 md:p-12 text-center max-w-7xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-6">Parceiros de Confiança</h2>
           <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-700 mb-10 leading-relaxed">
             Temos orgulho de construir relacionamentos duradouros e de atender a uma vasta gama de clientes, transformando suas visões em realidade.
@@ -132,12 +132,12 @@ const SobreNos: React.FC = () => {
                   alt={`Logo do ${client.name}`}
                   width={120}
                   height={60}
-                  className="grayscale hover:grayscale-0 transition-all duration-300 object-contain" // Grayscale com hover colorido
+                  className="grayscale hover:grayscale-0 transition-all duration-300 object-contain"
                 />
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
       </div>
     </div>

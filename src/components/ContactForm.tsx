@@ -1,4 +1,5 @@
 import React, { useState, ChangeEvent } from 'react';
+import { FaPaperPlane } from 'react-icons/fa'; // Ícone para o botão de envio
 
 // Função para aplicar a máscara no número de telefone
 const formatPhoneNumber = (value: string): string => {
@@ -40,7 +41,7 @@ const ContactForm: React.FC = () => {
         setStatus('submitting');
 
         try {
-            const res = await fetch('/api/contact', { // Alterado o endpoint da API
+            const res = await fetch('/api/contact', { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -68,48 +69,48 @@ const ContactForm: React.FC = () => {
     };
 
     return (
-        <div className="mx-auto rounded-xl py-12 md:py-16 bg-white shadow-lg max-w-2xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-8">
-                <p className="text-orange-500 font-semibold text-lg">Faça um Orçamento</p>
-                <h2 className="text-gray-800 text-4xl md:text-4xl font-bold leading-tight mt-2">
+        <div className="bg-white rounded-xl shadow-xl p-8 md:p-12 max-w-full mx-auto"> 
+            <div className="text-center mb-8 md:mb-10">
+                <p className="text-orange-500 font-bold text-lg mb-2">Solicite um Orçamento</p> 
+                <h2 className="text-gray-800 text-3xl md:text-4xl font-extrabold leading-tight"> 
                     Transforme seu Projeto em Realidade
                 </h2>
-                <p className="text-lg text-gray-600 mt-4">
+                <p className="text-lg text-gray-700 mt-4 leading-relaxed"> 
                     Compartilhe suas ideias e necessidades. Nossa equipe está pronta para oferecer as melhores soluções em engenharia, arquitetura e design.
                 </p>
             </div>
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4"> {/* Use grid instead of flex-wrap for better control */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> {/* Grid responsivo */}
                     {/* Input para o Nome */}
-                    <div>
+                    <div className="md:col-span-1"> {/* Ocupa 1 coluna em desktop */}
                         <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="Seu Nome"
+                            placeholder="Seu Nome Completo" 
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-gray-900 placeholder-gray-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50 text-gray-900 placeholder-gray-500" 
                         />
                     </div>
                     {/* Input para o Email */}
-                    <div>
+                    <div className="md:col-span-1"> {/* Ocupa 1 coluna em desktop */}
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Seu Email"
+                            placeholder="Seu Melhor E-mail" 
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-gray-900 placeholder-gray-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50 text-gray-900 placeholder-gray-500"
                         />
                     </div>
                     {/* Input para o Telefone */}
-                    <div>
+                    <div className="md:col-span-2"> {/* Ocupa 2 colunas em desktop */}
                         <input
                             type="text"
                             value={phone}
                             onChange={handlePhoneChange}
-                            placeholder="Celular/WhatsApp"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-gray-900 placeholder-gray-500"
+                            placeholder="Seu Telefone/WhatsApp (Opcional)" 
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50 text-gray-900 placeholder-gray-500"
                         />
                     </div>
                 </div>
@@ -117,9 +118,9 @@ const ContactForm: React.FC = () => {
                 <select
                     value={serviceOfInterest}
                     onChange={(e) => setServiceOfInterest(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-gray-900 placeholder-gray-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50 text-gray-900 placeholder-gray-500"
                 >
-                    <option value="">Serviço de Interesse (Opcional)</option>
+                    <option value="">Selecione um Serviço de Interesse (Opcional)</option>
                     <option value="Construção">Construção</option>
                     <option value="Projetos">Projetos (Arquitetônicos, Engenharia, Interiores)</option>
                     <option value="Reformas e Manutenção">Reformas e Manutenção</option>
@@ -129,24 +130,25 @@ const ContactForm: React.FC = () => {
                 <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Descreva seu projeto ou sua necessidade..."
-                    rows={5}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-gray-900 placeholder-gray-500"
+                    placeholder="Descreva seu projeto ou sua necessidade em detalhes..." 
+                    rows={6} 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50 text-gray-900 placeholder-gray-500"
                 ></textarea>
                 <button
                     type="submit"
                     disabled={status === 'submitting'}
-                    className="mt-4 w-full px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-md transition-colors duration-200 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                    className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full shadow-lg transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed transform hover:-translate-y-1" 
                 >
                     {status === 'submitting' ? 'Enviando...' : 'Enviar Mensagem'}
+                    <FaPaperPlane className="ml-2" />
                 </button>
                 {status === 'success' && (
-                    <p className="mt-4 text-green-600 font-medium text-center">
+                    <p className="mt-4 text-green-600 font-medium text-center text-lg">
                         Sua mensagem foi enviada com sucesso! Em breve entraremos em contato.
                     </p>
                 )}
                 {status === 'error' && (
-                    <p className="mt-4 text-red-600 font-medium text-center">
+                    <p className="mt-4 text-red-600 font-medium text-center text-lg">
                         Ocorreu um erro ao enviar sua mensagem. Por favor, tente novamente.
                     </p>
                 )}
