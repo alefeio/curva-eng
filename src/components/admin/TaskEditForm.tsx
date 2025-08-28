@@ -77,8 +77,9 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
     e.preventDefault();
     if (!formData) return;
 
+    // Verificação de autenticação e role antes de enviar a requisição PUT
     if (status !== 'authenticated' || !session?.user?.id) {
-        setError('Você precisa estar logado e ser um administrador para editar tarefas.');
+        setError('Você precisa estar logado para editar tarefas.');
         return;
     }
     if ((session.user as any)?.role !== 'ADMIN') {

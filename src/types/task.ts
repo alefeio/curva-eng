@@ -3,6 +3,7 @@
 export interface User {
   id: string;
   name: string | null;
+  role?: string | null; // Adicionado para consistência, assumindo que User tem uma role
 }
 
 export interface Task {

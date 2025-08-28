@@ -10,9 +10,9 @@ import {
   MdHelpOutline,
   MdLogout,
   MdPalette,
-  MdAssignment,
-  MdAddCircle,
-  MdClose, // Adicionando o ícone de fechar
+  MdAssignment, 
+  MdAddCircle, 
+  MdClose, 
 } from 'react-icons/md';
 
 interface AdminLayoutProps {
@@ -20,7 +20,6 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  // Estado para controlar a visibilidade da barra lateral em dispositivos móveis
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
@@ -50,18 +49,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Sidebar de Navegação */}
       <aside
-        className={`fixed inset-y-0 left-0 w-64 z-30 shadow-lg p-6 bg-white dark:bg-gray-800 transition-transform duration-300 ease-in-out transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } md:relative md:translate-x-0 md:w-64`}
-      > 
-        <Link href="/">
-          <img
-            src="/images/logo.png"
-            alt="Logomarca Curva Engenharia"
-            className="mt-10 md:mt-2 mb-4 transition-all duration-300 h-auto w-40 md:w-48"
-          />
-        </Link>
-        <h2 className="text-2xl mb-8 font-bold text-gray-900 dark:text-white">Painel Admin</h2>
-
+        className={`fixed inset-y-0 left-0 w-64 z-30 shadow-lg p-6 bg-white dark:bg-gray-800 transition-transform duration-300 ease-in-out transform ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:relative md:translate-x-0 md:w-64`}
+      >
+        <h2 className="text-2xl font-bold mb-8 text-gray-900 dark:text-white">Painel Admin</h2>
+        
         <nav className="space-y-6">
           {/* Grupo 1: Conteúdo da Landing Page */}
           <div>
@@ -165,7 +158,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Conteúdo Principal */}
-      <main className="flex-1 p-8 bg-gray-100 dark:bg-gray-900 transition-all duration-300">
+      <main className="flex-1 p-8 bg-gray-100 dark:bg-gray-900 transition-all duration-300 md:ml-64">
         {children}
       </main>
     </div>

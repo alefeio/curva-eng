@@ -1,14 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Task, User } from '../../../types/task'; // Importa as interfaces do arquivo central
-import { useSession } from 'next-auth/react'; // Importa useSession
+import { Task, User } from '../../../types/task'; 
+import { useSession } from 'next-auth/react'; 
 import AdminLayout from 'components/admin/AdminLayout';
 import TaskDetailModal from 'components/admin/TaskDetailModal';
 import TaskEditForm from 'components/admin/TaskEditForm';
 
 export default function TasksPage() {
-  const { data: session, status } = useSession(); // Obtenha a sessão e o status
+  const { data: session, status } = useSession(); 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,12 +29,12 @@ export default function TasksPage() {
 
 
   const fetchTasks = useCallback(async () => {
-    if (status !== 'authenticated') {
+    // Verificação de autenticação e role antes de fazer a requisição API
+    if (status !== 'authenticated' || !session?.user?.id) {
       setLoading(false);
       setError('Você precisa estar autenticado para visualizar as tarefas.');
       return; 
     }
-    // Verifica a role ANTES de fazer a requisição, dando feedback imediato ao cliente
     if ((session.user as any)?.role !== 'ADMIN') {
         setLoading(false);
         setError('Acesso negado. Apenas administradores podem visualizar as tarefas.');
@@ -56,7 +56,7 @@ export default function TasksPage() {
     } finally {
       setLoading(false);
     }
-  }, [status, session]); // Adicione session como dependência
+  }, [status, session]); 
 
 
   useEffect(() => {
@@ -145,7 +145,8 @@ export default function TasksPage() {
     );
   }
 
-  if (status === 'unauthenticated' || (status === 'authenticated' && (session.user as any)?.role !== 'ADMIN')) {
+  // Se o usuário não estiver autenticado OU não for ADMIN, mostra mensagem de acesso negado
+  if (status === 'unauthenticated' || (status === 'authenticated' && (session?.user as any)?.role !== 'ADMIN')) {
     return (
       <AdminLayout>
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] text-center text-red-500 p-4">
@@ -194,7 +195,7 @@ export default function TasksPage() {
           <div className="flex space-x-4">
             <button
               onClick={() => setViewMode('table')}
-              className={`py-2 px-4 rounded-md font-bold transition duration-300 shadow-md ${
+              className={`px-6 py-2 rounded-md font-bold transition duration-300 shadow-md ${
                 viewMode === 'table' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -202,7 +203,7 @@ export default function TasksPage() {
             </button>
             <button
               onClick={() => setViewMode('kanban')}
-              className={`py-2 px-4 rounded-md font-bold transition duration-300 shadow-md ${
+              className={`px-6 py-2 rounded-md font-bold transition duration-300 shadow-md ${
                 viewMode === 'kanban' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >

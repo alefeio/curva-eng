@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { Task, User } from '../../../types/task'; // Importa as interfaces do arquivo central
+import { Task, User } from '../../../types/task'; 
 import AdminLayout from 'components/admin/AdminLayout';
 
 // Defina as interfaces para o formulário
@@ -79,13 +79,14 @@ export default function NewTaskPage() {
     
     // Obter o autorId da sessão
     const authorId = session?.user?.id;
+    // Verificação de autenticação e role antes de enviar a requisição POST
     if (status !== 'authenticated' || !authorId) {
-      setError('Você precisa estar logado e ser um administrador para criar tarefas.');
+      setError('Você precisa estar logado para criar tarefas.');
       return;
     }
     if ((session.user as any)?.role !== 'ADMIN') {
         setError('Acesso negado. Apenas administradores podem criar tarefas.');
-        setLoading(false);
+        setLoading(false); 
         return;
     }
 
@@ -221,7 +222,7 @@ export default function NewTaskPage() {
               </div>
 
               <div>
-                <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">Data de Vencimento</label>
+                <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">Data de Vencimento</label>
                 <input
                   type="date"
                   name="dueDate"
@@ -234,7 +235,7 @@ export default function NewTaskPage() {
               </div>
 
               <div>
-                <label htmlFor="assignedToId" className="block text-sm font-medium text-gray-700">Responsável</label>
+                <label htmlFor="assignedToId" className="block text-sm font-medium text-gray-700 mb-1">Responsável</label>
                 {usersLoading ? (
                   <p className="mt-1 text-gray-500">Carregando usuários...</p>
                 ) : (
@@ -258,8 +259,8 @@ export default function NewTaskPage() {
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={loading || usersLoading || status !== 'authenticated'}
-                className={`py-2 px-4 rounded-md font-bold transition duration-300 ${loading || usersLoading || status !== 'authenticated' ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
+                disabled={loading || usersLoading || status !== 'authenticated' || (session && (session.user as any)?.role !== 'ADMIN')}
+                className={`py-2 px-4 rounded-md font-bold transition duration-300 ${loading || usersLoading || status !== 'authenticated' || (session && (session.user as any)?.role !== 'ADMIN') ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
               >
                 {loading ? 'Criando...' : 'Criar Tarefa'}
               </button>

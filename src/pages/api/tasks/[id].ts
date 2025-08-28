@@ -10,29 +10,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const session = await getSession({ req });
 
   // LOGS DE DEPURACAO DA SESSAO NO SERVIDOR
+  console.log(`\n--- [API /api/tasks/${id}] INICIO DA REQUISICAO ---`);
   console.log(`[API /api/tasks/${id}] Método: ${req.method}`);
-  console.log(`[API /api/tasks/${id}] Sessão recebida:`, session ? 'Presente' : 'Ausente');
+  console.log(`[API /api/tasks/${id}] Sessão Completa (Servidor):`, JSON.stringify(session, null, 2));
   if (session) {
     console.log(`[API /api/tasks/${id}] User ID na sessão:`, session.user?.id);
     console.log(`[API /api/tasks/${id}] User Role na sessão:`, (session.user as any)?.role);
   } else {
-    console.log(`[API /api/tasks/${id}] Sessão vazia para a requisição.`);
+    console.log(`[API /api/tasks/${id}] Sessão ausente para a requisição.`);
   }
+  console.log(`--- [API /api/tasks/${id}] FIM DOS LOGS DE SESSAO ---\n`);
   // FIM DOS LOGS DE DEPURACAO
 
-  // Autorização genérica: exige ADMIN para PUT/DELETE
-  // GET permite qualquer usuário autenticado (ou não, se a tarefa for pública, o que não é o caso aqui)
+
+  // Autorização genérica: exige ADMIN para PUT/DELETE. GET exige sessão para tarefas do admin.
   if (req.method !== 'GET') { // Para PUT e DELETE
     if (!session || (session.user as any)?.role !== 'ADMIN') { 
-      console.warn(`[API /api/tasks/${id}] Acesso negado para ${req.method}. Sessão: ${session ? 'presente' : 'ausente'}, Role: ${(session?.user as any)?.role}`);
+      console.warn(`[API /api/tasks/${id}] Acesso NEGADO para ${req.method}. Sessão: ${session ? 'presente' : 'ausente'}, Role: ${(session?.user as any)?.role}`);
       return res.status(401).json({ message: 'Não autorizado. Apenas administradores podem realizar esta operação.' });
     }
   } else { // Para GET
-      if (!session) { // Para GET, se não houver sessão, também não autoriza (já que as tarefas não são públicas)
-           console.warn(`[API /api/tasks/${id}] Acesso negado para GET. Sessão ausente.`);
+      // Para GET, se não houver sessão, não autoriza (já que as tarefas não são públicas neste contexto de admin)
+      if (!session) { 
+           console.warn(`[API /api/tasks/${id}] Acesso NEGADO para GET. Sessão ausente.`);
            return res.status(401).json({ message: 'Não autorizado para visualização sem autenticação.' });
       }
+      // Se quiser que APENAS ADMIN veja QUALQUER tarefa, adicione:
+      // if ((session.user as any)?.role !== 'ADMIN') {
+      //   console.warn(`[API /api/tasks/${id}] Acesso NEGADO para GET. Role: ${(session?.user as any)?.role}`);
+      //   return res.status(403).json({ message: 'Proibido. Apenas administradores podem visualizar todas as tarefas.' });
+      // }
   }
+
 
   if (typeof id !== 'string') {
     return res.status(400).json({ message: 'ID da tarefa inválido.' });
