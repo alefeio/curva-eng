@@ -6,7 +6,7 @@ import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
 import { FaHeart } from "react-icons/fa";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import { ZoomableImage } from "./ZoomableImage";
+import ZoomableImage from "./ZoomableImage";
 import { ModalHeaderFooter } from "./ModalHeaderFooter";
 import { ColecaoItem, ColecaoProps } from "types";
 
