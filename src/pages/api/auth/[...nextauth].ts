@@ -4,9 +4,17 @@ import NextAuth, { NextAuthOptions } from "next-auth"
 import EmailProvider from "next-auth/providers/email"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { Resend } from 'resend';
-import prisma from "../../../../lib/prisma";
+import prisma from "../../../../lib/prisma"; // Seu import do Prisma
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// LOGS DE DEPURACAO PARA VARIAVEIS DE AMBIENTE DENTRO DA CONFIGURACAO NEXTAUTH
+console.log("--- NEXTAUTH CONFIG LOADED ---");
+console.log("process.env.NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
+console.log("process.env.NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET ? "DEFINIDO" : "NÃO DEFINIDO");
+console.log("process.env.NODE_ENV:", process.env.NODE_ENV);
+console.log("process.env.EMAIL_FROM:", process.env.EMAIL_FROM);
+console.log("--- END NEXTAUTH CONFIG LOGS ---");
 
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma),
@@ -30,6 +38,10 @@ export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
     },
+    // Removendo a propriedade 'jwt' aqui, pois NextAuth 4+ gerencia isso automaticamente
+    // e ter um 'jwt' de nível superior com 'secret' pode causar conflitos ou ser redundante
+    // se o 'secret' principal já estiver definido.
+    // next-auth configura o secret do JWT com o 'secret' da configuração principal.
 
     callbacks: {
         async jwt({ token, user }) {
@@ -54,6 +66,7 @@ export const authOptions: NextAuthOptions = {
         }
     },
     secret: process.env.NEXTAUTH_SECRET,
+    // debug: process.env.NODE_ENV === "development", // Você pode ativar isso para mais logs de NextAuth
 };
 
 export default NextAuth(authOptions);

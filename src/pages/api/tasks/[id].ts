@@ -12,11 +12,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // LOGS DE DEPURACAO DA SESSAO NO SERVIDOR (MAIS DETALHADOS)
   console.log(`\n--- [API /api/tasks/${id}] INICIO DA REQUISICAO ---`);
   console.log(`[API /api/tasks/${id}] Método: ${req.method}`);
+  console.log(`[API /api/tasks/${id}] Requisição Host: ${req.headers.host}`);
+  console.log(`[API /api/tasks/${id}] Requisição Origin: ${req.headers.origin}`);
+  console.log(`[API /api/tasks/${id}] Variável de Ambiente NEXTAUTH_URL no runtime da API: ${process.env.NEXTAUTH_URL}`);
+  console.log(`[API /api/tasks/${id}] Cookies da Requisição: ${req.headers.cookie || 'Nenhum cookie presente'}`);
   console.log(`[API /api/tasks/${id}] Sessão Recebida (JSON):`, JSON.stringify(session, null, 2));
   if (session) {
     console.log(`[API /api/tasks/${id}] User ID na sessão:`, session.user?.id);
     console.log(`[API /api/tasks/${id}] User Role na sessão:`, (session.user as any)?.role);
-    // Adiciona uma verificação explícita do tipo da role
     console.log(`[API /api/tasks/${id}] Tipo da User Role:`, typeof (session.user as any)?.role);
   } else {
     console.log(`[API /api/tasks/${id}] Sessão ausente para a requisição.`);
