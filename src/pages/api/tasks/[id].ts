@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
-import prisma from '../../../../lib/prisma';
+import { Task } from '../../../types/task'; // Importa a interface Task do arquivo central
+import prisma from '../../../../lib/prisma'; // ATENÇÃO: Ajuste este caminho se seu lib/prisma.ts estiver em outro lugar
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query; 
@@ -12,6 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   console.log(`[API /api/tasks/${id}] Requisição Host: ${req.headers.host}`);
   console.log(`[API /api/tasks/${id}] Requisição Origin: ${req.headers.origin}`);
   console.log(`[API /api/tasks/${id}] Variável de Ambiente NEXTAUTH_URL no runtime da API: ${process.env.NEXTAUTH_URL}`);
+  console.log(`[API /api/tasks/${id}] Variável de Ambiente NEXTAUTH_SECRET no runtime da API (início/fim): ${process.env.NEXTAUTH_SECRET ? `${process.env.NEXTAUTH_SECRET.substring(0, 5)}...${process.env.NEXTAUTH_SECRET.slice(-5)}` : "NÃO DEFINIDO"}`);
   console.log(`[API /api/tasks/${id}] Cookies da Requisição: ${req.headers.cookie || 'Nenhum cookie presente'}`);
   console.log(`[API /api/tasks/${id}] Sessão Recebida (JSON):`, JSON.stringify(session, null, 2));
   if (session) {
@@ -125,6 +127,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
       res.status(405).end(`Method ${req.method} Not Allowed`);
   }
-
-  await prisma.$disconnect();
 }

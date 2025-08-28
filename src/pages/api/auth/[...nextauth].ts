@@ -4,7 +4,7 @@ import NextAuth, { NextAuthOptions } from "next-auth"
 import EmailProvider from "next-auth/providers/email"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { Resend } from 'resend';
-import prisma from "../../../../lib/prisma"; // Ajuste este caminho se seu lib/prisma.ts estiver em outro lugar
+import prisma from "../../../../lib/prisma"; // ATENÇÃO: Ajuste este caminho se seu lib/prisma.ts estiver em outro lugar
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -41,9 +41,7 @@ export const authOptions: NextAuthOptions = {
     },
     callbacks: {
         async jwt({ token, user }) {
-            // Adiciona o role e o id do usuário ao token
             if (user) {
-                // Use a instância global do prisma
                 const userFromDb = await prisma.user.findUnique({
                     where: { id: user.id },
                     select: { role: true },
@@ -54,7 +52,6 @@ export const authOptions: NextAuthOptions = {
             return token;
         },
         async session({ session, token }) {
-            // Adiciona o id e o role do token à sessão do usuário
             if (session.user) {
                 (session.user as any).id = (token as any).id;
                 (session.user as any).role = (token as any).role;
@@ -63,7 +60,7 @@ export const authOptions: NextAuthOptions = {
         }
     },
     secret: process.env.NEXTAUTH_SECRET,
-    // debug: process.env.NODE_ENV === "development", // Ative isso para mais logs internos do NextAuth se necessário
+    // debug: process.env.NODE_ENV === "development", // Você pode ativar isso para mais logs internos do NextAuth se necessário
 };
 
 export default NextAuth(authOptions);
