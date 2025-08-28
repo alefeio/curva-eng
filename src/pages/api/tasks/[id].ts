@@ -9,13 +9,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { id } = req.query; 
   const session = await getSession({ req });
 
-  // LOGS DE DEPURACAO DA SESSAO NO SERVIDOR
+  // LOGS DE DEPURACAO DA SESSAO NO SERVIDOR (MAIS DETALHADOS)
   console.log(`\n--- [API /api/tasks/${id}] INICIO DA REQUISICAO ---`);
   console.log(`[API /api/tasks/${id}] Método: ${req.method}`);
-  console.log(`[API /api/tasks/${id}] Sessão Completa (Servidor):`, JSON.stringify(session, null, 2));
+  console.log(`[API /api/tasks/${id}] Sessão Recebida (JSON):`, JSON.stringify(session, null, 2));
   if (session) {
     console.log(`[API /api/tasks/${id}] User ID na sessão:`, session.user?.id);
     console.log(`[API /api/tasks/${id}] User Role na sessão:`, (session.user as any)?.role);
+    // Adiciona uma verificação explícita do tipo da role
+    console.log(`[API /api/tasks/${id}] Tipo da User Role:`, typeof (session.user as any)?.role);
   } else {
     console.log(`[API /api/tasks/${id}] Sessão ausente para a requisição.`);
   }
@@ -26,13 +28,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Autorização genérica: exige ADMIN para PUT/DELETE. GET exige sessão para tarefas do admin.
   if (req.method !== 'GET') { // Para PUT e DELETE
     if (!session || (session.user as any)?.role !== 'ADMIN') { 
-      console.warn(`[API /api/tasks/${id}] Acesso NEGADO para ${req.method}. Sessão: ${session ? 'presente' : 'ausente'}, Role: ${(session?.user as any)?.role}`);
+      console.warn(`[API /api/tasks/${id}] Acesso NEGADO para ${req.method}. Motivo: ${!session ? 'Sessão Ausente' : `Role: ${(session?.user as any)?.role} (não é ADMIN)`}`);
       return res.status(401).json({ message: 'Não autorizado. Apenas administradores podem realizar esta operação.' });
     }
   } else { // Para GET
       // Para GET, se não houver sessão, não autoriza (já que as tarefas não são públicas neste contexto de admin)
       if (!session) { 
-           console.warn(`[API /api/tasks/${id}] Acesso NEGADO para GET. Sessão ausente.`);
+           console.warn(`[API /api/tasks/${id}] Acesso NEGADO para GET. Motivo: Sessão Ausente.`);
            return res.status(401).json({ message: 'Não autorizado para visualização sem autenticação.' });
       }
       // Se quiser que APENAS ADMIN veja QUALQUER tarefa, adicione:

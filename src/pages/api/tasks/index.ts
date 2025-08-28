@@ -8,13 +8,15 @@ const prisma = new PrismaClient();
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getSession({ req });
 
-  // LOGS DE DEPURACAO DA SESSAO NO SERVIDOR
+  // LOGS DE DEPURACAO DA SESSAO NO SERVIDOR (MAIS DETALHADOS)
   console.log(`\n--- [API /api/tasks/index] INICIO DA REQUISICAO ---`);
   console.log(`[API /api/tasks/index] Método: ${req.method}`);
-  console.log(`[API /api/tasks/index] Sessão Completa (Servidor):`, JSON.stringify(session, null, 2));
+  console.log(`[API /api/tasks/index] Sessão Recebida (JSON):`, JSON.stringify(session, null, 2));
   if (session) {
     console.log(`[API /api/tasks/index] User ID na sessão:`, session.user?.id);
     console.log(`[API /api/tasks/index] User Role na sessão:`, (session.user as any)?.role);
+    // Adiciona uma verificação explícita do tipo da role
+    console.log(`[API /api/tasks/index] Tipo da User Role:`, typeof (session.user as any)?.role);
   } else {
     console.log(`[API /api/tasks/index] Sessão ausente para a requisição.`);
   }
@@ -25,12 +27,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Autorização genérica: exige ADMIN para POST. GET exige sessão para tarefas do admin.
   if (req.method === 'POST') {
     if (!session || (session.user as any)?.role !== 'ADMIN') { 
-      console.warn(`[API /api/tasks/index] Acesso NEGADO para POST. Sessão: ${session ? 'presente' : 'ausente'}, Role: ${(session?.user as any)?.role}`);
+      console.warn(`[API /api/tasks/index] Acesso NEGADO para POST. Motivo: ${!session ? 'Sessão Ausente' : `Role: ${(session?.user as any)?.role} (não é ADMIN)`}`);
       return res.status(401).json({ message: 'Não autorizado. Apenas administradores podem realizar esta operação.' });
     }
   } else if (req.method === 'GET') {
       if (!session) { 
-          console.warn(`[API /api/tasks/index] Acesso NEGADO para GET. Sessão ausente.`);
+          console.warn(`[API /api/tasks/index] Acesso NEGADO para GET. Motivo: Sessão Ausente.`);
           return res.status(401).json({ message: 'Não autorizado para visualização sem autenticação.' });
       }
       // Se quiser que APENAS ADMIN veja todas as tarefas na lista, adicione:

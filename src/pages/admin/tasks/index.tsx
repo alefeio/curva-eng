@@ -20,7 +20,8 @@ export default function TasksPage() {
 
   // LOG PARA DEPURAR A SESSAO NO NAVEGADOR (CLIENT-SIDE)
   useEffect(() => {
-    console.log("[TasksPage CLIENT] Sessão:", session, "Status:", status);
+    console.log("[TasksPage CLIENT] Sessão:", JSON.stringify(session, null, 2));
+    console.log("[TasksPage CLIENT] Status:", status);
     if (session) {
       console.log("[TasksPage CLIENT] User ID:", session.user?.id);
       console.log("[TasksPage CLIENT] User Role:", (session.user as any)?.role);

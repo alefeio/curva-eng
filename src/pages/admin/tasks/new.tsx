@@ -34,7 +34,8 @@ export default function NewTaskPage() {
 
   // LOG PARA DEPURAR A SESSAO NO NAVEGADOR (CLIENT-SIDE)
   useEffect(() => {
-    console.log("[NewTaskPage CLIENT] Sessão:", session, "Status:", status);
+    console.log("[NewTaskPage CLIENT] Sessão:", JSON.stringify(session, null, 2));
+    console.log("[NewTaskPage CLIENT] Status:", status);
     if (session) {
       console.log("[NewTaskPage CLIENT] User ID:", session.user?.id);
       console.log("[NewTaskPage CLIENT] User Role:", (session.user as any)?.role);
@@ -207,7 +208,7 @@ export default function NewTaskPage() {
               </div>
 
               <div>
-                <label htmlFor="priority" className="block text-sm font-medium text-gray-700">Prioridade</label>
+                <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">Prioridade</label>
                 <select
                   name="priority"
                   id="priority"

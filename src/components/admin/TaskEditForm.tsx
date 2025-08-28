@@ -19,7 +19,8 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
 
   // LOG PARA DEPURAR A SESSÃO NO NAVEGADOR (CLIENT-SIDE)
   useEffect(() => {
-    console.log("[TaskEditForm CLIENT] Sessão:", session, "Status:", status);
+    console.log("[TaskEditForm CLIENT] Sessão:", JSON.stringify(session, null, 2));
+    console.log("[TaskEditForm CLIENT] Status:", status);
     if (session) {
       console.log("[TaskEditForm CLIENT] User ID:", session.user?.id);
       console.log("[TaskEditForm CLIENT] User Role:", (session.user as any)?.role);
