@@ -1,32 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { MdClose } from 'react-icons/md';
 import { useSession } from 'next-auth/react';
-
-// Interfaces (devem ser consistentes com TaskDetailModal e a API)
-interface User {
-  id: string;
-  name: string | null; // Corrigido para aceitar null
-}
-
-interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  status: 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA';
-  priority: number;
-  dueDate: string | null; // Pode ser null
-  
-  // IDs das relações (chaves estrangeiras do DB)
-  authorId: string;
-  assignedToId: string;
-
-  // Objetos de relação populados pelo Prisma (opcionais na interface, mas esperados na exibição)
-  author?: User; 
-  assignedTo?: User; 
-  
-  createdAt: string;
-  updatedAt: string;
-}
+import { Task, User } from 'types/task';
 
 interface TaskEditFormProps {
   taskId: string;
@@ -35,12 +10,18 @@ interface TaskEditFormProps {
 }
 
 const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpdated }) => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession(); // Obtenha o status da sessão
   const [formData, setFormData] = useState<Task | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // LOG PARA DEPURAR A SESSÃO
+  useEffect(() => {
+    console.log("Sessão em TaskEditForm:", session, "Status:", status);
+  }, [session, status]);
+
 
   // Busca a tarefa existente e a lista de usuários
   useEffect(() => {
@@ -92,10 +73,10 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
     e.preventDefault();
     if (!formData) return;
 
-    const updaterId = session?.user?.id;
-    if (!updaterId) {
-      setError('Não foi possível obter o ID do usuário. Por favor, faça login novamente.');
-      return;
+    // Verifica o status da sessão antes de tentar obter o ID
+    if (status !== 'authenticated' || !session?.user?.id) {
+        setError('Não foi possível obter o ID do usuário autenticado. Por favor, faça login novamente.');
+        return;
     }
 
     setSubmitting(true);
@@ -115,7 +96,6 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
         throw new Error(errorData.message || 'Falha ao atualizar a tarefa.');
       }
 
-      // A API de atualização deve retornar a tarefa com as relações 'author' e 'assignedTo' incluídas
       const updatedTask: Task = await response.json();
       onTaskUpdated(updatedTask); 
       onClose(); 
@@ -269,8 +249,8 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
             </button>
             <button
               type="submit"
-              disabled={submitting}
-              className={`py-2 px-4 rounded-md font-bold transition duration-300 ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
+              disabled={submitting || status === 'loading' || status === 'unauthenticated'} // Desabilita se não autenticado
+              className={`py-2 px-4 rounded-md font-bold transition duration-300 ${submitting || status === 'loading' || status === 'unauthenticated' ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
             >
               {submitting ? 'Salvando...' : 'Salvar Alterações'}
             </button>

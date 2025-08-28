@@ -1,53 +1,36 @@
 import { useEffect, useState, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { Task, User } from '../../../types/task'; // Importa as interfaces do arquivo central
+import { useSession } from 'next-auth/react'; // Importa useSession
 import AdminLayout from 'components/admin/AdminLayout';
 import TaskDetailModal from 'components/admin/TaskDetailModal';
 import TaskEditForm from 'components/admin/TaskEditForm';
 
-// Interfaces (consistentes com o modelo do Prisma e os componentes de modal)
-interface User {
-  id: string;
-  name: string | null; // Corrigido para aceitar null
-}
-
-interface Task {
-  id: string;
-  title: string;
-  description: string | null; // Pode ser null
-  status: 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA';
-  priority: number;
-  dueDate: string | null; // Pode ser null
-  
-  // IDs das relações (chaves estrangeiras do DB)
-  authorId: string;
-  assignedToId: string;
-
-  // Objetos de relação populados pelo Prisma (opcionais na interface, mas esperados na exibição)
-  author?: User; 
-  assignedTo?: User; 
-  
-  createdAt: string;
-  updatedAt: string;
-}
-
 export default function TasksPage() {
+  const { data: session, status } = useSession(); // Obtenha a sessão e o status
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
 
-  // Estados para controlar os modais
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const fetchTasks = useCallback(async () => {
+    if (status !== 'authenticated') {
+      setLoading(false);
+      return; // Não busca tarefas se não estiver autenticado
+    }
+
     try {
       setLoading(true);
       const response = await fetch('/api/tasks');
       if (!response.ok) {
-        throw new Error('Falha ao buscar as tarefas.');
+        // Se a resposta não for OK, pode ser 401 (Unauthorized) ou outro erro
+        const errorText = await response.text(); // Pega o texto da resposta para depuração
+        throw new Error(`Falha ao buscar as tarefas: ${response.status} ${response.statusText} - ${errorText}`);
       }
       const data: Task[] = await response.json(); 
       setTasks(data);
@@ -56,13 +39,12 @@ export default function TasksPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [status]); // Adicione status como dependência
 
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
 
-  // Funções para abrir/fechar modais
   const openDetailModal = (task: Task) => {
     setSelectedTask(task);
     setShowDetailModal(true);
@@ -83,12 +65,11 @@ export default function TasksPage() {
     setSelectedTask(null);
   };
 
-  // Função para atualizar a tarefa na lista após a edição
   const handleTaskUpdated = (updatedTask: Task) => {
     setTasks(prevTasks => prevTasks.map(task => 
       task.id === updatedTask.id ? { ...updatedTask, assignedTo: updatedTask.assignedTo } : task 
     ));
-    closeEditModal(); // Fecha o modal de edição após a atualização
+    closeEditModal(); 
   };
 
   const getStatusColor = (status: Task['status']) => {
@@ -136,15 +117,29 @@ export default function TasksPage() {
     'CONCLUIDA': tasks.filter(task => task.status === 'CONCLUIDA'),
   };
 
-  if (loading) {
+  if (status === 'loading') {
     return (
       <AdminLayout>
         <div className="flex justify-center items-center h-screen">
-          <p>Carregando tarefas...</p>
+          <p>Verificando autenticação...</p>
         </div>
       </AdminLayout>
     );
   }
+
+  if (status === 'unauthenticated') {
+    return (
+      <AdminLayout>
+        <div className="flex justify-center items-center h-screen">
+          <p className="text-red-500 text-xl">Você precisa estar logado para ver as tarefas.</p>
+          <p className="text-gray-600 mt-2">
+            Por favor, <Link href="/api/auth/signin" className="text-orange-500 hover:underline">faça login</Link>.
+          </p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
 
   if (error) {
     return (
@@ -153,6 +148,16 @@ export default function TasksPage() {
           <p className="text-red-500">Erro: {error}</p>
         </div>
       </AdminLayout>
+    );
+  }
+
+  if (loading) { // Removido para o final da renderização condicional
+    return (
+        <AdminLayout>
+            <div className="flex justify-center items-center h-screen">
+                <p>Carregando tarefas...</p>
+            </div>
+        </AdminLayout>
     );
   }
 
@@ -238,7 +243,7 @@ export default function TasksPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {task.assignedTo?.name || 'N/A'} {/* Acessa name com safe navigation */}
+                          {task.assignedTo?.name || 'N/A'} 
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}
@@ -272,7 +277,7 @@ export default function TasksPage() {
                     tasksForColumn.map(task => (
                       <div key={task.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-200">
                         <h3 className="text-base font-semibold text-gray-900 truncate">{task.title}</h3>
-                        <p className="text-sm text-gray-500 mt-1">Responsável: {task.assignedTo?.name || 'N/A'}</p> {/* Acessa name com safe navigation */}
+                        <p className="text-sm text-gray-500 mt-1">Responsável: {task.assignedTo?.name || 'N/A'}</p> 
                         {task.dueDate && (
                           <p className="text-xs text-gray-400 mt-1">Vencimento: {new Date(task.dueDate).toLocaleDateString()}</p>
                         )}

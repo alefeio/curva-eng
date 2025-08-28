@@ -1,31 +1,6 @@
 import React from 'react';
 import { MdClose, MdPerson, MdCalendarToday, MdOutlineDescription, MdLabel, MdPriorityHigh } from 'react-icons/md';
-
-// Interfaces (consistentes com o modelo do Prisma e a página TasksPage)
-interface User {
-  id: string;
-  name: string | null; // Corrigido para aceitar null
-}
-
-interface Task {
-  id: string;
-  title: string;
-  description: string | null; // Pode ser null
-  status: 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA';
-  priority: number;
-  dueDate: string | null; // Pode ser null
-  
-  // IDs das relações (chaves estrangeiras do DB)
-  authorId: string;
-  assignedToId: string;
-
-  // Objetos de relação populados pelo Prisma (opcionais na interface, mas esperados na exibição)
-  author?: User; 
-  assignedTo?: User; 
-
-  createdAt: string;
-  updatedAt: string;
-}
+import { Task } from 'types/task';
 
 interface TaskDetailModalProps {
   task: Task;

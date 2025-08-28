@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { Task, User } from '../../../types/task'; // Importa as interfaces do arquivo central
 import AdminLayout from 'components/admin/AdminLayout';
 
 // Defina as interfaces para o formulário
@@ -10,24 +11,19 @@ interface TaskFormData {
   title: string;
   description: string;
   status: 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA';
-  priority: number; // Agora o estado guarda o valor numérico
+  priority: number; 
   dueDate: string;
   assignedToId: string;
 }
 
-interface User {
-  id: string;
-  name: string | null; // Corrigido para aceitar null
-}
-
 export default function NewTaskPage() {
   const router = useRouter();
-  const { data: session, status } = useSession(); // Obtenha a sessão do usuário e o status
+  const { data: session, status } = useSession(); 
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
     description: '',
     status: 'PENDENTE',
-    priority: 1, // Valor inicial para a prioridade (Normal)
+    priority: 1, 
     dueDate: '',
     assignedToId: '',
   });
@@ -43,7 +39,7 @@ export default function NewTaskPage() {
       try {
         const response = await fetch('/api/users');
         if (!response.ok) {
-          throw new Error('Failed to load users.');
+          throw new Error('Falha ao carregar usuários.');
         }
         const data = await response.json();
         setUsers(data.users);
@@ -59,7 +55,6 @@ export default function NewTaskPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    // Converte o valor de prioridade para número
     const updatedValue = name === 'priority' ? parseInt(value) : value;
     setFormData(prev => ({ ...prev, [name]: updatedValue }));
   };
@@ -67,7 +62,6 @@ export default function NewTaskPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Adicionando validação do lado do cliente
     if (!formData.title || !formData.assignedToId || !formData.dueDate) {
       setError('Por favor, preencha todos os campos obrigatórios.');
       return;
@@ -75,8 +69,8 @@ export default function NewTaskPage() {
     
     // Obter o autorId da sessão
     const authorId = session?.user?.id;
-    if (!authorId) {
-      setError('Não foi possível obter o ID do autor. Por favor, faça login novamente.');
+    if (status !== 'authenticated' || !authorId) {
+      setError('Não foi possível obter o ID do autor autenticado. Por favor, faça login novamente.');
       return;
     }
 
@@ -100,7 +94,7 @@ export default function NewTaskPage() {
       const newTask = await response.json();
       console.log('Tarefa criada com sucesso:', newTask);
 
-      router.push('/admin/tasks'); // Redireciona para a lista de tarefas após o sucesso
+      router.push('/admin/tasks'); 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Um erro inesperado ocorreu.');
     } finally {
@@ -139,7 +133,7 @@ export default function NewTaskPage() {
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Criar Nova Tarefa</h1>
           <p className="text-gray-500">
-            <Link href="/admin/tasks" className="text-accent hover:underline">Voltar para a lista de tarefas</Link>
+            <Link href="/admin/tasks" className="text-orange-500 hover:underline">Voltar para a lista de tarefas</Link>
           </p>
         </div>
 
@@ -156,7 +150,7 @@ export default function NewTaskPage() {
                 value={formData.title}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent sm:text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
               />
             </div>
 
@@ -168,7 +162,7 @@ export default function NewTaskPage() {
                 value={formData.description}
                 onChange={handleChange}
                 rows={4}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent sm:text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
               />
             </div>
             
@@ -180,7 +174,7 @@ export default function NewTaskPage() {
                   id="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
                 >
                   <option value="PENDENTE">Pendente</option>
                   <option value="EM_ANDAMENTO">Em Andamento</option>
@@ -195,7 +189,7 @@ export default function NewTaskPage() {
                   id="priority"
                   value={formData.priority}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
                 >
                   <option value={0}>Baixa</option>
                   <option value={1}>Normal</option>
@@ -212,7 +206,7 @@ export default function NewTaskPage() {
                   value={formData.dueDate}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
                 />
               </div>
 
@@ -227,7 +221,7 @@ export default function NewTaskPage() {
                     value={formData.assignedToId}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent sm:text-sm"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
                   >
                     <option value="">Selecione um usuário...</option>
                     {users.map(user => (
@@ -241,8 +235,8 @@ export default function NewTaskPage() {
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={loading || usersLoading}
-                className={`py-2 px-4 rounded-md font-bold transition duration-300 ${loading || usersLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-accent hover:bg-accent-dark'} text-white`}
+                disabled={loading || usersLoading || status !== 'authenticated'}
+                className={`py-2 px-4 rounded-md font-bold transition duration-300 ${loading || usersLoading || status !== 'authenticated' ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
               >
                 {loading ? 'Criando...' : 'Criar Tarefa'}
               </button>
