@@ -21,17 +21,19 @@ const ContactSection: React.FC = () => {
                 <div className="flex flex-1 flex-col items-center p-8 bg-gray-800 rounded-xl shadow-xl text-white">
                     <h4 className="font-bold text-white text-2xl mb-6">Fale Conosco</h4>
                     <div className="space-y-5 text-gray-200">
-                        <p className="flex items-center justify-center space-x-3 text-xl">
+                        <p className="flex flex-col items-center justify-center space-x-3 text-xl">
                             <MdPhone className="text-orange-500 text-3xl" />
                             <a href="tel:+5591982016888" className="font-semibold hover:text-orange-500 transition-colors">
                                 +55 (91) 98201-6888
                             </a>
                         </p>
-                        <p className="flex items-center justify-center space-x-3 text-xl overflow-hidden">
+                        <p className="flex flex-col items-center justify-center space-x-3 text-xl overflow-hidden">
                             <MdEmail className="text-orange-500 text-3xl" />
-                            <a href="mailto:contato@curvaengenharia.com.br" className="font-semibold hover:text-orange-500 transition-colors">
-                                contato@curvaengenharia.com.br
-                            </a>
+                            <small className="md:text-sm">
+                                <a href="mailto:contato@curvaengenharia.com.br" className="font-semibold hover:text-orange-500 transition-colors">
+                                    contato@curvaengenharia.com.br
+                                </a>
+                            </small>
                         </p>
                     </div>
                 </div>
