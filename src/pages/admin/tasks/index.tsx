@@ -1,19 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import AdminLayout from 'components/admin/AdminLayout';
+import TaskDetailModal from 'components/admin/TaskDetailModal';
+import TaskEditForm from 'components/admin/TaskEditForm';
 
-// Defina a interface para a tarefa, correspondendo ao seu modelo do Prisma
+// Interfaces (consistentes com o modelo do Prisma e os componentes de modal)
+interface User {
+  id: string;
+  name: string | null; // Corrigido para aceitar null
+}
+
 interface Task {
   id: string;
   title: string;
-  description: string;
+  description: string | null; // Pode ser null
   status: 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA';
   priority: number;
-  dueDate: string | null;
-  author: { id: string; name: string };
-  assignedTo: { id: string; name: string };
+  dueDate: string | null; // Pode ser null
+  
+  // IDs das relações (chaves estrangeiras do DB)
+  authorId: string;
+  assignedToId: string;
+
+  // Objetos de relação populados pelo Prisma (opcionais na interface, mas esperados na exibição)
+  author?: User; 
+  assignedTo?: User; 
+  
   createdAt: string;
+  updatedAt: string;
 }
 
 export default function TasksPage() {
@@ -22,25 +37,59 @@ export default function TasksPage() {
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/tasks');
-        if (!response.ok) {
-          throw new Error('Falha ao buscar as tarefas.');
-        }
-        const data = await response.json();
-        setTasks(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Um erro inesperado ocorreu.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Estados para controlar os modais
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-    fetchTasks();
+  const fetchTasks = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/tasks');
+      if (!response.ok) {
+        throw new Error('Falha ao buscar as tarefas.');
+      }
+      const data: Task[] = await response.json(); 
+      setTasks(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Um erro inesperado ocorreu.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
+  // Funções para abrir/fechar modais
+  const openDetailModal = (task: Task) => {
+    setSelectedTask(task);
+    setShowDetailModal(true);
+  };
+
+  const closeDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedTask(null);
+  };
+
+  const openEditModal = (task: Task) => {
+    setSelectedTask(task);
+    setShowEditModal(true);
+  };
+
+  const closeEditModal = () => {
+    setShowEditModal(false);
+    setSelectedTask(null);
+  };
+
+  // Função para atualizar a tarefa na lista após a edição
+  const handleTaskUpdated = (updatedTask: Task) => {
+    setTasks(prevTasks => prevTasks.map(task => 
+      task.id === updatedTask.id ? { ...updatedTask, assignedTo: updatedTask.assignedTo } : task 
+    ));
+    closeEditModal(); // Fecha o modal de edição após a atualização
+  };
 
   const getStatusColor = (status: Task['status']) => {
     switch (status) {
@@ -115,12 +164,12 @@ export default function TasksPage() {
         </Head>
 
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Minhas Tarefas</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Minhas Tarefas</h1>
           <div className="flex space-x-4">
             <button
               onClick={() => setViewMode('table')}
               className={`py-2 px-4 rounded-md font-bold transition duration-300 shadow-md ${
-                viewMode === 'table' ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                viewMode === 'table' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
               Tabela
@@ -128,12 +177,12 @@ export default function TasksPage() {
             <button
               onClick={() => setViewMode('kanban')}
               className={`py-2 px-4 rounded-md font-bold transition duration-300 shadow-md ${
-                viewMode === 'kanban' ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                viewMode === 'kanban' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
               Kanban
             </button>
-            <Link href="/admin/tasks/new" className="bg-accent hover:bg-accent-dark text-white font-bold py-2 px-4 rounded-md transition duration-300 shadow-md">
+            <Link href="/admin/tasks/new" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 shadow-md">
               + Nova Tarefa
             </Link>
           </div>
@@ -189,18 +238,18 @@ export default function TasksPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {task.assignedTo.name}
+                          {task.assignedTo?.name || 'N/A'} {/* Acessa name com safe navigation */}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <Link href={`/admin/tasks/${task.id}`} className="text-indigo-600 hover:text-indigo-900 mr-4">
+                          <button onClick={() => openDetailModal(task)} className="text-orange-600 hover:text-orange-900 mr-4">
                             Ver Detalhes
-                          </Link>
-                          <Link href={`/admin/tasks/edit/${task.id}`} className="text-accent hover:text-accent-dark">
+                          </button>
+                          <button onClick={() => openEditModal(task)} className="text-blue-600 hover:text-blue-900">
                             Editar
-                          </Link>
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -223,7 +272,7 @@ export default function TasksPage() {
                     tasksForColumn.map(task => (
                       <div key={task.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-200">
                         <h3 className="text-base font-semibold text-gray-900 truncate">{task.title}</h3>
-                        <p className="text-sm text-gray-500 mt-1">Responsável: {task.assignedTo.name}</p>
+                        <p className="text-sm text-gray-500 mt-1">Responsável: {task.assignedTo?.name || 'N/A'}</p> {/* Acessa name com safe navigation */}
                         {task.dueDate && (
                           <p className="text-xs text-gray-400 mt-1">Vencimento: {new Date(task.dueDate).toLocaleDateString()}</p>
                         )}
@@ -236,12 +285,12 @@ export default function TasksPage() {
                           </span>
                         </div>
                         <div className="flex justify-end mt-4 space-x-2">
-                          <Link href={`/admin/tasks/${task.id}`} className="text-sm text-indigo-600 hover:text-indigo-900">
+                          <button onClick={() => openDetailModal(task)} className="text-sm text-orange-600 hover:text-orange-900">
                             Detalhes
-                          </Link>
-                          <Link href={`/admin/tasks/edit/${task.id}`} className="text-sm text-accent hover:text-accent-dark">
+                          </button>
+                          <button onClick={() => openEditModal(task)} className="text-sm text-blue-600 hover:text-blue-900">
                             Editar
-                          </Link>
+                          </button>
                         </div>
                       </div>
                     ))
@@ -252,6 +301,23 @@ export default function TasksPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de Detalhes da Tarefa */}
+      {showDetailModal && selectedTask && (
+        <TaskDetailModal 
+          task={selectedTask} 
+          onClose={closeDetailModal} 
+        />
+      )}
+
+      {/* Modal de Edição da Tarefa */}
+      {showEditModal && selectedTask && (
+        <TaskEditForm
+          taskId={selectedTask.id}
+          onClose={closeEditModal}
+          onTaskUpdated={handleTaskUpdated}
+        />
+      )}
     </AdminLayout>
   );
 }
