@@ -1,8 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { MdClose } from 'react-icons/md';
 import { useSession } from 'next-auth/react';
-import { Task } from 'types/task';
-import { User } from '@prisma/client';
+import { Task, User } from 'types/task';
 
 interface TaskEditFormProps {
   taskId: string;
@@ -146,6 +145,12 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
 
   if (!formData) return null;
 
+  // Lógica para determinar se o botão deve ser desabilitado
+  const isDisabled = submitting || 
+                     status === 'loading' || 
+                     status === 'unauthenticated' || 
+                     (session?.user?.role !== 'ADMIN'); // Verifica diretamente a role
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-2xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto relative transform transition-all scale-100 opacity-100" onClick={e => e.stopPropagation()}>
@@ -259,8 +264,8 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
             </button>
             <button
               type="submit"
-              disabled={submitting || status === 'loading' || status === 'unauthenticated' || (session && (session.user as any)?.role !== 'ADMIN')} 
-              className={`py-2 px-4 rounded-md font-bold transition duration-300 ${submitting || status === 'loading' || status === 'unauthenticated' || (session && (session.user as any)?.role !== 'ADMIN') ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
+              disabled={isDisabled} 
+              className={`py-2 px-4 rounded-md font-bold transition duration-300 ${isDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
             >
               {submitting ? 'Salvando...' : 'Salvar Alterações'}
             </button>
