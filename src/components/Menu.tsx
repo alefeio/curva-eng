@@ -2,8 +2,8 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { LinkItem } from '../types/index'; 
-import { MdMenu, MdClose } from 'react-icons/md'; // Importa ícones de menu e fechar
+import { LinkItem } from '../types/index';
+import { MdMenu, MdClose, MdAccountCircle } from 'react-icons/md'; // Importa ícones de menu, fechar e conta
 
 // A interface MenuProps está definida aqui, como é a única a usá-la
 interface MenuProps {
@@ -16,7 +16,7 @@ interface MenuProps {
 export function Menu({ menuData }: MenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession(); // Inclua o status para saber se a sessão está carregando
   const router = useRouter();
 
   const handleSignIn = () => {
@@ -36,6 +36,51 @@ export function Menu({ menuData }: MenuProps) {
   }
 
   const { logoUrl, links } = menuData;
+
+  // Lógica para o botão de autenticação
+  const authButton = status === 'loading' ? (
+    <span className="text-gray-400">Carregando...</span>
+  ) : session ? (
+    <Link
+      href="/admin"
+      className="relative text-gray-100 hover:text-orange-500 transition-colors duration-300 group flex items-center gap-1"
+      onClick={() => setMenuOpen(false)}
+    >
+      <MdAccountCircle className="w-5 h-5" /> Minha Conta
+      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
+    </Link>
+  ) : (
+    <button
+      onClick={handleSignIn}
+      className="relative text-gray-100 hover:text-orange-500 transition-colors duration-300 group flex items-center gap-1 bg-orange-500 px-3 py-1 rounded-md hover:bg-orange-600"
+    >
+      Entrar
+    </button>
+  );
+
+  const authButtonMobile = status === 'loading' ? (
+    <li className="block py-2 text-gray-400 border-b border-gray-700">Carregando...</li>
+  ) : session ? (
+    <li>
+      <Link
+        href="/admin"
+        className="block py-2 hover:text-orange-500 transition-colors border-b border-gray-700 flex items-center gap-2"
+        onClick={() => setMenuOpen(false)}
+      >
+        <MdAccountCircle className="w-5 h-5" /> Minha Conta
+      </Link>
+    </li>
+  ) : (
+    <li>
+      <button
+        onClick={() => { handleSignIn(); setMenuOpen(false); }}
+        className="w-full text-left py-2 hover:text-orange-500 transition-colors border-b border-gray-700 flex items-center gap-2 bg-orange-500 px-3 rounded-md hover:bg-orange-600 text-white"
+      >
+        Entrar
+      </button>
+    </li>
+  );
+
 
   return (
     <header
@@ -57,20 +102,20 @@ export function Menu({ menuData }: MenuProps) {
         </Link>
 
         {/* Navegação Desktop */}
-        <nav className="hidden md:flex gap-8 font-semibold">
+        <nav className="hidden md:flex gap-8 font-semibold items-center"> {/* Adicionado items-center para alinhar o botão */}
           {links.map(({ text, url, target }) => (
             <Link
               key={url}
               href={url}
-              className="relative text-gray-100 hover:text-orange-500 transition-colors duration-300 group" // Cor de texto ajustada, adiciona group
+              className="relative text-gray-100 hover:text-orange-500 transition-colors duration-300 group"
               onClick={() => setMenuOpen(false)}
               target={target}
             >
               {text}
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span> {/* Sublinhado sutil no hover */}
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
             </Link>
           ))}
-          {/* Opcionais de autenticação, mantidos comentados */}
+          {authButton} {/* Botão de autenticação para desktop */}
         </nav>
 
         {/* Botão Hamburger para Mobile */}
@@ -82,18 +127,18 @@ export function Menu({ menuData }: MenuProps) {
           aria-controls="mobile-menu"
         >
           {menuOpen ? (
-            <MdClose className="w-6 h-6" /> // Ícone de fechar
+            <MdClose className="w-6 h-6" />
           ) : (
-            <MdMenu className="w-6 h-6" /> // Ícone de menu
+            <MdMenu className="w-6 h-6" />
           )}
         </button>
       </div>
 
       {/* Overlay para mobile quando o menu está aberto */}
       {menuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-60 z-30 md:hidden"
-          onClick={() => setMenuOpen(false)} // Fecha o menu ao clicar no overlay
+          onClick={() => setMenuOpen(false)}
         ></div>
       )}
 
@@ -119,14 +164,14 @@ export function Menu({ menuData }: MenuProps) {
               <Link
                 href={url}
                 className="block py-2 hover:text-orange-500 transition-colors border-b border-gray-700 last:border-b-0"
-                onClick={() => setMenuOpen(false)} // Fecha o menu ao clicar no link
+                onClick={() => setMenuOpen(false)}
                 target={target}
               >
                 {text}
               </Link>
             </li>
           ))}
-          {/* Opcionais de autenticação para mobile, se forem reativados */}
+          {authButtonMobile} {/* Botão de autenticação para mobile */}
         </ul>
       </nav>
     </header>
