@@ -1,4 +1,4 @@
-import React, { useEffect, useState, FormEvent } from 'react';
+import React, { useEffect, useState, FormEvent, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { Task, Comment, TaskStatusEnum } from 'types/task';
 
@@ -9,14 +9,33 @@ interface TaskDetailModalProps {
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
   const { data: session } = useSession();
-  const [comments, setComments] = useState<Comment[]>(task.comments || []);
+  const [comments, setComments] = useState<Comment[]>([]); // Inicializa vazio, será populado por fetchComments
   const [newCommentMessage, setNewCommentMessage] = useState<string>('');
   const [commentLoading, setCommentLoading] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
+  const [hasViewed, setHasViewed] = useState(false);
 
-  // Função para buscar comentários (útil se a tarefa não vier com eles inicialmente)
-  const fetchComments = async () => {
-    if (!task?.id) return;
+  // Helper para formatar a data
+  const formatDate = (dateString: string | Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    };
+    return new Date(dateString).toLocaleDateString('pt-BR', options);
+  };
+
+  // Função para buscar comentários
+  const fetchComments = useCallback(async () => {
+    if (!task?.id) {
+      console.warn("Task ID is missing, cannot fetch comments.");
+      setCommentError('Não foi possível carregar comentários: ID da tarefa ausente.');
+      return;
+    }
+    setCommentError(null);
     try {
       const response = await fetch(`/api/tasks/${task.id}/comments`);
       if (response.ok) {
@@ -30,50 +49,48 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
       console.error("Erro ao buscar comentários:", error);
       setCommentError(error instanceof Error ? error.message : 'Erro ao carregar comentários.');
     }
-  };
+  }, [task?.id]); // Dependência: task.id
 
-  // Registrar visualizações de comentários quando o modal é aberto
-  useEffect(() => {
-    if (session?.user?.id && comments.length > 0) {
-      comments.forEach(comment => {
-        // Verifica se o usuário logado ainda não visualizou este comentário
-        if (!comment.viewedBy.includes(session.user!.id)) {
-          fetch(`/api/comments/${comment.id}/view`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ viewerId: session.user!.id }) // Enviando explicitamente o ID, embora a API o pegue da sessão
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (!data.success) {
-              console.error(`Erro ao registrar visualização para o comentário ${comment.id}:`, data.message);
-            } else {
-                // Atualiza o estado do comentário localmente para refletir a nova visualização
-                setComments(prevComments => 
-                    prevComments.map(c => 
-                        c.id === comment.id && !c.viewedBy.includes(session.user!.id)
-                            ? { ...c, viewedBy: [...c.viewedBy, session.user!.id] }
-                            : c
-                    )
-                );
-            }
-          })
-          .catch(error => console.error(`Erro na requisição de visualização para o comentário ${comment.id}:`, error));
-        }
+  // Função para marcar como visualizado
+  const markAsViewed = useCallback(async () => {
+    if (!task?.id || !session?.user?.id || hasViewed) return;
+
+    try {
+      const response = await fetch(`/api/tasks/${task.id}/mark-viewed`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: session.user.id }),
       });
-    }
-    // Inicialmente carrega os comentários (se a task já não os tiver)
-    if (!task.comments || task.comments.length === 0) {
-        fetchComments();
-    }
-  }, [task.id, session?.user?.id, comments]); // Dependências do useEffect
 
+      if (response.ok) {
+        setHasViewed(true);
+        console.log(`Tarefa ${task.id} marcada como visualizada pelo usuário ${session.user.id}`);
+        // Opcional: refetch comments para atualizar a contagem de visualizações em tempo real
+        fetchComments();
+      } else {
+        const errorData = await response.json();
+        console.error('Erro ao marcar como visualizado:', errorData.message);
+      }
+    } catch (error) {
+      console.error("Erro ao chamar API de visualização:", error);
+    }
+  }, [task?.id, session?.user?.id, hasViewed, fetchComments]);
+
+
+  // Efeito para carregar comentários e marcar como visualizado na montagem
+  useEffect(() => {
+    if (task?.id) {
+      fetchComments();
+      markAsViewed();
+    }
+  }, [task?.id, fetchComments, markAsViewed]);
+
+  // Adicionar comentário
   const handleAddComment = async (e: FormEvent) => {
     e.preventDefault();
-    if (!newCommentMessage.trim() || !session?.user?.id || (session.user as any)?.role !== 'ADMIN') {
-      setCommentError('Você precisa estar logado como ADMIN e digitar uma mensagem.');
-      return;
-    }
+    if (!newCommentMessage.trim() || !task?.id) return;
 
     setCommentLoading(true);
     setCommentError(null);
@@ -81,19 +98,21 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     try {
       const response = await fetch(`/api/tasks/${task.id}/comments`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: newCommentMessage, authorId: session.user.id }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: newCommentMessage }),
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        setNewCommentMessage('');
+        fetchComments(); // Recarrega os comentários para incluir o novo
+      } else {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Falha ao adicionar comentário.');
       }
-
-      const addedComment: Comment = await response.json();
-      setComments(prev => [...prev, addedComment]);
-      setNewCommentMessage('');
     } catch (error) {
+      console.error("Erro ao adicionar comentário:", error);
       setCommentError(error instanceof Error ? error.message : 'Erro ao adicionar comentário.');
     } finally {
       setCommentLoading(false);
@@ -102,93 +121,106 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
 
   const getStatusColor = (status: TaskStatusEnum) => {
     switch (status) {
-      case TaskStatusEnum.PENDENTE: return 'bg-red-100 text-red-800';
-      case TaskStatusEnum.EM_ANDAMENTO: return 'bg-yellow-100 text-yellow-800';
-      case TaskStatusEnum.CONCLUIDA: return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPriorityText = (priority: number) => {
-    switch (priority) {
-      case 2: return 'Alta';
-      case 1: return 'Normal';
-      case 0: return 'Baixa';
-      default: return 'N/A';
+      case 'PENDENTE':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'EM_ANDAMENTO':
+        return 'bg-blue-100 text-blue-800';
+      case 'CONCLUIDA':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPriorityColor = (priority: number) => {
-    switch (priority) {
-      case 2: return 'bg-red-500 text-white';
-      case 1: return 'bg-yellow-500 text-white';
-      case 0: return 'bg-blue-500 text-white';
-      default: return 'bg-gray-500 text-white';
-    }
+    if (priority >= 3) return 'bg-red-100 text-red-800';
+    if (priority === 2) return 'bg-orange-100 text-orange-800';
+    return 'bg-green-100 text-green-800';
   };
 
+  const getPriorityText = (priority: number) => {
+    if (priority >= 3) return 'Alta';
+    if (priority === 2) return 'Média';
+    return 'Baixa';
+  };
+
+  if (!task) {
+    return (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center p-4">
+        <div className="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full">
+          <p>Carregando detalhes da tarefa...</p>
+          <button onClick={onClose} className="mt-4 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Fechar</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4" onClick={onClose}>
-      <div className="bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-2xl w-full max-h-[95vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center p-4 z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+        <h2 className="text-2xl font-bold mb-4 text-orange-600">Detalhes da Tarefa: {task.title}</h2>
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl"
         >
           &times;
         </button>
 
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">{task.title}</h2>
-        <p className="text-gray-600 mb-6">{task.description || 'Sem descrição.'}</p>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
-            <p className="text-sm font-medium text-gray-500">Status</p>
-            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(task.status)}`}>
+            <p className="text-sm font-medium text-gray-500">Descrição:</p>
+            <p className="mt-1 text-gray-900">{task.description}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">Status:</p>
+            <span className={`mt-1 px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(task.status)}`}>
               {task.status.replace(/_/g, ' ')}
             </span>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-500">Prioridade</p>
-            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityColor(task.priority)}`}>
+            <p className="text-sm font-medium text-gray-500">Prioridade:</p>
+            <span className={`mt-1 px-3 py-1 rounded-full text-sm font-semibold ${getPriorityColor(task.priority)}`}>
               {getPriorityText(task.priority)}
             </span>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-500">Responsável</p>
-            <p className="text-gray-800 font-semibold">{task.assignedTo?.name || 'N/A'}</p>
+            <p className="text-sm font-medium text-gray-500">Vencimento:</p>
+            <p className="mt-1 text-gray-900">{task.dueDate ? formatDate(task.dueDate) : 'N/A'}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-500">Autor</p>
-            <p className="text-gray-800 font-semibold">{task.author?.name || 'N/A'}</p>
+            <p className="text-sm font-medium text-gray-500">Responsável:</p>
+            <p className="mt-1 text-gray-900">{task.assignedTo?.name || 'Não atribuído'}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-500">Vencimento</p>
-            <p className="text-gray-800 font-semibold">{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}</p>
+            <p className="text-sm font-medium text-gray-500">Criada em:</p>
+            <p className="mt-1 text-gray-900">{formatDate(task.createdAt)}</p>
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Criado em</p>
-            <p className="text-gray-800 font-semibold">{new Date(task.createdAt).toLocaleDateString()} {new Date(task.createdAt).toLocaleTimeString()}</p>
-          </div>
+          {task.updatedAt && (
+            <div>
+              <p className="text-sm font-medium text-gray-500">Última atualização:</p>
+              <p className="mt-1 text-gray-900">{formatDate(task.updatedAt)}</p>
+            </div>
+          )}
         </div>
 
-        {/* Seção de Comentários */}
-        <h3 className="text-xl font-bold text-gray-800 mb-4 border-t pt-4 mt-6">Comentários ({comments.length})</h3>
-        {commentError && <div className="text-red-500 text-sm mb-4">{commentError}</div>}
-        
-        <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
+        <h3 className="text-xl font-bold mb-3 text-orange-600">Comentários ({comments.length})</h3>
+        {commentError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <strong className="font-bold">Erro:</strong>
+            <span className="block sm:inline"> {commentError}</span>
+          </div>
+        )}
+        <div className="space-y-4 mb-6 max-h-60 overflow-y-auto border p-3 rounded-md bg-gray-50">
           {comments.length === 0 ? (
-            <p className="text-gray-500">Nenhum comentário ainda.</p>
+            <p className="text-gray-600">Nenhum comentário ainda.</p>
           ) : (
-            comments.map(comment => (
-              <div key={comment.id} className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                <div className="flex justify-between items-center mb-1">
-                  <p className="font-semibold text-gray-700">{comment.author?.name || 'Usuário Desconhecido'}</p>
-                  <span className="text-xs text-gray-400">
-                    {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString()}
-                  </span>
+            comments.map((comment) => (
+              <div key={comment.id} className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <div className="flex justify-between items-center text-sm mb-1">
+                  <span className="font-semibold text-gray-800">{comment.author?.name || 'Usuário Desconhecido'}</span>
+                  <span className="text-gray-500">{formatDate(comment.createdAt)}</span>
                 </div>
-                <p className="text-gray-700 text-sm">{comment.message}</p>
+                <p className="text-gray-700">{comment.message}</p>
                 <div className="text-right text-xs text-gray-500 mt-2">
                     Visualizações: {comment.viewedBy.length}
                 </div>
