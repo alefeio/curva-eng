@@ -168,60 +168,77 @@ export default function TasksPage() {
     const taskId = e.dataTransfer.getData("taskId");
     console.log("handleDrop: taskId from dataTransfer:", taskId);
 
-    if (!taskId || taskId === draggedTaskId) {
-      console.log("handleDrop: Invalid taskId or dropping on same task/column. taskId:", taskId, "draggedTaskId:", draggedTaskId);
-      return; // Evita soltar na mesma tarefa ou coluna
-    }
-
     // Encontre a tarefa arrastada
     const taskToMove = tasks.find(task => task.id === taskId);
     console.log("handleDrop: taskToMove found:", taskToMove);
 
-    if (taskToMove && taskToMove.status !== newStatus) {
-      console.log("handleDrop: Attempting to update task status.");
-      console.log("handleDrop: Old Status:", taskToMove.status, "New Status:", newStatus);
-      console.log("handleDrop: Full task object being sent:", { ...taskToMove, status: newStatus });
-
-
-      // Atualiza o estado local imediatamente para uma experiência de usuário mais fluida
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task.id === taskId ? { ...task, status: newStatus } : task
-        )
+    // **Lógica de validação ajustada:**
+    // 1. O taskId deve existir
+    // 2. A tarefa deve ser encontrada
+    // 3. O novo status deve ser diferente do status atual da tarefa
+    if (!taskId || !taskToMove || taskToMove.status === newStatus) {
+      console.log("handleDrop: Aborting drop. Reasons:",
+        !taskId ? "Invalid taskId." : "",
+        !taskToMove ? "Task not found." : "",
+        taskToMove?.status === newStatus ? `Status is already ${newStatus}.` : ""
       );
+      return;
+    }
 
-      // Atualiza o backend
-      try {
-        const response = await fetch(`/api/tasks/${taskId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ...taskToMove, status: newStatus }), // Envia o objeto completo com o novo status
-        });
+    console.log("handleDrop: Attempting to update task status.");
+    console.log("handleDrop: Old Status:", taskToMove.status, "New Status:", newStatus);
+    console.log("handleDrop: Full task object being sent:", { ...taskToMove, status: newStatus });
 
-        console.log("handleDrop: API response received:", response);
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("handleDrop: API error response data:", errorData);
-          throw new Error(errorData.message || 'Falha ao atualizar o status da tarefa no backend.');
-        } else {
-          console.log("handleDrop: Task status updated successfully in backend.");
-        }
-        // O fetchTasks pode ser chamado aqui para revalidar os dados, se necessário,
-        // mas como o estado local já foi atualizado, pode ser opcional.
-        // fetchTasks(); 
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Um erro inesperado ocorreu ao atualizar o status.');
-        // Se houver erro no backend, você pode querer reverter a mudança no frontend
-        // para o estado original, ou mostrar uma mensagem de erro persistente.
-        // Por simplicidade, estamos apenas logando e mostrando o erro.
-        console.error("Erro ao atualizar status via API:", err);
+    // Atualiza o estado local imediatamente para uma experiência de usuário mais fluida
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? { ...task, status: newStatus } : task
+      )
+    );
+
+    // Atualiza o backend
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Certifique-se de enviar APENAS os campos que podem ser atualizados via PUT
+        // E inclua o `assignedToId` e `authorId` que são campos obrigatórios
+        body: JSON.stringify({
+          title: taskToMove.title,
+          description: taskToMove.description,
+          status: newStatus,
+          priority: taskToMove.priority,
+          dueDate: taskToMove.dueDate,
+          assignedToId: taskToMove.assignedToId,
+          // authorId é geralmente fixo, mas é bom enviar para consistência se sua API espera
+          authorId: taskToMove.authorId, 
+        }), 
+      });
+
+      console.log("handleDrop: API response received:", response);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("handleDrop: API error response data:", errorData);
+        // Reverte a mudança no frontend se a API falhar
+        setTasks(prevTasks =>
+          prevTasks.map(task =>
+            task.id === taskId ? { ...task, status: taskToMove.status } : task
+          )
+        );
+        throw new Error(errorData.message || 'Falha ao atualizar o status da tarefa no backend.');
+      } else {
+        console.log("handleDrop: Task status updated successfully in backend.");
       }
-    } else {
-      console.log("handleDrop: Task status is already newStatus or taskToMove not found.");
-      console.log("handleDrop: taskToMove:", taskToMove, "newStatus:", newStatus);
+      // O fetchTasks pode ser chamado aqui para revalidar os dados, se necessário,
+      // mas como o estado local já foi atualizado, pode ser opcional.
+      // fetchTasks(); 
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Um erro inesperado ocorreu ao atualizar o status.');
+      console.error("Erro ao atualizar status via API:", err);
     }
   };
   // --- Fim das Funções de Drag and Drop ---
