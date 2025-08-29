@@ -18,7 +18,7 @@ interface Projeto {
   subtitle: string | null;
   description: string | null;
   order: number;
-  isPublic: boolean; // NOVO: Campo público
+  publico: boolean; // CORRIGIDO: Campo 'publico'
   items: ProjetoFoto[];
 }
 
@@ -28,7 +28,7 @@ interface FormState {
   subtitle: string;
   description: string;
   order: number;
-  isPublic: boolean; // NOVO: Campo público no estado do formulário
+  publico: boolean; // CORRIGIDO: Campo 'publico' no estado do formulário
   items: ProjetoFoto[];
 }
 
@@ -51,7 +51,7 @@ export default function AdminProjetos() {
     subtitle: "",
     description: "",
     order: 0,
-    isPublic: false, // NOVO: Inicializa como false
+    publico: false, // CORRIGIDO: Inicializa 'publico' como false
     items: [{
       local: "",
       tipo: TIPOS_DE_PROJETO[0], // Define o primeiro tipo como padrão
@@ -95,7 +95,7 @@ export default function AdminProjetos() {
       subtitle: "",
       description: "",
       order: 0,
-      isPublic: false, // NOVO: Reseta para false
+      publico: false, // CORRIGIDO: Reseta 'publico' para false
       items: [{
         local: "",
         tipo: TIPOS_DE_PROJETO[0],
@@ -105,15 +105,15 @@ export default function AdminProjetos() {
     });
   };
 
-  // CORREÇÃO: Tipo de evento mais específico para checkbox
+  // CORRIGIDO: Tipo de evento e nome do campo para 'publico'
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
 
-    // NOVO: Lida com o checkbox de forma segura
     if (e.target.type === "checkbox") {
       setForm(prevForm => ({
         ...prevForm,
-        [name]: (e.target as HTMLInputElement).checked // Type assertion segura
+        // CORRIGIDO: Atualiza o campo 'publico'
+        [name]: (e.target as HTMLInputElement).checked
       }));
     } else if (name === "order") {
       setForm(prevForm => ({ ...prevForm, [name]: parseInt(value, 10) || 0 }));
@@ -155,7 +155,7 @@ export default function AdminProjetos() {
       subtitle: projeto.subtitle || "",
       description: projeto.description || "",
       order: projeto.order || 0,
-      isPublic: projeto.isPublic, // NOVO: Carrega o valor de isPublic
+      publico: projeto.publico, // CORRIGIDO: Carrega o valor de 'publico'
       items: projeto.items.map(item => ({
         ...item,
         img: item.img as string,
@@ -195,6 +195,8 @@ export default function AdminProjetos() {
       const method = form.id ? "PUT" : "POST";
       const body = {
         ...form,
+        // CORRIGIDO: Garante que 'publico' seja enviado no body
+        publico: form.publico,
         items: itemsWithUrls
       };
 
@@ -264,17 +266,17 @@ export default function AdminProjetos() {
               <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="Descrição completa do Projeto" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
               <input type="number" name="order" value={form.order} onChange={handleFormChange} placeholder="Ordem de exibição" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
 
-              {/* NOVO: Checkbox para Projeto Público */}
+              {/* CORRIGIDO: Checkbox para Projeto Público (nome e id) */}
               <div className="flex items-center mt-2">
                 <input
                   type="checkbox"
-                  name="isPublic"
-                  id="isPublic"
-                  checked={form.isPublic}
+                  name="publico" // CORRIGIDO
+                  id="publico" // CORRIGIDO
+                  checked={form.publico}
                   onChange={handleFormChange}
                   className="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                 />
-                <label htmlFor="isPublic" className="ml-2 block text-base text-gray-900">
+                <label htmlFor="publico" className="ml-2 block text-base text-gray-900"> {/* CORRIGIDO */}
                   Projeto Público
                 </label>
               </div>
@@ -350,8 +352,8 @@ export default function AdminProjetos() {
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-gray-800">{projeto.title}</h3>
                       <p className="text-sm text-gray-500">{projeto.subtitle}</p>
-                      {/* NOVO: Exibe se o projeto é público */}
-                      {projeto.isPublic && (
+                      {/* CORRIGIDO: Exibe se o projeto é público usando 'publico' */}
+                      {projeto.publico && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-2">
                           Público
                         </span>
@@ -412,11 +414,11 @@ export default function AdminProjetos() {
               <button
                 onClick={() => {
                   setShowModal(false);
-                  setModalAction(null); // Garante que a ação é limpa mesmo se "Cancelar" for clicado
+                  setModalAction(null); // Limpa a ação ao cancelar
                 }}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition duration-200"
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-200"
               >
-                {modalAction ? "Cancelar" : "OK"}
+                {modalAction ? "Cancelar" : "Ok"}
               </button>
             </div>
           </div>

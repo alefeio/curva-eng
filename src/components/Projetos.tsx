@@ -20,7 +20,7 @@ interface Projeto {
     subtitle: string;
     description: string;
     order: number;
-    isPublic: boolean; // NOVO: Adicionado o campo isPublic
+    publico: boolean; // CORRIGIDO: Agora usa 'publico' para corresponder ao backend
     items: ProjetoFoto[];
 }
 
@@ -42,8 +42,8 @@ const Projetos: React.FC = () => {
             const res = await fetch("/api/crud/projetos", { method: "GET" });
             const data = await res.json();
             if (res.ok && data.success) {
-                // FILTRO APLICADO: Apenas projetos com isPublic: true
-                const publicProjetos = data.projetos.filter((p: Projeto) => p.isPublic);
+                // CORRIGIDO: Filtro aplicado para 'publico: true'
+                const publicProjetos = data.projetos.filter((p: Projeto) => p.publico);
                 setProjects(publicProjetos.sort((a: Projeto, b: Projeto) => a.order - b.order));
             } else {
                 console.error("Erro ao carregar projetos:", data.message);
@@ -82,7 +82,7 @@ const Projetos: React.FC = () => {
         }
     };
 
-    // Extrai todas as categorias únicas dos projetos *já filtrados por isPublic*
+    // Extrai todas as categorias únicas dos projetos *já filtrados por publico*
     const allCategories = Array.from(new Set(projects.flatMap(p => p.items.map(i => i.tipo))));
 
     const filteredProjects = activeCategory === 'todos'
