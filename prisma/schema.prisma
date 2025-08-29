@@ -228,6 +228,10 @@ model File {
   task         Task?     @relation(fields: [taskId], references: [id])
   taskId       String?
 
+  // NOVO: Relacionamento com o projeto ao qual o arquivo pertence (opcional)
+  projeto      Projetos? @relation(fields: [projetoId], references: [id]) // Use 'Projetos' conforme seu arquivo 'projetos.ts'
+  projetoId    String?
+
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -254,6 +258,8 @@ model Projetos {
   tasks       Task[]        // NOVO: Relação com as tarefas que pertencem a este projeto
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  files     File[] // Um projeto pode ter muitos arquivos
 }
 
 model ProjetoFoto {

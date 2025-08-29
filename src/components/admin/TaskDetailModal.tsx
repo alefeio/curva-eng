@@ -1,6 +1,26 @@
-import React, { useEffect, useState, FormEvent, useCallback } from 'react';
+import React, { useEffect, useState, FormEvent, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { Task, Comment, TaskStatusEnum, User } from 'types/task'; // Adicionado User aqui para o tipo viewedByUsers
+
+// Definição da interface File, que reflete o modelo Prisma
+export interface File {
+  id: string;
+  url: string;
+  filename: string;
+  mimetype: string;
+  uploadedById: string;
+  taskId?: string | null;
+  projetoId?: string | null; // Corrigido para projetoId conforme seu schema
+  createdAt: string;
+}
+
+// Estenda a interface Task para incluir 'files' e 'projectId'
+// Assumindo que sua interface Task já pode ter um projectId opcional,
+// se não, você pode adicionar 'projectId?: string | null;' aqui.
+export interface ExtendedTask extends Task {
+  files?: File[];
+  projectId?: string | null; // Assumindo que a tarefa pode estar vinculada a um projeto
+}
 
 // Estenda a interface Comment para incluir 'viewedByUsers'
 interface CommentWithViewers extends Comment {
@@ -8,7 +28,7 @@ interface CommentWithViewers extends Comment {
 }
 
 interface TaskDetailModalProps {
-  task: Task;
+  task: ExtendedTask; // Usar a interface ExtendedTask aqui
   onClose: () => void;
 }
 
@@ -19,6 +39,14 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
   const [commentLoading, setCommentLoading] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
   const [hasViewed, setHasViewed] = useState(false);
+
+  // Estados para gerenciamento de arquivos
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [fileToUpload, setFileToUpload] = useState<globalThis.File | null>(null);
+  const [isFileUploading, setIsFileUploading] = useState(false);
+  const [fileUploadError, setFileUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   // Estado para controlar a visibilidade do tooltip
   const [showTooltip, setShowTooltip] = useState<string | null>(null); // Armazena o ID do comentário para qual o tooltip está ativo
@@ -59,6 +87,29 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     }
   }, [task?.id]); // Dependência: task.id
 
+  // NOVO: Função para buscar arquivos
+  const fetchFiles = useCallback(async () => {
+    if (!task?.id) {
+      console.warn("Task ID is missing, cannot fetch files.");
+      setFileUploadError('Não foi possível carregar arquivos: ID da tarefa ausente.');
+      return;
+    }
+    setFileUploadError(null);
+    try {
+      const response = await fetch(`/api/tasks/${task.id}/files`);
+      if (response.ok) {
+        const data: File[] = await response.json();
+        setUploadedFiles(data);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Falha ao carregar arquivos.');
+      }
+    } catch (error) {
+      console.error("Erro ao buscar arquivos:", error);
+      setFileUploadError(error instanceof Error ? error.message : 'Erro ao carregar arquivos.');
+    }
+  }, [task?.id]);
+
   // Função para marcar como visualizado
   const markAsViewed = useCallback(async () => {
     if (!task?.id || !session?.user?.id || hasViewed) return;
@@ -90,9 +141,10 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
   useEffect(() => {
     if (task?.id) {
       fetchComments();
+      fetchFiles(); // NOVO: Chamar fetchFiles também
       markAsViewed();
     }
-  }, [task?.id, fetchComments, markAsViewed]);
+  }, [task?.id, fetchComments, fetchFiles, markAsViewed]);
 
   // Adicionar comentário
   const handleAddComment = async (e: FormEvent) => {
@@ -126,6 +178,61 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     }
   };
 
+  // NOVO: Lidar com a seleção de arquivo
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFileToUpload(e.target.files[0]);
+      setFileUploadError(null); // Limpa erros anteriores
+    } else {
+      setFileToUpload(null);
+    }
+  };
+
+  // NOVO: Lidar com o upload do arquivo
+  const handleFileUpload = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!fileToUpload || !task?.id) {
+      setFileUploadError('Nenhum arquivo selecionado ou ID da tarefa ausente.');
+      return;
+    }
+
+    setIsFileUploading(true);
+    setFileUploadError(null);
+
+    const formData = new FormData();
+    formData.append('file', fileToUpload);
+    formData.append('taskId', task.id);
+    if (task.projectId) { // Envia o projectId se a tarefa estiver vinculada a um projeto
+      formData.append('projetoId', task.projectId);
+    }
+
+    try {
+      // Você precisará criar este endpoint API: /api/upload
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData, // FormData não precisa de 'Content-Type' no header, o navegador define
+      });
+
+      if (response.ok) {
+        const uploadedFile: File = await response.json();
+        setUploadedFiles((prevFiles) => [...prevFiles, uploadedFile]);
+        setFileToUpload(null); // Limpa o arquivo selecionado
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''; // Limpa o input file
+        }
+        fetchFiles(); // Recarregar para garantir que a lista esteja atualizada
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Falha ao fazer upload do arquivo.');
+      }
+    } catch (error) {
+      console.error("Erro ao fazer upload do arquivo:", error);
+      setFileUploadError(error instanceof Error ? error.message : 'Erro ao fazer upload do arquivo.');
+    } finally {
+      setIsFileUploading(false);
+    }
+  };
+
   const getStatusColor = (status: TaskStatusEnum) => {
     switch (status) {
       case 'PENDENTE':
@@ -150,6 +257,44 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     if (priority === 2) return 'Média';
     return 'Baixa';
   };
+
+  // Helper para determinar o ícone do arquivo
+  const getFileIcon = (mimetype: string) => {
+    if (mimetype.startsWith('image/')) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L20 16m-2-6a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      );
+    }
+    if (mimetype === 'application/pdf') {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      );
+    }
+    if (mimetype.includes('spreadsheet') || mimetype.includes('excel')) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      );
+    }
+    if (mimetype.includes('document') || mimetype.includes('word')) {
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        );
+      }
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0011.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg>
+    );
+  };
+
 
   if (!task) {
     return (
@@ -210,6 +355,63 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
           )}
         </div>
 
+        {/* NOVO: Seção de Upload de Arquivos */}
+        <h3 className="text-xl font-bold mb-3 text-orange-600">Arquivos da Tarefa ({uploadedFiles.length})</h3>
+        {(session?.user as any)?.role === 'ADMIN' && (
+          <form onSubmit={handleFileUpload} className="mb-6 p-4 border rounded-md bg-gray-50">
+            <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-2">Anexar Arquivo</label>
+            <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3">
+              <input
+                id="file-upload"
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="block w-full text-sm text-gray-500
+                         file:mr-4 file:py-2 file:px-4
+                         file:rounded-md file:border-0
+                         file:text-sm file:font-semibold
+                         file:bg-orange-50 file:text-orange-700
+                         hover:file:bg-orange-100"
+                disabled={isFileUploading}
+              />
+              <button
+                type="submit"
+                disabled={isFileUploading || !fileToUpload}
+                className={`py-2 px-4 rounded-md font-bold transition duration-300 w-full sm:w-auto ${
+                  isFileUploading || !fileToUpload ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'
+                } text-white`}
+              >
+                {isFileUploading ? 'Enviando...' : 'Fazer Upload'}
+              </button>
+            </div>
+            {fileUploadError && (
+              <p className="text-red-600 text-sm mt-2">{fileUploadError}</p>
+            )}
+          </form>
+        )}
+
+        {/* NOVO: Lista de Arquivos */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          {uploadedFiles.length === 0 ? (
+            <p className="text-gray-600">Nenhum arquivo anexado ainda.</p>
+          ) : (
+            uploadedFiles.map((file) => (
+              <a
+                key={file.id}
+                href={file.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 p-2 border rounded-md shadow-sm hover:shadow-md transition-shadow duration-200 bg-white group"
+              >
+                {getFileIcon(file.mimetype)}
+                <span className="text-sm font-medium text-gray-700 group-hover:text-orange-600 truncate max-w-[150px]">
+                  {file.filename}
+                </span>
+              </a>
+            ))
+          )}
+        </div>
+
         <h3 className="text-xl font-bold mb-3 text-orange-600">Comentários ({comments.length})</h3>
         {commentError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
@@ -217,7 +419,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
             <span className="block sm:inline"> {commentError}</span>
           </div>
         )}
-        {/* Adicione overflow-visible aqui para o contêiner de comentários se necessário */}
         <div className="space-y-4 mb-6 max-h-60 overflow-y-auto border p-3 rounded-md bg-gray-50">
           {comments.length === 0 ? (
             <p className="text-gray-600">Nenhum comentário ainda.</p>
@@ -229,9 +430,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
                   <span className="text-gray-500">{formatDate(comment.createdAt)}</span>
                 </div>
                 <p className="text-gray-700">{comment.message}</p>
-                {/* Div para o tooltip */}
                 <div
-                  className="relative inline-block z-10" // Adicionado z-10 para o contêiner do tooltip
+                  className="relative inline-block z-10"
                   onMouseEnter={() => setShowTooltip(comment.id)}
                   onMouseLeave={() => setShowTooltip(null)}
                 >
@@ -240,19 +440,18 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
                   </div>
                   {showTooltip === comment.id && comment.viewedBy.length > 0 && (
                     <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max p-2 bg-gray-800 text-white text-xs rounded-md shadow-lg z-20">
-                      <p className="font-bold mb-1 text-white">Visualizado por:</p> {/* Cor do texto ajustada */}
+                      <p className="font-bold mb-1 text-white">Visualizado por:</p>
                       <ul className="list-disc list-inside">
                         {comment.viewedByUsers && comment.viewedByUsers.length > 0 ? (
                           comment.viewedByUsers.map((viewer) => (
-                            <li key={viewer.id} className="text-white">{viewer.name || viewer.id}</li> // Mostra o nome ou o ID como fallback
+                            <li key={viewer.id} className="text-white">{viewer.name || viewer.id}</li>
                           ))
                         ) : (
                           comment.viewedBy.map((viewerId) => (
-                            <li key={viewerId} className="text-white">{viewerId}</li> // Fallback para IDs se viewedByUsers não estiver disponível
+                            <li key={viewerId} className="text-white">{viewerId}</li>
                           ))
                         )}
                       </ul>
-                      {/* Triângulo do tooltip */}
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-800 rotate-45 transform -translate-y-1/2"></div>
                     </div>
                   )}
