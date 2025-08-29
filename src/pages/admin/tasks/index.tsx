@@ -1,11 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Task, User, TaskStatusEnum } from '../../../types/task'; // Importe TaskStatusEnum
+import { Task, User, Projeto, TaskStatusEnum } from '../../../types/task'; // Importe todas as interfaces relevantes
 import { useSession } from 'next-auth/react';
 import AdminLayout from 'components/admin/AdminLayout';
 import TaskDetailModal from 'components/admin/TaskDetailModal';
 import TaskEditForm from 'components/admin/TaskEditForm';
+
+// As interfaces Task, User e Projeto agora são importadas de '../../../types/task'
+// Removidas as declarações de interface locais duplicadas.
 
 export default function TasksPage() {
   const { data: session, status } = useSession();
@@ -19,6 +22,11 @@ export default function TasksPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
+  // NOVO: Estados para o filtro de projeto
+  const [projetos, setProjetos] = useState<Projeto[]>([]);
+  const [projetosLoading, setProjetosLoading] = useState(true);
+  const [selectedProjetoId, setSelectedProjetoId] = useState<string>(''); // "" para "Todos os Projetos"
+
   // LOG PARA DEPURAR A SESSAO NO NAVEGADOR (CLIENT-SIDE)
   useEffect(() => {
     console.log("[TasksPage CLIENT] Sessão:", JSON.stringify(session, null, 2));
@@ -29,8 +37,29 @@ export default function TasksPage() {
     }
   }, [session, status]);
 
+  // NOVO: Busca a lista de projetos da sua API /api/crud/projetos
+  useEffect(() => {
+    const fetchProjetos = async () => {
+      setProjetosLoading(true);
+      try {
+        const response = await fetch('/api/crud/projetos'); // Verifique o caminho correto da sua API de projetos
+        if (!response.ok) {
+          throw new Error('Falha ao carregar projetos.');
+        }
+        const data = await response.json();
+        setProjetos(data.projetos);
+      } catch (err) {
+        console.error('Falha ao buscar projetos:', err);
+        // Não setamos erro globalmente aqui para não bloquear a renderização das tarefas
+      } finally {
+        setProjetosLoading(false);
+      }
+    };
+    fetchProjetos();
+  }, []);
 
-  const fetchTasks = useCallback(async () => {
+
+  const fetchTasks = useCallback(async (projetoIdToFilter?: string) => {
     // Verificação de autenticação e role antes de fazer a requisição API
     if (status !== 'authenticated' || !session?.user?.id) {
       setLoading(false);
@@ -43,10 +72,13 @@ export default function TasksPage() {
       return;
     }
 
-
     try {
       setLoading(true);
-      const response = await fetch('/api/tasks');
+      let url = '/api/tasks';
+      if (projetoIdToFilter) {
+        url += `?projetoId=${projetoIdToFilter}`;
+      }
+      const response = await fetch(url);
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Falha ao buscar as tarefas: ${response.status} ${response.statusText} - ${errorText}`);
@@ -62,8 +94,8 @@ export default function TasksPage() {
 
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    fetchTasks(selectedProjetoId); // Passa o projetoId selecionado
+  }, [fetchTasks, selectedProjetoId]); // Adiciona selectedProjetoId como dependência
 
   const openDetailModal = (task: Task) => {
     setSelectedTask(task);
@@ -87,7 +119,7 @@ export default function TasksPage() {
 
   const handleTaskUpdated = (updatedTask: Task) => {
     setTasks(prevTasks => prevTasks.map(task =>
-      task.id === updatedTask.id ? { ...updatedTask, assignedTo: updatedTask.assignedTo, author: updatedTask.author } : task
+      task.id === updatedTask.id ? { ...updatedTask, assignedTo: updatedTask.assignedTo, author: updatedTask.author, projeto: updatedTask.projeto, description: updatedTask.description, dueDate: updatedTask.dueDate } : task
     ));
     closeEditModal();
   };
@@ -132,6 +164,7 @@ export default function TasksPage() {
   };
 
   // Objeto de colunas Kanban usando o TaskStatusEnum
+  // As tarefas já estarão filtradas pelo fetchTasks se um projeto for selecionado
   const kanbanColumns = {
     [TaskStatusEnum.PENDENTE]: tasks.filter(task => task.status === TaskStatusEnum.PENDENTE),
     [TaskStatusEnum.EM_ANDAMENTO]: tasks.filter(task => task.status === TaskStatusEnum.EM_ANDAMENTO),
@@ -213,9 +246,9 @@ export default function TasksPage() {
           priority: taskToMove.priority,
           dueDate: taskToMove.dueDate,
           assignedToId: taskToMove.assignedToId,
-          // authorId é geralmente fixo, mas é bom enviar para consistência se sua API espera
-          authorId: taskToMove.authorId, 
-        }), 
+          authorId: taskToMove.authorId, // Mantém o autorId (não deve ser alterado via PUT de status)
+          projetoId: taskToMove.projetoId, // Inclui o projetoId para manter a consistência
+        }),
       });
 
       console.log("handleDrop: API response received:", response);
@@ -235,7 +268,7 @@ export default function TasksPage() {
       }
       // O fetchTasks pode ser chamado aqui para revalidar os dados, se necessário,
       // mas como o estado local já foi atualizado, pode ser opcional.
-      // fetchTasks(); 
+      // fetchTasks();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Um erro inesperado ocorreu ao atualizar o status.');
       console.error("Erro ao atualizar status via API:", err);
@@ -282,11 +315,11 @@ export default function TasksPage() {
     );
   }
 
-  if (loading) {
+  if (loading || projetosLoading) { // Adicionado projetosLoading aqui
     return (
       <AdminLayout>
         <div className="flex justify-center items-center h-screen">
-          <p>Carregando tarefas...</p>
+          <p>Carregando tarefas e projetos...</p>
         </div>
       </AdminLayout>
     );
@@ -301,20 +334,35 @@ export default function TasksPage() {
 
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Minhas Tarefas</h1>
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap items-center gap-4 mt-4 md:mt-0">
+            {/* NOVO: Filtro de Projeto */}
+            <div className="w-full md:w-auto">
+              <label htmlFor="project-filter" className="sr-only">Filtrar por Projeto</label>
+              <select
+                id="project-filter"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
+                value={selectedProjetoId}
+                onChange={(e) => setSelectedProjetoId(e.target.value)}
+                disabled={projetosLoading}
+              >
+                <option value="">Todos os Projetos</option>
+                {projetos.map(projeto => (
+                  <option key={projeto.id} value={projeto.id}>{projeto.title}</option>
+                ))}
+              </select>
+            </div>
+
             <button
               onClick={() => setViewMode('table')}
-              className={`px-6 py-2 rounded-md font-bold transition duration-300 shadow-md ${
-                viewMode === 'table' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              className={`px-6 py-2 rounded-md font-bold transition duration-300 shadow-md ${viewMode === 'table' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
             >
               Tabela
             </button>
             <button
               onClick={() => setViewMode('kanban')}
-              className={`px-6 py-2 rounded-md font-bold transition duration-300 shadow-md ${
-                viewMode === 'kanban' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              className={`px-6 py-2 rounded-md font-bold transition duration-300 shadow-md ${viewMode === 'kanban' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
             >
               Kanban
             </button>
@@ -336,6 +384,9 @@ export default function TasksPage() {
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Título
                       </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Projeto
+                      </th> {/* NOVO: Coluna Projeto na tabela */}
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
@@ -362,6 +413,10 @@ export default function TasksPage() {
                               {task.title}
                             </div>
                           </div>
+                        </td>
+                        {/* NOVO: Dados do Projeto na tabela */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {task.projeto?.title || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(task.status)}`}>
@@ -421,14 +476,14 @@ export default function TasksPage() {
                         className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-200 cursor-grab"
                       >
                         <h3 className="text-base font-semibold text-gray-900 truncate">{task.title}</h3>
+                        {task.projeto?.title && ( // NOVO: Exibe o nome do projeto no card Kanban
+                          <p className="text-sm text-gray-600 mt-1">Projeto: {task.projeto.title}</p>
+                        )}
                         <p className="text-sm text-gray-500 mt-1">Responsável: {task.assignedTo?.name || 'N/A'}</p>
                         {task.dueDate && (
                           <p className="text-xs text-gray-400 mt-1">Vencimento: {new Date(task.dueDate).toLocaleDateString()}</p>
                         )}
                         <div className="flex flex-wrap items-center mt-2 space-x-2">
-                          {/* <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.status)}`}>
-                            {task.status.replace(/_/g, ' ')}
-                          </span> */}
                           <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getPriorityColor(task.priority)}`}>
                             {getPriorityText(task.priority)}
                           </span>

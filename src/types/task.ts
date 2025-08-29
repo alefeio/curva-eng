@@ -12,6 +12,14 @@ export interface User {
   role?: string | null;
 }
 
+// NOVO: Interface para Projeto
+export interface Projeto {
+  id: string;
+  title: string;
+  // Adicione outras propriedades do Projeto se forem relevantes para o frontend
+  // Por exemplo: subtitle?: string; description?: string;
+}
+
 // NOVO: Interface para Comentários
 export interface Comment {
   id: string;
@@ -31,14 +39,18 @@ export interface Task {
   status: TaskStatusEnum;
   priority: number;
   dueDate: string | null;
-  
+
   authorId: string;
   assignedToId: string;
 
   author?: User;
   assignedTo?: User;
   comments?: Comment[]; // NOVO: Comentários associados à tarefa
-  
+
+  // NOVO: Propriedades de Projeto
+  projetoId?: string | null; // ID do projeto associado, pode ser nulo
+  projeto?: Projeto; // Objeto do projeto associado, opcional
+
   createdAt: string;
   updatedAt: string;
 }

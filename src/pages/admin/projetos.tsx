@@ -18,6 +18,7 @@ interface Projeto {
   subtitle: string | null;
   description: string | null;
   order: number;
+  isPublic: boolean; // NOVO: Campo público
   items: ProjetoFoto[];
 }
 
@@ -27,6 +28,7 @@ interface FormState {
   subtitle: string;
   description: string;
   order: number;
+  isPublic: boolean; // NOVO: Campo público no estado do formulário
   items: ProjetoFoto[];
 }
 
@@ -49,6 +51,7 @@ export default function AdminProjetos() {
     subtitle: "",
     description: "",
     order: 0,
+    isPublic: false, // NOVO: Inicializa como false
     items: [{
       local: "",
       tipo: TIPOS_DE_PROJETO[0], // Define o primeiro tipo como padrão
@@ -56,9 +59,12 @@ export default function AdminProjetos() {
       img: ""
     }],
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalAction, setModalAction] = useState<(() => void) | null>(null);
 
   useEffect(() => {
     fetchProjetos();
@@ -89,6 +95,7 @@ export default function AdminProjetos() {
       subtitle: "",
       description: "",
       order: 0,
+      isPublic: false, // NOVO: Reseta para false
       items: [{
         local: "",
         tipo: TIPOS_DE_PROJETO[0],
@@ -98,29 +105,37 @@ export default function AdminProjetos() {
     });
   };
 
+  // CORREÇÃO: Tipo de evento mais específico para checkbox
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    if (name === "order") {
-        setForm({ ...form, [name]: parseInt(value, 10) || 0 });
+
+    // NOVO: Lida com o checkbox de forma segura
+    if (e.target.type === "checkbox") {
+      setForm(prevForm => ({
+        ...prevForm,
+        [name]: (e.target as HTMLInputElement).checked // Type assertion segura
+      }));
+    } else if (name === "order") {
+      setForm(prevForm => ({ ...prevForm, [name]: parseInt(value, 10) || 0 }));
     } else {
-        setForm({ ...form, [name]: value });
+      setForm(prevForm => ({ ...prevForm, [name]: value }));
     }
   };
 
   const handleItemChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, index: number) => {
     const { name, value } = e.target;
     const newItems = [...form.items];
-  
+
     // Verifica se o elemento é um input e se tem arquivos
     if (name === "img" && e.target instanceof HTMLInputElement && e.target.files) {
       newItems[index] = { ...newItems[index], [name]: e.target.files[0] };
     } else {
       newItems[index] = { ...newItems[index], [name]: value };
     }
-    
+
     setForm({ ...form, items: newItems });
   };
-  
+
   const handleAddItem = () => {
     setForm({
       ...form,
@@ -140,8 +155,9 @@ export default function AdminProjetos() {
       subtitle: projeto.subtitle || "",
       description: projeto.description || "",
       order: projeto.order || 0,
+      isPublic: projeto.isPublic, // NOVO: Carrega o valor de isPublic
       items: projeto.items.map(item => ({
-        ...item, 
+        ...item,
         img: item.img as string,
         local: item.local || '',
         tipo: item.tipo || TIPOS_DE_PROJETO[0], // Define um valor padrão se for nulo
@@ -155,7 +171,7 @@ export default function AdminProjetos() {
     e.preventDefault();
     setLoading(true);
     setError("");
-  
+
     try {
       const itemsWithUrls = await Promise.all(
         form.items.map(async (item) => {
@@ -175,22 +191,23 @@ export default function AdminProjetos() {
           return item;
         })
       );
-  
+
       const method = form.id ? "PUT" : "POST";
-      const body = { 
-        ...form, 
+      const body = {
+        ...form,
         items: itemsWithUrls
       };
-      
+
       const res = await fetch("/api/crud/projetos", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-  
+
       const data = await res.json();
       if (res.ok && data.success) {
-        alert(`Projeto ${form.id ? 'atualizado' : 'criado'} com sucesso!`);
+        setModalMessage(`Projeto ${form.id ? 'atualizado' : 'criado'} com sucesso!`);
+        setShowModal(true);
         resetForm();
         fetchProjetos();
       } else {
@@ -202,26 +219,31 @@ export default function AdminProjetos() {
       setLoading(false);
     }
   };
-  
-  const handleDelete = async (id: string, isItem = false) => {
-    if (!confirm(`Tem certeza que deseja excluir ${isItem ? "esta foto" : "este projeto"}?`)) return;
 
-    try {
-      const res = await fetch("/api/crud/projetos", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, isItem }),
-      });
-      if (res.ok) {
-        alert(`${isItem ? "Foto" : "Projeto"} excluído com sucesso!`);
-        fetchProjetos();
-      } else {
-        const data = await res.json();
-        setError(data.message || "Erro ao excluir.");
+  const handleDelete = async (id: string, isItem = false) => {
+    setModalMessage(`Tem certeza que deseja excluir ${isItem ? "esta foto" : "este projeto"}?`);
+    setModalAction(() => async () => {
+      try {
+        const res = await fetch("/api/crud/projetos", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, isItem }),
+        });
+        if (res.ok) {
+          setModalMessage(`${isItem ? "Foto" : "Projeto"} excluído com sucesso!`);
+          setShowModal(true);
+          fetchProjetos();
+        } else {
+          const data = await res.json();
+          setError(data.message || "Erro ao excluir.");
+        }
+      } catch (e) {
+        setError("Erro ao conectar com a API.");
+      } finally {
+        setShowModal(false); // Fecha o modal após a ação
       }
-    } catch (e) {
-      setError("Erro ao conectar com a API.");
-    }
+    });
+    setShowModal(true);
   };
 
   return (
@@ -232,7 +254,7 @@ export default function AdminProjetos() {
       <AdminLayout>
         <main className="container mx-auto p-6 lg:p-12 mt-20">
           <h1 className="text-4xl font-extrabold mb-8 text-gray-800">Gerenciar Projetos</h1>
-          
+
           {/* Formulário de Criação/Edição */}
           <section className="bg-white p-8 rounded-xl shadow-lg mb-10 border border-gray-200">
             <h2 className="text-2xl font-bold mb-6 text-gray-700">{form.id ? "Editar Projeto" : "Adicionar Novo Projeto"}</h2>
@@ -241,7 +263,22 @@ export default function AdminProjetos() {
               <input type="text" name="subtitle" value={form.subtitle} onChange={handleFormChange} placeholder="Subtítulo do Projeto" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
               <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="Descrição completa do Projeto" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
               <input type="number" name="order" value={form.order} onChange={handleFormChange} placeholder="Ordem de exibição" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900" />
-              
+
+              {/* NOVO: Checkbox para Projeto Público */}
+              <div className="flex items-center mt-2">
+                <input
+                  type="checkbox"
+                  name="isPublic"
+                  id="isPublic"
+                  checked={form.isPublic}
+                  onChange={handleFormChange}
+                  className="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                />
+                <label htmlFor="isPublic" className="ml-2 block text-base text-gray-900">
+                  Projeto Público
+                </label>
+              </div>
+
               <h3 className="text-xl font-bold mt-6 text-gray-700">Fotos do Projeto</h3>
               {form.items.map((item, index) => (
                 <div key={index} className="flex flex-col md:flex-row gap-4 p-4 border border-dashed border-gray-300 rounded-lg relative">
@@ -259,7 +296,7 @@ export default function AdminProjetos() {
                     </select>
                     <textarea name="detalhes" value={item.detalhes} onChange={(e) => handleItemChange(e, index)} placeholder="Detalhes da foto" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-200 text-gray-900 col-span-1 md:col-span-2" />
                   </div>
-                  
+
                   <div className="flex-1 w-full flex flex-col items-center gap-2 border border-gray-300 rounded-lg p-3">
                     {typeof item.img === 'string' && item.img && (
                       <div className="w-full flex justify-center mb-2">
@@ -270,13 +307,13 @@ export default function AdminProjetos() {
                       <MdAddPhotoAlternate size={24} />
                       {item.img instanceof File ? item.img.name : "Escolher arquivo..."}
                     </label>
-                    <input 
-                      type="file" 
-                      name="img" 
-                      id={`img-${index}`} 
-                      onChange={(e) => handleItemChange(e, index)} 
+                    <input
+                      type="file"
+                      name="img"
+                      id={`img-${index}`}
+                      onChange={(e) => handleItemChange(e, index)}
                       required={!item.img || item.img instanceof File}
-                      className="hidden" 
+                      className="hidden"
                     />
                   </div>
                 </div>
@@ -284,7 +321,7 @@ export default function AdminProjetos() {
               <button type="button" onClick={handleAddItem} className="bg-gray-200 text-gray-800 p-3 rounded-lg mt-2 flex items-center justify-center gap-2 font-semibold hover:bg-gray-300 transition duration-200">
                 <MdAddPhotoAlternate size={24} /> Adicionar Nova Foto
               </button>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 mt-6">
                 <button type="submit" disabled={loading} className="bg-orange-500 text-white p-4 rounded-lg flex-1 font-bold shadow-md hover:bg-orange-600 transition duration-200 disabled:bg-gray-400">
                   {loading ? (form.id ? "Atualizando..." : "Salvando...") : (form.id ? "Atualizar Projeto" : "Salvar Projeto")}
@@ -313,6 +350,12 @@ export default function AdminProjetos() {
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-gray-800">{projeto.title}</h3>
                       <p className="text-sm text-gray-500">{projeto.subtitle}</p>
+                      {/* NOVO: Exibe se o projeto é público */}
+                      {projeto.isPublic && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-2">
+                          Público
+                        </span>
+                      )}
                     </div>
                     <div className="flex gap-2 mt-4 md:mt-0">
                       <button onClick={() => handleEdit(projeto)} className="bg-gray-200 text-gray-700 p-2 rounded-lg hover:bg-gray-300 transition duration-200">
@@ -346,6 +389,39 @@ export default function AdminProjetos() {
           </section>
         </main>
       </AdminLayout>
+
+      {/* Modal de Confirmação/Alerta (substituindo alert/confirm) */}
+      {showModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl max-w-sm mx-auto">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">Atenção</h3>
+            <p className="text-gray-700 mb-6">{modalMessage}</p>
+            <div className="flex justify-end space-x-4">
+              {modalAction && ( // Se houver uma ação de confirmação, mostra o botão "Confirmar"
+                <button
+                  onClick={() => {
+                    if (modalAction) modalAction();
+                    setShowModal(false);
+                    setModalAction(null); // Limpa a ação após a execução
+                  }}
+                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200"
+                >
+                  Confirmar
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  setModalAction(null); // Garante que a ação é limpa mesmo se "Cancelar" for clicado
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition duration-200"
+              >
+                {modalAction ? "Cancelar" : "OK"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

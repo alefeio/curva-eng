@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { Task, User } from '../../../types/task'; 
+import { Task, User } from '../../../types/task';
 import AdminLayout from 'components/admin/AdminLayout';
 
 // Defina as interfaces para o formulário
@@ -11,26 +11,36 @@ interface TaskFormData {
   title: string;
   description: string;
   status: 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA';
-  priority: number; 
+  priority: number;
   dueDate: string;
   assignedToId: string;
+  projetoId?: string; // NOVO: campo opcional para o ID do projeto
+}
+
+// Interface para o Projeto, baseada no seu schema.prisma
+interface Projeto {
+  id: string;
+  title: string;
 }
 
 export default function NewTaskPage() {
   const router = useRouter();
-  const { data: session, status } = useSession(); 
+  const { data: session, status } = useSession();
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
     description: '',
     status: 'PENDENTE',
-    priority: 1, 
+    priority: 1,
     dueDate: '',
     assignedToId: '',
+    projetoId: '', // Inicializa como string vazia para o select
   });
   const [users, setUsers] = useState<User[]>([]);
+  const [projetos, setProjetos] = useState<Projeto[]>([]); // NOVO: Estado para armazenar projetos
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [usersLoading, setUsersLoading] = useState(true);
+  const [projetosLoading, setProjetosLoading] = useState(true); // NOVO: Estado para carregamento de projetos
 
   // LOG PARA DEPURAR A SESSAO NO NAVEGADOR (CLIENT-SIDE)
   useEffect(() => {
@@ -41,7 +51,6 @@ export default function NewTaskPage() {
       console.log("[NewTaskPage CLIENT] User Role:", (session.user as any)?.role);
     }
   }, [session, status]);
-
 
   // Busca a lista de usuários da sua API /api/users
   useEffect(() => {
@@ -64,6 +73,28 @@ export default function NewTaskPage() {
     fetchUsers();
   }, []);
 
+  // NOVO: Busca a lista de projetos da sua API /api/crud/projetos
+  useEffect(() => {
+    const fetchProjetos = async () => {
+      setProjetosLoading(true);
+      try {
+        const response = await fetch('/api/crud/projetos'); // Verifique o caminho correto da sua API de projetos
+        if (!response.ok) {
+          throw new Error('Falha ao carregar projetos.');
+        }
+        const data = await response.json();
+        setProjetos(data.projetos);
+      } catch (err) {
+        console.error('Falha ao buscar projetos:', err);
+        setError('Falha ao carregar a lista de projetos.');
+      } finally {
+        setProjetosLoading(false);
+      }
+    };
+    fetchProjetos();
+  }, []);
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     const updatedValue = name === 'priority' ? parseInt(value) : value;
@@ -77,7 +108,7 @@ export default function NewTaskPage() {
       setError('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
-    
+
     // Obter o autorId da sessão
     const authorId = session?.user?.id;
     // Verificação de autenticação e role antes de enviar a requisição POST
@@ -86,9 +117,9 @@ export default function NewTaskPage() {
       return;
     }
     if ((session.user as any)?.role !== 'ADMIN') {
-        setError('Acesso negado. Apenas administradores podem criar tarefas.');
-        setLoading(false); 
-        return;
+      setError('Acesso negado. Apenas administradores podem criar tarefas.');
+      setLoading(false);
+      return;
     }
 
 
@@ -96,12 +127,18 @@ export default function NewTaskPage() {
     setError(null);
 
     try {
+      const payload = { ...formData, authorId };
+      // Se projetoId for uma string vazia, remova-o do payload para enviar null ou undefined ao backend
+      if (payload.projetoId === '') {
+        delete payload.projetoId;
+      }
+
       const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData, authorId }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -112,7 +149,7 @@ export default function NewTaskPage() {
       const newTask = await response.json();
       console.log('Tarefa criada com sucesso:', newTask);
 
-      router.push('/admin/tasks'); 
+      router.push('/admin/tasks');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Um erro inesperado ocorreu.');
     } finally {
@@ -141,7 +178,7 @@ export default function NewTaskPage() {
             Por favor, verifique suas credenciais ou entre em contato com o administrador.
           </p>
           <Link href="/admin/tasks" className="mt-6 inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 shadow-md">
-              Voltar para a lista de tarefas
+            Voltar para a lista de tarefas
           </Link>
         </div>
       </AdminLayout>
@@ -190,7 +227,7 @@ export default function NewTaskPage() {
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
@@ -255,13 +292,35 @@ export default function NewTaskPage() {
                   </select>
                 )}
               </div>
+
+              {/* NOVO: Campo de seleção de projeto */}
+              <div>
+                <label htmlFor="projetoId" className="block text-sm font-medium text-gray-700 mb-1">Projeto (Opcional)</label>
+                {projetosLoading ? (
+                  <p className="mt-1 text-gray-500">Carregando projetos...</p>
+                ) : (
+                  <select
+                    name="projetoId"
+                    id="projetoId"
+                    value={formData.projetoId}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
+                  >
+                    <option value="">Nenhum projeto</option> {/* Opção para não selecionar projeto */}
+                    {projetos.map(projeto => (
+                      <option key={projeto.id} value={projeto.id}>{projeto.title}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
             </div>
-            
+
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={loading || usersLoading || status !== 'authenticated' || (session && (session.user as any)?.role !== 'ADMIN')}
-                className={`py-2 px-4 rounded-md font-bold transition duration-300 ${loading || usersLoading || status !== 'authenticated' || (session && (session.user as any)?.role !== 'ADMIN') ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
+                disabled={loading || usersLoading || projetosLoading || status !== 'authenticated' || (session && (session.user as any)?.role !== 'ADMIN')}
+                className={`py-2 px-4 rounded-md font-bold transition duration-300 ${loading || usersLoading || projetosLoading || status !== 'authenticated' || (session && (session.user as any)?.role !== 'ADMIN') ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
               >
                 {loading ? 'Criando...' : 'Criar Tarefa'}
               </button>

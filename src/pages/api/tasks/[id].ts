@@ -47,7 +47,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
             author: {
               select: { id: true, name: true },
-            }
+            },
+            projeto: { // NOVO: Inclui os dados do projeto
+              select: { id: true, title: true },
+            },
           },
         });
 
@@ -63,7 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     case 'PUT':
       try {
-        const { title, description, status, priority, dueDate, assignedToId } = req.body;
+        const { title, description, status, priority, dueDate, assignedToId, projetoId } = req.body; // NOVO: Pega projetoId do corpo
 
         if (!title || !status || priority === undefined || !dueDate || !assignedToId) {
           return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
@@ -79,11 +82,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           data: {
             title,
             description,
-            status: validatedStatus as any, // Adicionado 'as any' para compatibilidade com o tipo do Prisma
+            status: validatedStatus as any,
             priority,
             dueDate: new Date(dueDate),
             assignedToId,
             updatedAt: new Date(),
+            // NOVO: Atualiza o projetoId. Se projetoId for null ou string vazia, desconecta.
+            projeto: projetoId ? { connect: { id: projetoId } } : { disconnect: true },
           },
           include: {
             assignedTo: {
@@ -91,7 +96,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
             author: {
                 select: { id: true, name: true },
-            }
+            },
+            projeto: { // NOVO: Inclui o projeto na resposta após a atualização
+              select: { id: true, title: true },
+            },
           },
         });
         res.status(200).json(updatedTask);

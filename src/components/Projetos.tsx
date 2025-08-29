@@ -1,7 +1,7 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { FaHome, FaRegBuilding, FaBuilding, FaCheckCircle } from 'react-icons/fa';
-import { AiOutlineClose } from 'react-icons/ai'; 
+import { AiOutlineClose } from 'react-icons/ai';
 import { MdOutlineArrowBackIos, MdOutlineArrowForwardIos } from "react-icons/md";
 import ZoomableImage from './ZoomableImage'; // Importa o componente ZoomableImage
 
@@ -20,6 +20,7 @@ interface Projeto {
     subtitle: string;
     description: string;
     order: number;
+    isPublic: boolean; // NOVO: Adicionado o campo isPublic
     items: ProjetoFoto[];
 }
 
@@ -41,7 +42,9 @@ const Projetos: React.FC = () => {
             const res = await fetch("/api/crud/projetos", { method: "GET" });
             const data = await res.json();
             if (res.ok && data.success) {
-                setProjects(data.projetos.sort((a: Projeto, b: Projeto) => a.order - b.order));
+                // FILTRO APLICADO: Apenas projetos com isPublic: true
+                const publicProjetos = data.projetos.filter((p: Projeto) => p.isPublic);
+                setProjects(publicProjetos.sort((a: Projeto, b: Projeto) => a.order - b.order));
             } else {
                 console.error("Erro ao carregar projetos:", data.message);
             }
@@ -62,10 +65,10 @@ const Projetos: React.FC = () => {
         setShowModal(false);
         setSelectedProject(null);
     };
-    
+
     const handleNextImage = () => {
         if (selectedProject) {
-            setCurrentImageIndex((prevIndex) => 
+            setCurrentImageIndex((prevIndex) =>
                 (prevIndex + 1) % selectedProject.items.length
             );
         }
@@ -73,13 +76,13 @@ const Projetos: React.FC = () => {
 
     const handlePrevImage = () => {
         if (selectedProject) {
-            setCurrentImageIndex((prevIndex) => 
+            setCurrentImageIndex((prevIndex) =>
                 (prevIndex - 1 + selectedProject.items.length) % selectedProject.items.length
             );
         }
     };
 
-    // Extrai todas as categorias únicas do banco de dados para os botões de filtro
+    // Extrai todas as categorias únicas dos projetos *já filtrados por isPublic*
     const allCategories = Array.from(new Set(projects.flatMap(p => p.items.map(i => i.tipo))));
 
     const filteredProjects = activeCategory === 'todos'
@@ -103,7 +106,7 @@ const Projetos: React.FC = () => {
     return (
         <div className="bg-gray-50 py-16 md:py-24"> {/* Fundo consistente com outros componentes */}
             <div className="container mx-auto px-4 md:px-8">
-                
+
                 {/* Título e Introdução */}
                 <div className="text-center mb-12 md:mb-16 max-w-5xl mx-auto">
                     <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4 leading-tight"> {/* Estilo aprimorado */}
@@ -156,8 +159,8 @@ const Projetos: React.FC = () => {
                                 <div className="p-6">
                                     <h3 className="text-xl md:text-2xl font-bold mb-2 text-gray-800">{projeto.title}</h3> {/* Título maior */}
                                     <p className="text-gray-600 text-base leading-relaxed mb-4">{projeto.subtitle}</p> {/* Subtítulo mais legível */}
-                                    <button 
-                                        onClick={() => openModal(projeto)} 
+                                    <button
+                                        onClick={() => openModal(projeto)}
                                         className="inline-flex items-center px-5 py-2 bg-orange-500 text-white font-semibold rounded-full shadow-md hover:bg-orange-600 transition-colors duration-300"
                                     >
                                         Ver Projeto <span className="ml-2" aria-hidden="true">&rarr;</span>
@@ -167,7 +170,7 @@ const Projetos: React.FC = () => {
                         ))}
                     </div>
                 )}
-                
+
                 {/* Chamada para Ação (Call to Action) */}
                 <div className="bg-gray-800 rounded-xl shadow-xl p-8 md:p-12 text-center mt-20 md:mt-32 max-w-5xl mx-auto"> {/* CTA com fundo escuro */}
                     <p className="text-2xl md:text-3xl font-extrabold text-white mb-6 leading-relaxed"> {/* Texto maior e mais impactante */}
@@ -190,23 +193,23 @@ const Projetos: React.FC = () => {
             {showModal && selectedProject && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4" onClick={closeModal}>
                     <div className="bg-white rounded-xl shadow-2xl p-6 md:p-8 max-w-5xl w-full max-h-[95vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
-                        
+
                         {/* Botão de fechar */}
-                        <button 
-                            onClick={closeModal} 
+                        <button
+                            onClick={closeModal}
                             className="absolute top-4 right-4 text-gray-200 hover:text-white bg-gray-800/70 p-2 rounded-full transition-colors z-20" // Botão de fechar mais elegante
                             aria-label="Fechar"
                         >
                             <AiOutlineClose size={24} />
                         </button>
-                        
+
                         {/* Slider de Imagens com Zoom */}
                         <div className="relative w-full h-[60vh] md:h-[75vh] mb-6 rounded-lg overflow-hidden flex items-center justify-center bg-gray-200"> {/* Altura responsiva */}
-                            <ZoomableImage 
-                                src={selectedProject.items[currentImageIndex].img} 
-                                alt={selectedProject.items[currentImageIndex].detalhes} 
+                            <ZoomableImage
+                                src={selectedProject.items[currentImageIndex].img}
+                                alt={selectedProject.items[currentImageIndex].detalhes}
                             />
-                            
+
                             {/* Botões do slider */}
                             {selectedProject.items.length > 1 && ( // Só mostra botões se houver mais de uma imagem
                                 <>
@@ -227,7 +230,7 @@ const Projetos: React.FC = () => {
                                 </>
                             )}
                         </div>
-                        
+
                         {/* Detalhes do Projeto */}
                         <div className="w-full h-auto">
                             <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-3"> {/* Título maior e mais forte */}
@@ -254,7 +257,7 @@ const Projetos: React.FC = () => {
                                 </p>
                             </div>
                         </div>
-                        
+
                     </div>
                 </div>
             )}

@@ -32,13 +32,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'GET') {
     try {
+      const { projetoId } = req.query; // Pega o projetoId da query string
+
+      const whereClause: any = {};
+      if (projetoId && typeof projetoId === 'string') {
+        whereClause.projetoId = projetoId;
+      }
+
       const tasks = await prisma.task.findMany({
+        where: whereClause, // Aplica o filtro de projeto
         include: {
           author: {
             select: { id: true, name: true },
           },
           assignedTo: {
             select: { id: true, name: true },
+          },
+          projeto: { // NOVO: Inclui os dados do projeto
+            select: { id: true, title: true },
           },
         },
         orderBy: {
@@ -52,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'POST') {
     try {
-      const { title, description, status, priority, dueDate, assignedToId, authorId } = req.body;
+      const { title, description, status, priority, dueDate, assignedToId, authorId, projetoId } = req.body; // NOVO: Pega projetoId do corpo
 
       if (!title || !status || priority === undefined || !dueDate || !assignedToId || !authorId) {
         return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
@@ -67,19 +78,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: {
           title,
           description,
-          status: validatedStatus as any, // Adicionado 'as any' para compatibilidade com o tipo do Prisma
+          status: validatedStatus as any,
           priority,
           dueDate: new Date(dueDate),
           assignedToId,
           authorId,
+          ...(projetoId && { projetoId: projetoId }), // NOVO: Conecta ao projeto se projetoId for fornecido
         },
         include: {
-            author: {
-                select: { id: true, name: true }
-            },
-            assignedTo: {
-                select: { id: true, name: true }
-            }
+          author: {
+            select: { id: true, name: true }
+          },
+          assignedTo: {
+            select: { id: true, name: true }
+          },
+          projeto: { // NOVO: Inclui o projeto na resposta após a criação
+            select: { id: true, title: true },
+          },
         }
       });
       res.status(201).json(newTask);
