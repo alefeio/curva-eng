@@ -6,11 +6,16 @@ import { authOptions } from "../../auth/[...nextauth]";
 import prisma from '../../../../../lib/prisma'; // ATENÇÃO: Ajuste este caminho
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { taskId } = req.query; // Pega o taskId da URL
+  let { taskId } = req.query; // Pega o taskId da URL
 
-  // Certifica-se de que taskId é uma string
-  if (typeof taskId !== 'string') {
-    return res.status(400).json({ message: 'ID da tarefa inválido.' });
+  // Garante que taskId é uma string. Se for um array, pega o primeiro elemento.
+  if (Array.isArray(taskId)) {
+    taskId = taskId[0];
+  }
+
+  // Certifica-se de que taskId é uma string válida
+  if (typeof taskId !== 'string' || !taskId) {
+    return res.status(400).json({ message: 'ID da tarefa inválido ou ausente.' });
   }
 
   // --- LOGS DE DEPURACAO ---
