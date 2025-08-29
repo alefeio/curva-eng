@@ -1,18 +1,19 @@
 import { useEffect, useState, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Task, User } from '../../../types/task'; 
-import { useSession } from 'next-auth/react'; 
+import { Task, User, TaskStatusEnum } from '../../../types/task'; // Importe TaskStatusEnum
+import { useSession } from 'next-auth/react';
 import AdminLayout from 'components/admin/AdminLayout';
 import TaskDetailModal from 'components/admin/TaskDetailModal';
 import TaskEditForm from 'components/admin/TaskEditForm';
 
 export default function TasksPage() {
-  const { data: session, status } = useSession(); 
+  const { data: session, status } = useSession();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('kanban'); // Mudei para iniciar em kanban
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null); // Estado para a tarefa arrastada
 
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -34,12 +35,12 @@ export default function TasksPage() {
     if (status !== 'authenticated' || !session?.user?.id) {
       setLoading(false);
       setError('Você precisa estar autenticado para visualizar as tarefas.');
-      return; 
+      return;
     }
     if ((session.user as any)?.role !== 'ADMIN') {
-        setLoading(false);
-        setError('Acesso negado. Apenas administradores podem visualizar as tarefas.');
-        return;
+      setLoading(false);
+      setError('Acesso negado. Apenas administradores podem visualizar as tarefas.');
+      return;
     }
 
 
@@ -47,17 +48,17 @@ export default function TasksPage() {
       setLoading(true);
       const response = await fetch('/api/tasks');
       if (!response.ok) {
-        const errorText = await response.text(); 
+        const errorText = await response.text();
         throw new Error(`Falha ao buscar as tarefas: ${response.status} ${response.statusText} - ${errorText}`);
       }
-      const data: Task[] = await response.json(); 
+      const data: Task[] = await response.json();
       setTasks(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Um erro inesperado ocorreu.');
     } finally {
       setLoading(false);
     }
-  }, [status, session]); 
+  }, [status, session]);
 
 
   useEffect(() => {
@@ -85,19 +86,19 @@ export default function TasksPage() {
   };
 
   const handleTaskUpdated = (updatedTask: Task) => {
-    setTasks(prevTasks => prevTasks.map(task => 
-      task.id === updatedTask.id ? { ...updatedTask, assignedTo: updatedTask.assignedTo, author: updatedTask.author } : task 
+    setTasks(prevTasks => prevTasks.map(task =>
+      task.id === updatedTask.id ? { ...updatedTask, assignedTo: updatedTask.assignedTo, author: updatedTask.author } : task
     ));
-    closeEditModal(); 
+    closeEditModal();
   };
 
   const getStatusColor = (status: Task['status']) => {
     switch (status) {
-      case 'PENDENTE':
+      case TaskStatusEnum.PENDENTE:
         return 'bg-red-100 text-red-800';
-      case 'EM_ANDAMENTO':
+      case TaskStatusEnum.EM_ANDAMENTO:
         return 'bg-yellow-100 text-yellow-800';
-      case 'CONCLUIDA':
+      case TaskStatusEnum.CONCLUIDA:
         return 'bg-green-100 text-green-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -130,11 +131,80 @@ export default function TasksPage() {
     }
   };
 
+  // Objeto de colunas Kanban usando o TaskStatusEnum
   const kanbanColumns = {
-    'PENDENTE': tasks.filter(task => task.status === 'PENDENTE'),
-    'EM_ANDAMENTO': tasks.filter(task => task.status === 'EM_ANDAMENTO'),
-    'CONCLUIDA': tasks.filter(task => task.status === 'CONCLUIDA'),
+    [TaskStatusEnum.PENDENTE]: tasks.filter(task => task.status === TaskStatusEnum.PENDENTE),
+    [TaskStatusEnum.EM_ANDAMENTO]: tasks.filter(task => task.status === TaskStatusEnum.EM_ANDAMENTO),
+    [TaskStatusEnum.CONCLUIDA]: tasks.filter(task => task.status === TaskStatusEnum.CONCLUIDA),
   };
+
+  // --- Funções de Drag and Drop ---
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
+    setDraggedTaskId(taskId);
+    e.dataTransfer.setData("taskId", taskId); // Armazena o ID da tarefa no evento de drag
+    e.currentTarget.classList.add('opacity-50', 'border-dashed', 'border-2', 'border-orange-500'); // Estilo para a tarefa arrastada
+  };
+
+  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    e.currentTarget.classList.remove('opacity-50', 'border-dashed', 'border-2', 'border-orange-500'); // Remove o estilo ao finalizar o drag
+    setDraggedTaskId(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault(); // Necessário para permitir o drop
+    e.currentTarget.classList.add('bg-orange-100', 'border-orange-500'); // Feedback visual na coluna
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.currentTarget.classList.remove('bg-orange-100', 'border-orange-500'); // Remove feedback visual
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>, newStatus: TaskStatusEnum) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('bg-orange-100', 'border-orange-500'); // Remove feedback visual
+
+    const taskId = e.dataTransfer.getData("taskId");
+    if (!taskId || taskId === draggedTaskId) return; // Evita soltar na mesma tarefa ou coluna
+
+    // Encontre a tarefa arrastada
+    const taskToMove = tasks.find(task => task.id === taskId);
+
+    if (taskToMove && taskToMove.status !== newStatus) {
+      // Atualiza o estado local imediatamente para uma experiência de usuário mais fluida
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === taskId ? { ...task, status: newStatus } : task
+        )
+      );
+
+      // Atualiza o backend
+      try {
+        const response = await fetch(`/api/tasks/${taskId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...taskToMove, status: newStatus }), // Envia o objeto completo com o novo status
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Falha ao atualizar o status da tarefa no backend.');
+        }
+        // O fetchTasks pode ser chamado aqui para revalidar os dados, se necessário,
+        // mas como o estado local já foi atualizado, pode ser opcional.
+        // fetchTasks(); 
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Um erro inesperado ocorreu ao atualizar o status.');
+        // Se houver erro no backend, você pode querer reverter a mudança no frontend
+        // para o estado original, ou mostrar uma mensagem de erro persistente.
+        // Por simplicidade, estamos apenas logando e mostrando o erro.
+        console.error("Erro ao atualizar status via API:", err);
+      }
+    }
+  };
+  // --- Fim das Funções de Drag and Drop ---
+
 
   if (status === 'loading') {
     return (
@@ -157,7 +227,7 @@ export default function TasksPage() {
             Por favor, verifique suas credenciais ou entre em contato com o administrador.
           </p>
           <Link href="/api/auth/signin" className="mt-6 inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 shadow-md">
-              Fazer Login
+            Fazer Login
           </Link>
         </div>
       </AdminLayout>
@@ -174,13 +244,13 @@ export default function TasksPage() {
     );
   }
 
-  if (loading) { 
+  if (loading) {
     return (
-        <AdminLayout>
-            <div className="flex justify-center items-center h-screen">
-                <p>Carregando tarefas...</p>
-            </div>
-        </AdminLayout>
+      <AdminLayout>
+        <div className="flex justify-center items-center h-screen">
+          <p>Carregando tarefas...</p>
+        </div>
+      </AdminLayout>
     );
   }
 
@@ -266,7 +336,7 @@ export default function TasksPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {task.assignedTo?.name || 'N/A'} 
+                          {task.assignedTo?.name || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}
@@ -288,19 +358,32 @@ export default function TasksPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {Object.entries(kanbanColumns).map(([status, tasksForColumn]) => (
-              <div key={status} className="bg-gray-100 p-4 rounded-lg shadow-md">
-                <h2 className="text-lg font-bold text-gray-700 mb-4">{status.replace(/_/g, ' ')} ({tasksForColumn.length})</h2>
+            {/* Mapeia as colunas Kanban usando o TaskStatusEnum */}
+            {Object.values(TaskStatusEnum).map((statusColumn) => (
+              <div
+                key={statusColumn}
+                className="bg-gray-100 p-4 rounded-lg shadow-md min-h-[300px]" // min-h para facilitar o drop em colunas vazias
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, statusColumn)} // Passa o status da coluna como novo status
+              >
+                <h2 className="text-lg font-bold text-gray-700 mb-4">{statusColumn.replace(/_/g, ' ')} ({kanbanColumns[statusColumn].length})</h2>
                 <div className="space-y-4">
-                  {tasksForColumn.length === 0 ? (
-                    <div className="text-center text-gray-500">
+                  {kanbanColumns[statusColumn].length === 0 ? (
+                    <div className="text-center text-gray-500 p-4">
                       Nenhuma tarefa nesta coluna.
                     </div>
                   ) : (
-                    tasksForColumn.map(task => (
-                      <div key={task.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+                    kanbanColumns[statusColumn].map(task => (
+                      <div
+                        key={task.id}
+                        draggable="true" // Torna a div arrastável
+                        onDragStart={(e) => handleDragStart(e, task.id)}
+                        onDragEnd={handleDragEnd}
+                        className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-200 cursor-grab"
+                      >
                         <h3 className="text-base font-semibold text-gray-900 truncate">{task.title}</h3>
-                        <p className="text-sm text-gray-500 mt-1">Responsável: {task.assignedTo?.name || 'N/A'}</p> 
+                        <p className="text-sm text-gray-500 mt-1">Responsável: {task.assignedTo?.name || 'N/A'}</p>
                         {task.dueDate && (
                           <p className="text-xs text-gray-400 mt-1">Vencimento: {new Date(task.dueDate).toLocaleDateString()}</p>
                         )}
@@ -332,9 +415,9 @@ export default function TasksPage() {
 
       {/* Modal de Detalhes da Tarefa */}
       {showDetailModal && selectedTask && (
-        <TaskDetailModal 
-          task={selectedTask} 
-          onClose={closeDetailModal} 
+        <TaskDetailModal
+          task={selectedTask}
+          onClose={closeDetailModal}
         />
       )}
 
