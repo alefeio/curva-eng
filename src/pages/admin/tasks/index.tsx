@@ -142,6 +142,8 @@ export default function TasksPage() {
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
     setDraggedTaskId(taskId);
     e.dataTransfer.setData("taskId", taskId); // Armazena o ID da tarefa no evento de drag
+    console.log("handleDragStart: Setting taskId in dataTransfer:", taskId);
+    console.log("handleDragStart: dataTransfer types:", e.dataTransfer.types);
     e.currentTarget.classList.add('opacity-50', 'border-dashed', 'border-2', 'border-orange-500'); // Estilo para a tarefa arrastada
   };
 
@@ -164,12 +166,23 @@ export default function TasksPage() {
     e.currentTarget.classList.remove('bg-orange-100', 'border-orange-500'); // Remove feedback visual
 
     const taskId = e.dataTransfer.getData("taskId");
-    if (!taskId || taskId === draggedTaskId) return; // Evita soltar na mesma tarefa ou coluna
+    console.log("handleDrop: taskId from dataTransfer:", taskId);
+
+    if (!taskId || taskId === draggedTaskId) {
+      console.log("handleDrop: Invalid taskId or dropping on same task/column. taskId:", taskId, "draggedTaskId:", draggedTaskId);
+      return; // Evita soltar na mesma tarefa ou coluna
+    }
 
     // Encontre a tarefa arrastada
     const taskToMove = tasks.find(task => task.id === taskId);
+    console.log("handleDrop: taskToMove found:", taskToMove);
 
     if (taskToMove && taskToMove.status !== newStatus) {
+      console.log("handleDrop: Attempting to update task status.");
+      console.log("handleDrop: Old Status:", taskToMove.status, "New Status:", newStatus);
+      console.log("handleDrop: Full task object being sent:", { ...taskToMove, status: newStatus });
+
+
       // Atualiza o estado local imediatamente para uma experiência de usuário mais fluida
       setTasks(prevTasks =>
         prevTasks.map(task =>
@@ -187,9 +200,14 @@ export default function TasksPage() {
           body: JSON.stringify({ ...taskToMove, status: newStatus }), // Envia o objeto completo com o novo status
         });
 
+        console.log("handleDrop: API response received:", response);
+
         if (!response.ok) {
           const errorData = await response.json();
+          console.error("handleDrop: API error response data:", errorData);
           throw new Error(errorData.message || 'Falha ao atualizar o status da tarefa no backend.');
+        } else {
+          console.log("handleDrop: Task status updated successfully in backend.");
         }
         // O fetchTasks pode ser chamado aqui para revalidar os dados, se necessário,
         // mas como o estado local já foi atualizado, pode ser opcional.
@@ -201,6 +219,9 @@ export default function TasksPage() {
         // Por simplicidade, estamos apenas logando e mostrando o erro.
         console.error("Erro ao atualizar status via API:", err);
       }
+    } else {
+      console.log("handleDrop: Task status is already newStatus or taskToMove not found.");
+      console.log("handleDrop: taskToMove:", taskToMove, "newStatus:", newStatus);
     }
   };
   // --- Fim das Funções de Drag and Drop ---
