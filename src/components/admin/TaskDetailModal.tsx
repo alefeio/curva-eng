@@ -15,6 +15,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
   const [commentError, setCommentError] = useState<string | null>(null);
   const [hasViewed, setHasViewed] = useState(false);
 
+  // Estado para controlar a visibilidade do tooltip
+  const [showTooltip, setShowTooltip] = useState<string | null>(null); // Armazena o ID do comentário para qual o tooltip está ativo
+
   // Helper para formatar a data
   const formatDate = (dateString: string | Date) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -61,14 +64,15 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: session.user.id }),
+        // O corpo da requisição pode não precisar do userId se o backend o pegar da sessão
+        // Mas se seu backend espera explicitamente, mantenha.
+        // body: JSON.stringify({ userId: session.user.id }),
       });
 
       if (response.ok) {
         setHasViewed(true);
         console.log(`Tarefa ${task.id} marcada como visualizada pelo usuário ${session.user.id}`);
-        // Opcional: refetch comments para atualizar a contagem de visualizações em tempo real
-        fetchComments();
+        fetchComments(); // Recarrega os comentários para atualizar a contagem de visualizações em tempo real
       } else {
         const errorData = await response.json();
         console.error('Erro ao marcar como visualizado:', errorData.message);
@@ -221,8 +225,26 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
                   <span className="text-gray-500">{formatDate(comment.createdAt)}</span>
                 </div>
                 <p className="text-gray-700">{comment.message}</p>
-                <div className="text-right text-xs text-gray-500 mt-2">
+                {/* Div para o tooltip */}
+                <div
+                  className="relative inline-block"
+                  onMouseEnter={() => setShowTooltip(comment.id)}
+                  onMouseLeave={() => setShowTooltip(null)}
+                >
+                  <div className="text-right text-xs text-gray-500 mt-2 cursor-pointer hover:underline">
                     Visualizações: {comment.viewedBy.length}
+                  </div>
+                  {showTooltip === comment.id && comment.viewedBy.length > 0 && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max p-2 bg-gray-800 text-white text-xs rounded-md shadow-lg z-10">
+                      <p className="font-bold mb-1">Visualizado por:</p>
+                      <ul className="list-disc list-inside">
+                        {comment.viewedBy.map((viewerId) => (
+                          <li key={viewerId}>{viewerId}</li> // Adapte para mostrar nomes se tiver acesso
+                        ))}
+                      </ul>
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-800 rotate-45 transform translate-y-1/2"></div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
