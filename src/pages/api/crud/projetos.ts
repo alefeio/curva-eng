@@ -47,15 +47,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   switch (method) {
     case 'POST':
       try {
-        // Incluindo 'isPublic' na desestruturação e no objeto de dados
-        const { title, subtitle, description, order, isPublic, items } = req.body;
+        // Agora usando 'publico' na desestruturação e no objeto de dados
+        const { title, subtitle, description, order, publico, items } = req.body;
         const novoProjeto = await prisma.projetos.create({
           data: {
             title,
             subtitle,
             description,
             order,
-            isPublic: isPublic ?? false, // Garante que isPublic seja definido, padrão para false se não enviado
+            publico: publico ?? false, // Garante que publico seja definido, padrão para false se não enviado
             items: {
               createMany: {
                 data: items.map((item: any) => ({
@@ -78,8 +78,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     case 'PUT':
       try {
-        // Incluindo 'isPublic' na desestruturação e no objeto de dados
-        const { id, title, subtitle, description, order, isPublic, items } = req.body;
+        // Agora usando 'publico' na desestruturação e no objeto de dados
+        const { id, title, subtitle, description, order, publico, items } = req.body;
 
         // Exclui todas as fotos existentes para o projeto antes de criar as novas
         await prisma.projetoFoto.deleteMany({
@@ -93,7 +93,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             subtitle,
             description,
             order,
-            isPublic: isPublic ?? false, // Garante que isPublic seja definido, padrão para false se não enviado
+            publico: publico ?? false, // Garante que publico seja definido, padrão para false se não enviado
             items: {
               createMany: {
                 data: items.map((item: any) => ({
