@@ -1,8 +1,7 @@
 import React, { useEffect, useState, FormEvent, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
-import { Task, Comment, TaskStatusEnum, User } from 'types/task'; // Adicionado User aqui para o tipo viewedByUsers
+import { Task, Comment, TaskStatusEnum, User } from 'types/task';
 
-// Definição da interface File, que reflete o modelo Prisma
 export interface File {
   id: string;
   url: string;
@@ -10,53 +9,44 @@ export interface File {
   mimetype: string;
   uploadedById: string;
   taskId?: string | null;
-  projetoId?: string | null; // Corrigido para projetoId conforme seu schema
+  projetoId?: string | null;
   createdAt: string;
-  // Adicionar aqui as informações do 'uploadedBy' e 'task'/'projeto' para exibição, se necessário
   uploadedBy?: { id: string; name: string } | null;
   task?: { id: string; title: string } | null;
   projeto?: { id: string; title: string } | null;
 }
 
-// Estenda a interface Task para incluir 'files' e 'projectId'
-// Assumindo que sua interface Task já pode ter um projectId opcional,
-// se não, você pode adicionar 'projectId?: string | null;' aqui.
 export interface ExtendedTask extends Task {
   files?: File[];
-  projetoId?: string | null; // Assumindo que a tarefa pode estar vinculada a um projeto
+  projetoId?: string | null;
 }
 
-// Estenda a interface Comment para incluir 'viewedByUsers'
 interface CommentWithViewers extends Comment {
   viewedByUsers?: { id: string; name: string }[];
 }
 
 interface TaskDetailModalProps {
-  task: ExtendedTask; // Usar a interface ExtendedTask aqui
+  task: ExtendedTask;
   onClose: () => void;
 }
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
   const { data: session } = useSession();
-  const [comments, setComments] = useState<CommentWithViewers[]>([]); // Usa a interface estendida
+  const [comments, setComments] = useState<CommentWithViewers[]>([]);
   const [newCommentMessage, setNewCommentMessage] = useState<string>('');
   const [commentLoading, setCommentLoading] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
   const [hasViewed, setHasViewed] = useState(false);
 
-  // Estados para gerenciamento de arquivos
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [fileToUpload, setFileToUpload] = useState<globalThis.File | null>(null);
-  const [isFileUploading, setIsFileUploading] = useState(false); // Para o upload físico
-  const [isFileSavingMetadata, setIsFileSavingMetadata] = useState(false); // Para salvar os metadados no DB
+  const [isFileUploading, setIsFileUploading] = useState(false);
+  const [isFileSavingMetadata, setIsFileSavingMetadata] = useState(false);
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [showTooltip, setShowTooltip] = useState<string | null>(null);
 
-  // Estado para controlar a visibilidade do tooltip
-  const [showTooltip, setShowTooltip] = useState<string | null>(null); // Armazena o ID do comentário para qual o tooltip está ativo
-
-  // Helper para formatar a data
   const formatDate = (dateString: string | Date) => {
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
@@ -69,7 +59,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     return new Date(dateString).toLocaleDateString('pt-BR', options);
   };
 
-  // Função para buscar comentários
   const fetchComments = useCallback(async () => {
     if (!task?.id) {
       console.warn("Task ID is missing, cannot fetch comments.");
@@ -80,7 +69,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     try {
       const response = await fetch(`/api/tasks/${task.id}/comments`);
       if (response.ok) {
-        const data: CommentWithViewers[] = await response.json(); // Espera o novo formato
+        const data: CommentWithViewers[] = await response.json();
         setComments(data);
       } else {
         const errorData = await response.json();
@@ -90,9 +79,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
       console.error("Erro ao buscar comentários:", error);
       setCommentError(error instanceof Error ? error.message : 'Erro ao carregar comentários.');
     }
-  }, [task?.id]); // Dependência: task.id
+  }, [task?.id]);
 
-  // NOVO: Função para buscar arquivos usando a nova rota /api/files
   const fetchFiles = useCallback(async () => {
     if (!task?.id) {
       console.warn("Task ID is missing, cannot fetch files.");
@@ -101,7 +89,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     }
     setFileUploadError(null);
     try {
-      // Agora usa a rota geral de arquivos com filtro por taskId
       const response = await fetch(`/api/files?taskId=${task.id}`);
       if (response.ok) {
         const data: File[] = await response.json();
@@ -116,7 +103,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     }
   }, [task?.id]);
 
-  // Função para marcar como visualizado
   const markAsViewed = useCallback(async () => {
     if (!task?.id || !session?.user?.id || hasViewed) return;
 
@@ -126,13 +112,12 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        // O backend deve pegar o userId da sessão.
       });
 
       if (response.ok) {
         setHasViewed(true);
         console.log(`Tarefa ${task.id} marcada como visualizada pelo usuário ${session.user.id}`);
-        fetchComments(); // Recarrega os comentários para atualizar a contagem de visualizações em tempo real
+        fetchComments();
       } else {
         const errorData = await response.json();
         console.error('Erro ao marcar como visualizado:', errorData.message);
@@ -142,17 +127,14 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     }
   }, [task?.id, session?.user?.id, hasViewed, fetchComments]);
 
-
-  // Efeito para carregar comentários e marcar como visualizado na montagem
   useEffect(() => {
     if (task?.id) {
       fetchComments();
-      fetchFiles(); // NOVO: Chamar fetchFiles também
+      fetchFiles();
       markAsViewed();
     }
   }, [task?.id, fetchComments, fetchFiles, markAsViewed]);
 
-  // Adicionar comentário
   const handleAddComment = async (e: FormEvent) => {
     e.preventDefault();
     if (!newCommentMessage.trim() || !task?.id) return;
@@ -171,7 +153,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
 
       if (response.ok) {
         setNewCommentMessage('');
-        fetchComments(); // Recarrega os comentários para incluir o novo
+        fetchComments();
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Falha ao adicionar comentário.');
@@ -184,17 +166,15 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     }
   };
 
-  // NOVO: Lidar com a seleção de arquivo
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFileToUpload(e.target.files[0]);
-      setFileUploadError(null); // Limpa erros anteriores
+      setFileUploadError(null);
     } else {
       setFileToUpload(null);
     }
   };
 
-  // NOVO: Lidar com o upload do arquivo (físico + metadados no DB)
   const handleFileUpload = async (e: FormEvent) => {
     e.preventDefault();
     if (!fileToUpload || !task?.id) {
@@ -202,7 +182,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
       return;
     }
 
-    setIsFileUploading(true); // Indica que o upload físico está em andamento
+    setIsFileUploading(true);
     setFileUploadError(null);
 
     const formData = new FormData();
@@ -212,21 +192,39 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
 
     try {
       // 1. Fazer o upload físico do arquivo (para Cloudinary, S3, etc.)
-      // Este endpoint /api/upload deve retornar a URL pública do arquivo, nome e mimetype.
+      console.log('--- Iniciando upload físico do arquivo para /api/upload ---');
       const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
 
+      console.log('Resposta bruta do /api/upload:', uploadResponse);
+
       if (!uploadResponse.ok) {
         const errorData = await uploadResponse.json();
+        console.error('Erro na resposta do /api/upload:', errorData);
         throw new Error(errorData.message || 'Falha ao fazer upload físico do arquivo.');
       }
       uploadedFileDetails = await uploadResponse.json();
+      console.log('Detalhes do arquivo após upload físico (de /api/upload):', uploadedFileDetails);
+
+      // VERIFICAÇÃO CRÍTICA AQUI: Garante que os campos necessários estão presentes
+      if (!uploadedFileDetails.url || !uploadedFileDetails.filename || !uploadedFileDetails.mimetype) {
+        throw new Error('O endpoint /api/upload não retornou URL, filename ou mimetype válidos.');
+      }
+
 
       // 2. Salvar os metadados do arquivo no seu banco de dados via /api/files
-      setIsFileUploading(false); // Upload físico concluído
-      setIsFileSavingMetadata(true); // Indica que o salvamento dos metadados está em andamento
+      setIsFileUploading(false);
+      setIsFileSavingMetadata(true);
+      console.log('--- Iniciando salvamento de metadados do arquivo para /api/files ---');
+      console.log('Payload enviado para /api/files:', {
+          url: uploadedFileDetails.url,
+          filename: uploadedFileDetails.filename,
+          mimetype: uploadedFileDetails.mimetype,
+          taskId: task.id,
+          projetoId: task.projetoId || null,
+      });
 
       const saveMetadataResponse = await fetch('/api/files', {
         method: 'POST',
@@ -237,22 +235,28 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
           url: uploadedFileDetails.url,
           filename: uploadedFileDetails.filename,
           mimetype: uploadedFileDetails.mimetype,
-          taskId: task.id, // Vincula à tarefa
-          projetoId: task.projetoId || null, // Vincula ao projeto se a tarefa tiver um
+          taskId: task.id,
+          projetoId: task.projetoId || null,
         }),
       });
 
+      console.log('Resposta bruta do /api/files:', saveMetadataResponse);
+
+
       if (!saveMetadataResponse.ok) {
         const errorData = await saveMetadataResponse.json();
+        console.error('Erro na resposta do /api/files (salvamento de metadados):', errorData);
         throw new Error(errorData.message || 'Falha ao salvar metadados do arquivo.');
       }
 
       // Se ambos os passos foram bem-sucedidos
-      setFileToUpload(null); // Limpa o arquivo selecionado
+      setFileToUpload(null);
       if (fileInputRef.current) {
-        fileInputRef.current.value = ''; // Limpa o input file
+        fileInputRef.current.value = '';
       }
-      fetchFiles(); // Recarregar para garantir que a lista esteja atualizada
+      fetchFiles();
+      console.log('Upload e salvamento de metadados do arquivo concluídos com sucesso!');
+
     } catch (error) {
       console.error("Erro no processo de upload/salvamento do arquivo:", error);
       setFileUploadError(error instanceof Error ? error.message : 'Erro ao processar o arquivo.');
@@ -287,7 +291,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     return 'Baixa';
   };
 
-  // Helper para determinar o ícone do arquivo
   const getFileIcon = (mimetype: string) => {
     if (mimetype.startsWith('image/')) {
       return (
@@ -386,7 +389,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
           )}
         </div>
 
-        {/* NOVO: Seção de Upload de Arquivos */}
+        {/* Seção de Upload de Arquivos */}
         <h3 className="text-xl font-bold mb-3 text-orange-600">Arquivos da Tarefa ({uploadedFiles.length})</h3>
         {(session?.user as any)?.role === 'ADMIN' && (
           <form onSubmit={handleFileUpload} className="mb-6 p-4 border rounded-md bg-gray-50">
@@ -421,7 +424,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
           </form>
         )}
 
-        {/* NOVO: Lista de Arquivos */}
+        {/* Lista de Arquivos */}
         <div className="mb-6 flex flex-wrap gap-3">
           {uploadedFiles.length === 0 ? (
             <p className="text-gray-600">Nenhum arquivo anexado ainda.</p>
