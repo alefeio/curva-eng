@@ -166,10 +166,9 @@ model Subscriber {
 // Novos modelos para o sistema de gestão da Curva Engenharia
 
 enum TaskStatus {
-  FEITO
   PENDENTE
-  ATRASADO
-  URGENTE
+  EM_ANDAMENTO
+  CONCLUIDA
 }
 
 model Task {

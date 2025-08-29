@@ -1,26 +1,30 @@
 // src/types/task.ts
 
+export enum TaskStatusEnum {
+  PENDENTE = 'PENDENTE',
+  EM_ANDAMENTO = 'EM_ANDAMENTO',
+  CONCLUIDA = 'CONCLUIDA',
+}
+
 export interface User {
   id: string;
   name: string | null;
-  role?: string | null; // Adicionado para consistência, assumindo que User tem uma role
+  role?: string | null;
 }
 
 export interface Task {
   id: string;
   title: string;
-  description: string | null; // Pode ser null
-  status: 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA';
+  description: string | null;
+  status: TaskStatusEnum;
   priority: number;
-  dueDate: string | null; // Pode ser null
+  dueDate: string | null;
   
-  // IDs das relações (chaves estrangeiras do DB)
   authorId: string;
   assignedToId: string;
 
-  // Objetos de relação populados pelo Prisma (opcionais, dependendo da query)
-  author?: User; 
-  assignedTo?: User; 
+  author?: User;
+  assignedTo?: User;
   
   createdAt: string;
   updatedAt: string;

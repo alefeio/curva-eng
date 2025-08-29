@@ -1,15 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getServerSession } from "next-auth"; // Importar getServerSession
-import { authOptions } from "../auth/[...nextauth]"; // Importar authOptions
-import { Task } from '../../../types/task'; // Importa a interface Task do arquivo central
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]";
+import { Task, TaskStatusEnum } from '../../../types/task';
 import prisma from '../../../../lib/prisma'; // ATENÇÃO: Ajuste este caminho se seu lib/prisma.ts estiver em outro lugar
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
-  // Usar getServerSession como nos outros arquivos que funcionam
   const session = await getServerSession(req, res, authOptions);
 
-  // LOGS DE DEPURACAO DA SESSAO NO SERVIDOR (MAIS DETALHADOS)
   console.log(`\n--- [API /api/tasks/${id}] INICIO DA REQUISICAO ---`);
   console.log(`[API /api/tasks/${id}] Método: ${req.method}`);
   console.log(`[API /api/tasks/${id}] Requisição Host: ${req.headers.host}`);
@@ -26,10 +24,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log(`[API /api/tasks/${id}] Sessão ausente para a requisição.`);
   }
   console.log(`--- [API /api/tasks/${id}] FIM DOS LOGS DE SESSAO ---\n`);
-  // FIM DOS LOGS DE DEPURACAO
 
 
-  // Autorização: exige ADMIN para PUT/DELETE/GET
   if (!session || (session.user as any)?.role !== 'ADMIN') {
     console.warn(`[API /api/tasks/${id}] Acesso NEGADO para ${req.method}. Motivo: ${!session ? 'Sessão Ausente' : `Role: ${(session?.user as any)?.role} (não é ADMIN)`}`);
     return res.status(401).json({ message: 'Acesso não autorizado. Apenas administradores podem realizar esta operação.' });
@@ -73,12 +69,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
         }
 
+        if (!Object.values(TaskStatusEnum).includes(status)) {
+            return res.status(400).json({ message: 'Status da tarefa inválido.' });
+        }
+        const validatedStatus = status as TaskStatusEnum;
+
         const updatedTask = await prisma.task.update({
           where: { id },
           data: {
             title,
             description,
-            status,
+            status: validatedStatus as any, // Adicionado 'as any' para compatibilidade com o tipo do Prisma
             priority,
             dueDate: new Date(dueDate),
             assignedToId,
