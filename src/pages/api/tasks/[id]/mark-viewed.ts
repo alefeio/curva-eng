@@ -29,25 +29,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'POST') {
     try {
-      // Atualiza todos os comentários da tarefa que AINDA NÃO possuem este userId em 'viewedBy'.
-      // Então, para esses comentários, adiciona o userId ao array 'viewedBy'.
-      const updatedCommentsCount = await prisma.comment.updateMany({
-        where: {
-          taskId: id, // Procura comentários associados à tarefa
-          NOT: { // O usuário NÃO visualizou este comentário ainda
-            viewedBy: {
-              has: userId // Verifica se o userId está presente no array
-            }
-          }
-        },
-        data: {
-          viewedBy: {
-            push: userId // Adiciona o userId ao array
-          }
-        }
+      // Busca a tarefa e seus comentários para garantir que o comentário existe
+      // Esta linha agora deve funcionar se o schema.prisma estiver correto
+      const task = await prisma.task.findUnique({
+        where: { id: id },
+        include: { comments: true },
       });
 
-      console.log(`[API /api/tasks/${id}/mark-viewed] ${updatedCommentsCount.count} comentários atualizados.`);
+      if (!task) {
+        return res.status(404).json({ message: 'Tarefa não encontrada.' });
+      }
+
+      let updatedCount = 0;
+      // Itera sobre cada comentário e atualiza APENAS se o userId não estiver lá
+      for (const comment of task.comments) {
+        if (!comment.viewedBy.includes(userId)) {
+          await prisma.comment.update({
+            where: { id: comment.id },
+            data: {
+              viewedBy: {
+                push: userId
+              }
+            }
+          });
+          updatedCount++;
+        }
+      }
+
+      console.log(`[API /api/tasks/${id}/mark-viewed] ${updatedCount} comentários atualizados.`);
       return res.status(200).json({ message: 'Visualização registrada com sucesso.' });
     } catch (error) {
       console.error(`Erro ao registrar visualização para a tarefa ${id} pelo usuário ${userId}:`, error);
