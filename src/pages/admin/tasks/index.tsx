@@ -426,9 +426,9 @@ export default function TasksPage() {
                           <p className="text-xs text-gray-400 mt-1">Vencimento: {new Date(task.dueDate).toLocaleDateString()}</p>
                         )}
                         <div className="flex flex-wrap items-center mt-2 space-x-2">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.status)}`}>
+                          {/* <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.status)}`}>
                             {task.status.replace(/_/g, ' ')}
-                          </span>
+                          </span> */}
                           <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getPriorityColor(task.priority)}`}>
                             {getPriorityText(task.priority)}
                           </span>

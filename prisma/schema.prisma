@@ -10,7 +10,7 @@ datasource db {
 }
 
 model Account {
-  id                String   @id @default(cuid())
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -22,7 +22,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -51,7 +51,7 @@ model User {
   site              Site?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
-  
+
   // Relações com os novos modelos
   tasksAuthored     Task[]    @relation("TaskAuthor")
   tasksAssigned     Task[]    @relation("TaskAssignee")
@@ -72,13 +72,13 @@ model VerificationToken {
 }
 
 model Menu {
-  id      Int    @id @default(1)
+  id      Int     @id @default(1)
   logoUrl String?
   links   Json
 }
 
 model Banner {
-  id      Int    @id @default(1)
+  id      Int   @id @default(1)
   banners Json
 }
 
@@ -146,14 +146,14 @@ model ColecaoItem {
 }
 
 model Site {
-  id                 String    @id @default(cuid())
-  userId             String    @unique
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tag_google_ads     String?
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag_google_ads       String?
   tag_google_analytics String?
-  tag_meta           String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  tag_meta             String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 }
 
 model Subscriber {
@@ -173,70 +173,74 @@ enum TaskStatus {
 }
 
 model Task {
-  id              String      @id @default(cuid())
-  title           String
-  description     String?
-  status          TaskStatus  @default(PENDENTE)
-  priority        Int         @default(0)
-  dueDate         DateTime?
-  
-  author          User        @relation("TaskAuthor", fields: [authorId], references: [id])
-  authorId        String
+  id           String      @id @default(cuid())
+  title        String
+  description  String?
+  status       TaskStatus  @default(PENDENTE)
+  priority     Int         @default(0)
+  dueDate      DateTime?
 
-  assignedTo      User        @relation("TaskAssignee", fields: [assignedToId], references: [id])
-  assignedToId    String
+  author       User        @relation("TaskAuthor", fields: [authorId], references: [id])
+  authorId     String
 
-  files           File[]
-  comments        Comment[]   // Array de comentários para esta tarefa
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  deletedAt       DateTime?
+  assignedTo   User        @relation("TaskAssignee", fields: [assignedToId], references: [id])
+  assignedToId String
+
+  files        File[]
+  comments     Comment[]   // Array de comentários para esta tarefa
+
+  // NOVO: Relacionamento opcional com Projetos
+  projeto      Projetos?   @relation(fields: [projetoId], references: [id])
+  projetoId    String?     // O ? torna o campo opcional
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  deletedAt    DateTime?
 }
 
 // Modelo para Comentários em Tarefas
 model Comment {
-  id              String      @id @default(cuid())
-  message         String
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id        String    @id @default(cuid())
+  message   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-  author          User        @relation("CommentAuthor", fields: [authorId], references: [id])
-  authorId        String
+  author    User      @relation("CommentAuthor", fields: [authorId], references: [id])
+  authorId  String
 
-  task            Task        @relation(fields: [taskId], references: [id])
-  taskId          String
+  task      Task      @relation(fields: [taskId], references: [id])
+  taskId    String
 
-  viewedBy        String[]    @default([]) // Array de IDs de usuários que visualizaram o comentário
+  viewedBy  String[]  @default([]) // Array de IDs de usuários que visualizaram o comentário
 }
 
 model File {
-  id              String    @id @default(cuid())
-  url             String    // URL do arquivo na Cloudinary
-  filename        String    // Nome original do arquivo
-  mimetype        String    // Tipo do arquivo (ex: 'application/pdf')
+  id           String    @id @default(cuid())
+  url          String    // URL do arquivo na Cloudinary
+  filename     String    // Nome original do arquivo
+  mimetype     String    // Tipo do arquivo (ex: 'application/pdf')
 
   // Relacionamento com o usuário que fez o upload
-  uploadedBy      User      @relation(fields: [uploadedById], references: [id])
-  uploadedById    String
-  
-  // Relacionamento com a tarefa à qual o arquivo pertence (opcional)
-  task            Task?     @relation(fields: [taskId], references: [id])
-  taskId          String?
+  uploadedBy   User      @relation(fields: [uploadedById], references: [id])
+  uploadedById String
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  // Relacionamento com a tarefa à qual o arquivo pertence (opcional)
+  task         Task?     @relation(fields: [taskId], references: [id])
+  taskId       String?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model Message {
-  id              String    @id @default(cuid())
-  content         String
-  
-  // Relacionamento com o autor da mensagem
-  sender          User      @relation(fields: [senderId], references: [id])
-  senderId        String
+  id        String    @id @default(cuid())
+  content   String
 
-  createdAt       DateTime  @default(now())
+  // Relacionamento com o autor da mensagem
+  sender    User      @relation(fields: [senderId], references: [id])
+  senderId  String
+
+  createdAt DateTime  @default(now())
 }
 
 model Projetos {
@@ -245,7 +249,9 @@ model Projetos {
   subtitle    String?
   description String?
   order       Int           @default(0)
+  publico     Boolean       @default(true) // NOVO: Campo para definir se o projeto é público
   items       ProjetoFoto[] // Define a relação com as fotos
+  tasks       Task[]        // NOVO: Relação com as tarefas que pertencem a este projeto
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
