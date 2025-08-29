@@ -8,9 +8,10 @@ import { authOptions } from '../auth/[...nextauth]';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
 
-  // Verifica se o usuário está autenticado
-  if (!session) {
-    return res.status(401).json({ message: 'Acesso não autorizado. É necessário estar logado.' });
+  // Verifica se o usuário está autenticado E se as informações do usuário estão disponíveis na sessão
+  if (!session || !session.user || !session.user.id) {
+    console.warn('[API /api/files] Acesso NEGADO. Motivo: Sessão ausente ou informações de usuário incompletas.');
+    return res.status(401).json({ message: 'Acesso não autorizado. É necessário estar logado e com informações de usuário completas.' });
   }
 
   switch (req.method) {
