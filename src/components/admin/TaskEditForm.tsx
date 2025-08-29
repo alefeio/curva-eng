@@ -1,6 +1,6 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { useSession } from 'next-auth/react';
-import { Projeto, Task, TaskStatusEnum, User } from 'types/task'; // Assumindo que esses tipos estão definidos corretamente aqui
+import { Projeto, Task, TaskStatusEnum, User } from 'types/task';
 
 interface TaskEditFormProps {
     taskId: string;
@@ -13,7 +13,7 @@ interface TaskFormData {
     description: string | null;
     status: TaskStatusEnum;
     priority: number;
-    dueDate: string | null; // Data no formato 'YYYY-MM-DD' para input[type="date"]
+    dueDate: string | null;
     assignedToId: string;
     projetoId: string | null;
 }
@@ -31,11 +31,11 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
     });
     const [users, setUsers] = useState<User[]>([]);
     const [projetos, setProjetos] = useState<Projeto[]>([]);
-    const [loading, setLoading] = useState(false); // Para o estado de submissão do formulário
-    const [error, setError] = useState<string | null>(null); // Erros de submissão
-    const [dataLoading, setDataLoading] = useState(true); // Para o carregamento inicial de TAREFA/USUÁRIOS/PROJETOS
-    const [usersError, setUsersError] = useState<string | null>(null); // Erros no fetch de usuários
-    const [projetosError, setProjetosError] = useState<string | null>(null); // Erros no fetch de projetos
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [dataLoading, setDataLoading] = useState(true);
+    const [usersError, setUsersError] = useState<string | null>(null);
+    const [projetosError, setProjetosError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -57,15 +57,14 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
 
                 setFormData({
                     title: taskData.title,
-                    description: taskData.description || null, // Garante que seja null se for undefined/vazio
+                    description: taskData.description || null,
                     status: taskData.status,
                     priority: taskData.priority,
-                    // Converte o objeto Date (ou string ISO) para 'YYYY-MM-DD' para o input type="date"
                     dueDate: taskData.dueDate
                         ? new Date(taskData.dueDate).toISOString().split('T')[0]
                         : null,
                     assignedToId: taskData.assignedToId,
-                    projetoId: taskData.projetoId || null, // Garante null se undefined/vazio
+                    projetoId: taskData.projetoId || null,
                 });
             } catch (err) {
                 console.error('[TaskEditForm] Erro ao buscar tarefa:', err);
@@ -75,14 +74,15 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
             // Fetch Users
             try {
                 console.log('[TaskEditForm] Buscando lista de usuários...');
-                const usersResponse = await fetch('/api/users'); // Verifique o caminho da sua API de usuários
+                const usersResponse = await fetch('/api/users');
                 if (!usersResponse.ok) {
                     const errorDetails = await usersResponse.json().catch(() => ({ message: 'Erro desconhecido ao parsear resposta de usuários.' }));
                     throw new Error(errorDetails.message || `Falha ao carregar a lista de usuários. Status: ${usersResponse.status}`);
                 }
-                const usersData: User[] = await usersResponse.json();
+                const usersData = await usersResponse.json(); // Pode ser { users: [...] }
                 console.log('[TaskEditForm] Usuários carregados:', usersData);
-                setUsers(usersData);
+                // CORREÇÃO AQUI: Acessar a propriedade 'users' do objeto retornado
+                setUsers(usersData.users || []); 
             } catch (err) {
                 console.error('[TaskEditForm] Erro ao buscar usuários:', err);
                 setUsersError(err instanceof Error ? err.message : 'Erro desconhecido ao carregar usuários.');
@@ -91,14 +91,13 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
             // Fetch Projetos
             try {
                 console.log('[TaskEditForm] Buscando lista de projetos...');
-                const projetosResponse = await fetch('/api/crud/projetos'); // Caminho da sua API de projetos
+                const projetosResponse = await fetch('/api/crud/projetos');
                 if (!projetosResponse.ok) {
                     const errorDetails = await projetosResponse.json().catch(() => ({ message: 'Erro desconhecido ao parsear resposta de projetos.' }));
                     throw new Error(errorDetails.message || `Falha ao carregar a lista de projetos. Status: ${projetosResponse.status}`);
                 }
                 const projetosData = await projetosResponse.json();
                 console.log('[TaskEditForm] Projetos carregados:', projetosData);
-                // Sua API de projetos retorna { success: true, projetos: [...] }, então acesse 'projetos'
                 setProjetos(projetosData.projetos || []);
             } catch (err) {
                 console.error('[TaskEditForm] Erro ao buscar projetos:', err);
@@ -109,14 +108,13 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
         };
 
         fetchData();
-    }, [taskId]); // Dependência taskId para re-executar se o ID da tarefa mudar
+    }, [taskId]);
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            // Converte strings vazias para null para campos opcionais
             [name]: (value === "" && (name === "description" || name === "dueDate" || name === "projetoId"))
                 ? null
                 : value,
@@ -285,11 +283,11 @@ const TaskEditForm: React.FC<TaskEditFormProps> = ({ taskId, onClose, onTaskUpda
                                 <select
                                     name="projetoId"
                                     id="projetoId"
-                                    value={formData.projetoId || ''} // Usa '' para a opção nula
+                                    value={formData.projetoId || ''}
                                     onChange={handleChange}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
                                 >
-                                    <option value="">Nenhum Projeto</option> {/* Opção para desassociar */}
+                                    <option value="">Nenhum Projeto</option>
                                     {projetos.map(projeto => (
                                         <option key={projeto.id} value={projeto.id}>{projeto.title}</option>
                                     ))}
