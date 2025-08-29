@@ -1,12 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
+import { getServerSession } from "next-auth"; // Importar getServerSession
+import { authOptions } from "../auth/[...nextauth]"; // Importar authOptions
 import { Task } from '../../../types/task'; // Importa a interface Task do arquivo central
 import prisma from '../../../../lib/prisma'; // ATENÇÃO: Ajuste este caminho se seu lib/prisma.ts estiver em outro lugar
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
-  // Removido 'secret' de getSession, pois não existe mais em versões recentes
-  const session = await getSession({ req });
+  // Usar getServerSession como nos outros arquivos que funcionam
+  const session = await getServerSession(req, res, authOptions);
 
   // LOGS DE DEPURACAO DA SESSAO NO SERVIDOR (MAIS DETALHADOS)
   console.log(`\n--- [API /api/tasks/${id}] INICIO DA REQUISICAO ---`);
@@ -28,23 +29,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // FIM DOS LOGS DE DEPURACAO
 
 
-  // Autorização genérica: exige ADMIN para PUT/DELETE. GET exige sessão para tarefas do admin.
-  if (req.method !== 'GET') { // Para PUT e DELETE
-    if (!session || (session.user as any)?.role !== 'ADMIN') {
-      console.warn(`[API /api/tasks/${id}] Acesso NEGADO para ${req.method}. Motivo: ${!session ? 'Sessão Ausente' : `Role: ${(session?.user as any)?.role} (não é ADMIN)`}`);
-      return res.status(401).json({ message: 'Não autorizado. Apenas administradores podem realizar esta operação.' });
-    }
-  } else { // Para GET
-    // Para GET, se não houver sessão, não autoriza (já que as tarefas não são públicas neste contexto de admin)
-    if (!session) {
-      console.warn(`[API /api/tasks/${id}] Acesso NEGADO para GET. Motivo: Sessão Ausente.`);
-      return res.status(401).json({ message: 'Não autorizado para visualização sem autenticação.' });
-    }
-    // Se quiser que APENAS ADMIN veja QUALQUER tarefa, adicione:
-    // if ((session.user as any)?.role !== 'ADMIN') {
-    //   console.warn(`[API /api/tasks/${id}] Acesso NEGADO para GET. Role: ${(session?.user as any)?.role}`);
-    //   return res.status(403).json({ message: 'Proibido. Apenas administradores podem visualizar todas as tarefas.' });
-    // }
+  // Autorização: exige ADMIN para PUT/DELETE/GET
+  if (!session || (session.user as any)?.role !== 'ADMIN') {
+    console.warn(`[API /api/tasks/${id}] Acesso NEGADO para ${req.method}. Motivo: ${!session ? 'Sessão Ausente' : `Role: ${(session?.user as any)?.role} (não é ADMIN)`}`);
+    return res.status(401).json({ message: 'Acesso não autorizado. Apenas administradores podem realizar esta operação.' });
   }
 
 
