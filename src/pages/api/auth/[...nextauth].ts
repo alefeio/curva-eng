@@ -26,7 +26,7 @@ export const authOptions: NextAuthOptions = {
                 await resend.emails.send({
                     from: from || "onboarding@resend.dev",
                     to: email,
-                    subject: "Link de login para o My Dress Belém",
+                    subject: "Link de login para o site Curva Engenharia",
                     html: `Clique neste link para entrar: <a href="${url}">${url}</a>`,
                 });
             },
