@@ -1,6 +1,11 @@
 import React, { useEffect, useState, FormEvent, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { Task, Comment, TaskStatusEnum } from 'types/task';
+import { Task, Comment, TaskStatusEnum, User } from 'types/task'; // Adicionado User aqui para o tipo viewedByUsers
+
+// Estenda a interface Comment para incluir 'viewedByUsers'
+interface CommentWithViewers extends Comment {
+  viewedByUsers?: { id: string; name: string }[];
+}
 
 interface TaskDetailModalProps {
   task: Task;
@@ -9,7 +14,7 @@ interface TaskDetailModalProps {
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
   const { data: session } = useSession();
-  const [comments, setComments] = useState<Comment[]>([]); // Inicializa vazio, será populado por fetchComments
+  const [comments, setComments] = useState<CommentWithViewers[]>([]); // Usa a interface estendida
   const [newCommentMessage, setNewCommentMessage] = useState<string>('');
   const [commentLoading, setCommentLoading] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
@@ -42,7 +47,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     try {
       const response = await fetch(`/api/tasks/${task.id}/comments`);
       if (response.ok) {
-        const data: Comment[] = await response.json();
+        const data: CommentWithViewers[] = await response.json(); // Espera o novo formato
         setComments(data);
       } else {
         const errorData = await response.json();
@@ -64,9 +69,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        // O corpo da requisição pode não precisar do userId se o backend o pegar da sessão
-        // Mas se seu backend espera explicitamente, mantenha.
-        // body: JSON.stringify({ userId: session.user.id }),
+        // O backend deve pegar o userId da sessão.
       });
 
       if (response.ok) {
@@ -214,6 +217,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
             <span className="block sm:inline"> {commentError}</span>
           </div>
         )}
+        {/* Adicione overflow-visible aqui para o contêiner de comentários se necessário */}
         <div className="space-y-4 mb-6 max-h-60 overflow-y-auto border p-3 rounded-md bg-gray-50">
           {comments.length === 0 ? (
             <p className="text-gray-600">Nenhum comentário ainda.</p>
@@ -227,7 +231,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
                 <p className="text-gray-700">{comment.message}</p>
                 {/* Div para o tooltip */}
                 <div
-                  className="relative inline-block"
+                  className="relative inline-block z-10" // Adicionado z-10 para o contêiner do tooltip
                   onMouseEnter={() => setShowTooltip(comment.id)}
                   onMouseLeave={() => setShowTooltip(null)}
                 >
@@ -235,14 +239,21 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
                     Visualizações: {comment.viewedBy.length}
                   </div>
                   {showTooltip === comment.id && comment.viewedBy.length > 0 && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max p-2 bg-gray-800 text-white text-xs rounded-md shadow-lg z-10">
-                      <p className="font-bold mb-1">Visualizado por:</p>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max p-2 bg-gray-800 text-white text-xs rounded-md shadow-lg z-20">
+                      <p className="font-bold mb-1 text-white">Visualizado por:</p> {/* Cor do texto ajustada */}
                       <ul className="list-disc list-inside">
-                        {comment.viewedBy.map((viewerId) => (
-                          <li key={viewerId}>{viewerId}</li> // Adapte para mostrar nomes se tiver acesso
-                        ))}
+                        {comment.viewedByUsers && comment.viewedByUsers.length > 0 ? (
+                          comment.viewedByUsers.map((viewer) => (
+                            <li key={viewer.id} className="text-white">{viewer.name || viewer.id}</li> // Mostra o nome ou o ID como fallback
+                          ))
+                        ) : (
+                          comment.viewedBy.map((viewerId) => (
+                            <li key={viewerId} className="text-white">{viewerId}</li> // Fallback para IDs se viewedByUsers não estiver disponível
+                          ))
+                        )}
                       </ul>
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-800 rotate-45 transform translate-y-1/2"></div>
+                      {/* Triângulo do tooltip */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-800 rotate-45 transform -translate-y-1/2"></div>
                     </div>
                   )}
                 </div>

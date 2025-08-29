@@ -1,4 +1,4 @@
-// src/pages/api/tasks/[id]/comments.ts
+z// src/pages/api/tasks/[id]/comments.ts
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from "next-auth";
@@ -6,57 +6,61 @@ import { authOptions } from "../../auth/[...nextauth]";
 import prisma from '../../../../../lib/prisma'; // ATENÇÃO: Ajuste este caminho
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  let { id } = req.query; // AGORA PEGA O 'id' DA URL
+  const { id } = req.query; // Mudado para 'id' para consistência com o caminho
+  const taskId = id as string; // Garante que taskId é string
 
-  // Garante que 'id' é uma string. Se for um array, pega o primeiro elemento.
-  if (Array.isArray(id)) {
-    id = id[0];
+  if (typeof taskId !== 'string') {
+    return res.status(400).json({ message: 'ID da tarefa inválido.' });
   }
 
-  // Certifica-se de que 'id' é uma string válida
-  if (typeof id !== 'string' || !id) {
-    return res.status(400).json({ message: 'ID da tarefa inválido ou ausente.' });
-  }
+  console.log(`\n--- [API /api/tasks/${taskId}/comments] INICIO DA REQUISICAO ---`);
+  console.log(`[API /api/tasks/${taskId}/comments] Método: ${req.method}`);
+  console.log(`[API /api/tasks/${taskId}/comments] Requisição Host: ${req.headers.host}`);
+  console.log(`[API /api/tasks/${taskId}/comments] Requisição Origin: ${req.headers.origin}`);
+  console.log(`[API /api/tasks/${taskId}/comments] Variável de Ambiente NEXTAUTH_URL no runtime da API: ${process.env.NEXTAUTH_URL}`);
+  console.log(`--- [API /api/tasks/${taskId}/comments] FIM DOS LOGS GERAIS ---\n`);
 
-  // --- LOGS DE DEPURACAO ---
-  console.log(`\n--- [API /api/tasks/${id}/comments] INICIO DA REQUISICAO ---`);
-  console.log(`[API /api/tasks/${id}/comments] Método: ${req.method}`);
-  console.log(`[API /api/tasks/${id}/comments] Requisição Host: ${req.headers.host}`);
-  console.log(`[API /api/tasks/${id}/comments] Requisição Origin: ${req.headers.origin}`);
-  console.log(`[API /api/tasks/${id}/comments] Variável de Ambiente NEXTAUTH_URL no runtime da API: ${process.env.NEXTAUTH_URL}`);
-  console.log(`--- [API /api/tasks/${id}/comments] FIM DOS LOGS GERAIS ---\n`);
+  const session = await getServerSession(req, res, authOptions);
 
   switch (req.method) {
     case 'GET':
-      const sessionGet = await getServerSession(req, res, authOptions);
-      if (!sessionGet || (sessionGet.user as any)?.role !== 'ADMIN') {
-        console.warn(`[API /api/tasks/${id}/comments] Acesso NEGADO para GET. Motivo: ${!sessionGet ? 'Sessão Ausente' : `Role: ${(sessionGet?.user as any)?.role} (não é ADMIN)`}`);
-        return res.status(401).json({ message: 'Acesso não autorizado. Apenas administradores podem visualizar comentários.' });
-      }
-
       try {
         const comments = await prisma.comment.findMany({
-          where: { taskId: id }, // Usa 'id' aqui
+          where: { taskId },
           include: {
             author: {
               select: { id: true, name: true },
             },
           },
-          orderBy: {
-            createdAt: 'asc',
-          },
+          orderBy: { createdAt: 'asc' },
         });
-        console.log(`[API /api/tasks/${id}/comments] GET executado. ${comments.length} comentários encontrados.`);
-        return res.status(200).json(comments);
+
+        const commentsWithViewers = await Promise.all(comments.map(async (comment) => {
+          if (comment.viewedBy && comment.viewedBy.length > 0) {
+            const viewedByUsers = await prisma.user.findMany({
+              where: {
+                id: {
+                  in: comment.viewedBy,
+                },
+              },
+              select: { id: true, name: true },
+            });
+            return { ...comment, viewedByUsers };
+          }
+          return { ...comment, viewedByUsers: [] };
+        }));
+
+        console.log(`[API /api/tasks/${taskId}/comments] GET executado. ${comments.length} comentários encontrados.`);
+        return res.status(200).json(commentsWithViewers);
       } catch (e: any) {
-        console.error(`[API /api/tasks/${id}/comments] Erro ao buscar comentários para a tarefa ${id}:`, e);
-        return res.status(500).json({ message: 'Erro interno do servidor ao buscar comentários.' });
+        console.error(`[API /api/tasks/${taskId}/comments] Erro ao buscar comentários para a tarefa ${taskId}:`, e);
+        return res.status(500).json({ message: 'Erro ao carregar comentários.', details: e.message });
       }
 
     case 'POST':
       const sessionPost = await getServerSession(req, res, authOptions);
       if (!sessionPost || (sessionPost.user as any)?.role !== 'ADMIN') {
-        console.warn(`[API /api/tasks/${id}/comments] Acesso NEGADO para POST. Motivo: ${!sessionPost ? 'Sessão Ausente' : `Role: ${(sessionPost?.user as any)?.role} (não é ADMIN)`}`);
+        console.warn(`[API /api/tasks/${taskId}/comments] Acesso NEGADO para POST. Motivo: ${!sessionPost ? 'Sessão Ausente' : `Role: ${(sessionPost?.user as any)?.role} (não é ADMIN)`}`);
         return res.status(401).json({ message: 'Acesso não autorizado. Apenas administradores podem adicionar comentários.' });
       }
 
@@ -72,8 +76,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           data: {
             message,
             authorId,
-            taskId: id, // Usa 'id' aqui
-            viewedBy: [],
+            taskId,
+            viewedBy: [], // Inicialmente, ninguém visualizou
           },
           include: {
             author: {
@@ -81,11 +85,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
           },
         });
-        console.log(`[API /api/tasks/${id}/comments] POST executado. Novo comentário ${newComment.id} criado.`);
-        return res.status(201).json(newComment);
+        console.log(`[API /api/tasks/${taskId}/comments] POST executado. Novo comentário ${newComment.id} criado.`);
+        const newCommentWithViewers = { ...newComment, viewedByUsers: [] }; // Adicionado para consistência
+        return res.status(201).json(newCommentWithViewers);
       } catch (e: any) {
-        console.error(`[API /api/tasks/${id}/comments] Erro ao criar comentário para a tarefa ${id}:`, e);
-        return res.status(500).json({ message: 'Erro interno do servidor ao criar comentário.' });
+        console.error(`[API /api/tasks/${taskId}/comments] Erro ao criar comentário para a tarefa ${taskId}:`, e);
+        return res.status(500).json({ message: 'Erro ao criar comentário.', details: e.message });
       }
 
     default:

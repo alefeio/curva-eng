@@ -13,30 +13,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (typeof id !== 'string' || !id) {
+    console.error('[API /api/tasks/[id]/mark-viewed] Erro: ID da tarefa inválido ou ausente.');
     return res.status(400).json({ message: 'ID da tarefa inválido ou ausente.' });
   }
 
   const session = await getServerSession(req, res, authOptions);
 
-  if (!session || (session.user as any)?.role !== 'ADMIN') {
-    return res.status(401).json({ message: 'Acesso não autorizado.' });
+  // Alteração: Agora qualquer usuário autenticado pode marcar como visualizado.
+  // A restrição para 'ADMIN' foi removida.
+  if (!session) {
+    console.warn(`[API /api/tasks/${id}/mark-viewed] Acesso NEGADO: Sessão ausente.`);
+    return res.status(401).json({ message: 'Acesso não autorizado. É necessário estar logado.' });
   }
 
   const userId = session.user?.id;
   if (!userId) {
+    console.error(`[API /api/tasks/${id}/mark-viewed] Erro: ID do usuário ausente na sessão.`);
     return res.status(400).json({ message: 'ID do usuário ausente.' });
   }
+
+  console.log(`\n--- [API /api/tasks/${id}/mark-viewed] INICIO DA REQUISICAO ---`);
+  console.log(`[API /api/tasks/${id}/mark-viewed] Método: ${req.method}`);
+  console.log(`[API /api/tasks/${id}/mark-viewed] Usuário: ${userId}`);
+  console.log(`--- [API /api/tasks/${id}/mark-viewed] FIM DOS LOGS GERAIS ---\n`);
+
 
   if (req.method === 'POST') {
     try {
       // Busca a tarefa e seus comentários para garantir que o comentário existe
-      // Esta linha agora deve funcionar se o schema.prisma estiver correto
       const task = await prisma.task.findUnique({
         where: { id: id },
         include: { comments: true },
       });
 
       if (!task) {
+        console.warn(`[API /api/tasks/${id}/mark-viewed] Tarefa não encontrada com ID: ${id}`);
         return res.status(404).json({ message: 'Tarefa não encontrada.' });
       }
 
@@ -48,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             where: { id: comment.id },
             data: {
               viewedBy: {
-                push: userId
+                push: userId // Adiciona o userId ao array viewedBy
               }
             }
           });
@@ -56,11 +67,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
 
-      console.log(`[API /api/tasks/${id}/mark-viewed] ${updatedCount} comentários atualizados.`);
+      if (updatedCount > 0) {
+        console.log(`[API /api/tasks/${id}/mark-viewed] Sucesso: ${updatedCount} comentários atualizados para o usuário ${userId}.`);
+      } else {
+        console.log(`[API /api/tasks/${id}/mark-viewed] Nenhum comentário novo para atualizar para o usuário ${userId}.`);
+      }
+
       return res.status(200).json({ message: 'Visualização registrada com sucesso.' });
-    } catch (error) {
-      console.error(`Erro ao registrar visualização para a tarefa ${id} pelo usuário ${userId}:`, error);
-      return res.status(500).json({ message: 'Erro interno do servidor ao registrar visualização.' });
+    } catch (error: any) {
+      console.error(`[API /api/tasks/${id}/mark-viewed] Erro ao registrar visualização para a tarefa ${id} pelo usuário ${userId}:`, error);
+      return res.status(500).json({ message: 'Erro interno do servidor ao registrar visualização.', details: error.message });
     }
   } else {
     res.setHeader('Allow', ['POST']);
