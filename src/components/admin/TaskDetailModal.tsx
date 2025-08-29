@@ -12,6 +12,10 @@ export interface File {
   taskId?: string | null;
   projetoId?: string | null; // Corrigido para projetoId conforme seu schema
   createdAt: string;
+  // Adicionar aqui as informações do 'uploadedBy' e 'task'/'projeto' para exibição, se necessário
+  uploadedBy?: { id: string; name: string } | null;
+  task?: { id: string; title: string } | null;
+  projeto?: { id: string; title: string } | null;
 }
 
 // Estenda a interface Task para incluir 'files' e 'projectId'
@@ -19,7 +23,7 @@ export interface File {
 // se não, você pode adicionar 'projectId?: string | null;' aqui.
 export interface ExtendedTask extends Task {
   files?: File[];
-  projectId?: string | null; // Assumindo que a tarefa pode estar vinculada a um projeto
+  projetoId?: string | null; // Assumindo que a tarefa pode estar vinculada a um projeto
 }
 
 // Estenda a interface Comment para incluir 'viewedByUsers'
@@ -43,7 +47,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
   // Estados para gerenciamento de arquivos
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [fileToUpload, setFileToUpload] = useState<globalThis.File | null>(null);
-  const [isFileUploading, setIsFileUploading] = useState(false);
+  const [isFileUploading, setIsFileUploading] = useState(false); // Para o upload físico
+  const [isFileSavingMetadata, setIsFileSavingMetadata] = useState(false); // Para salvar os metadados no DB
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -87,7 +92,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     }
   }, [task?.id]); // Dependência: task.id
 
-  // NOVO: Função para buscar arquivos
+  // NOVO: Função para buscar arquivos usando a nova rota /api/files
   const fetchFiles = useCallback(async () => {
     if (!task?.id) {
       console.warn("Task ID is missing, cannot fetch files.");
@@ -96,7 +101,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     }
     setFileUploadError(null);
     try {
-      const response = await fetch(`/api/tasks/${task.id}/files`);
+      // Agora usa a rota geral de arquivos com filtro por taskId
+      const response = await fetch(`/api/files?taskId=${task.id}`);
       if (response.ok) {
         const data: File[] = await response.json();
         setUploadedFiles(data);
@@ -188,7 +194,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     }
   };
 
-  // NOVO: Lidar com o upload do arquivo
+  // NOVO: Lidar com o upload do arquivo (físico + metadados no DB)
   const handleFileUpload = async (e: FormEvent) => {
     e.preventDefault();
     if (!fileToUpload || !task?.id) {
@@ -196,40 +202,63 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
       return;
     }
 
-    setIsFileUploading(true);
+    setIsFileUploading(true); // Indica que o upload físico está em andamento
     setFileUploadError(null);
 
     const formData = new FormData();
     formData.append('file', fileToUpload);
-    formData.append('taskId', task.id);
-    if (task.projectId) { // Envia o projectId se a tarefa estiver vinculada a um projeto
-      formData.append('projetoId', task.projectId);
-    }
+
+    let uploadedFileDetails: { url: string; filename: string; mimetype: string };
 
     try {
-      // Você precisará criar este endpoint API: /api/upload
-      const response = await fetch('/api/upload', {
+      // 1. Fazer o upload físico do arquivo (para Cloudinary, S3, etc.)
+      // Este endpoint /api/upload deve retornar a URL pública do arquivo, nome e mimetype.
+      const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
-        body: formData, // FormData não precisa de 'Content-Type' no header, o navegador define
+        body: formData,
       });
 
-      if (response.ok) {
-        const uploadedFile: File = await response.json();
-        setUploadedFiles((prevFiles) => [...prevFiles, uploadedFile]);
-        setFileToUpload(null); // Limpa o arquivo selecionado
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ''; // Limpa o input file
-        }
-        fetchFiles(); // Recarregar para garantir que a lista esteja atualizada
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Falha ao fazer upload do arquivo.');
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.message || 'Falha ao fazer upload físico do arquivo.');
       }
+      uploadedFileDetails = await uploadResponse.json();
+
+      // 2. Salvar os metadados do arquivo no seu banco de dados via /api/files
+      setIsFileUploading(false); // Upload físico concluído
+      setIsFileSavingMetadata(true); // Indica que o salvamento dos metadados está em andamento
+
+      const saveMetadataResponse = await fetch('/api/files', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: uploadedFileDetails.url,
+          filename: uploadedFileDetails.filename,
+          mimetype: uploadedFileDetails.mimetype,
+          taskId: task.id, // Vincula à tarefa
+          projetoId: task.projetoId || null, // Vincula ao projeto se a tarefa tiver um
+        }),
+      });
+
+      if (!saveMetadataResponse.ok) {
+        const errorData = await saveMetadataResponse.json();
+        throw new Error(errorData.message || 'Falha ao salvar metadados do arquivo.');
+      }
+
+      // Se ambos os passos foram bem-sucedidos
+      setFileToUpload(null); // Limpa o arquivo selecionado
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''; // Limpa o input file
+      }
+      fetchFiles(); // Recarregar para garantir que a lista esteja atualizada
     } catch (error) {
-      console.error("Erro ao fazer upload do arquivo:", error);
-      setFileUploadError(error instanceof Error ? error.message : 'Erro ao fazer upload do arquivo.');
+      console.error("Erro no processo de upload/salvamento do arquivo:", error);
+      setFileUploadError(error instanceof Error ? error.message : 'Erro ao processar o arquivo.');
     } finally {
       setIsFileUploading(false);
+      setIsFileSavingMetadata(false);
     }
   };
 
@@ -307,6 +336,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     );
   }
 
+  const isProcessingFile = isFileUploading || isFileSavingMetadata;
+
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center p-4 z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
@@ -367,21 +398,21 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 className="block w-full text-sm text-gray-500
-                         file:mr-4 file:py-2 file:px-4
-                         file:rounded-md file:border-0
-                         file:text-sm file:font-semibold
-                         file:bg-orange-50 file:text-orange-700
-                         hover:file:bg-orange-100"
-                disabled={isFileUploading}
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-md file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-orange-50 file:text-orange-700
+                                  hover:file:bg-orange-100"
+                disabled={isProcessingFile}
               />
               <button
                 type="submit"
-                disabled={isFileUploading || !fileToUpload}
+                disabled={isProcessingFile || !fileToUpload}
                 className={`py-2 px-4 rounded-md font-bold transition duration-300 w-full sm:w-auto ${
-                  isFileUploading || !fileToUpload ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'
+                  isProcessingFile || !fileToUpload ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'
                 } text-white`}
               >
-                {isFileUploading ? 'Enviando...' : 'Fazer Upload'}
+                {isFileUploading ? 'Enviando...' : isFileSavingMetadata ? 'Salvando...' : 'Fazer Upload'}
               </button>
             </div>
             {fileUploadError && (
