@@ -390,7 +390,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
         </div>
 
         {/* Seção de Upload de Arquivos */}
-        <h3 className="text-xl font-bold mb-3 text-orange-600">Arquivos da Tarefa ({uploadedFiles.length})</h3>
+        <h3 className="text-xl font-bold mb-3 text-orange-600">Arquivos ({uploadedFiles.length})</h3>
         {(session?.user as any)?.role === 'ADMIN' && (
           <form onSubmit={handleFileUpload} className="mb-6 p-4 border rounded-md bg-gray-50">
             <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-2">Anexar Arquivo</label>
@@ -415,7 +415,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
                   isProcessingFile || !fileToUpload ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'
                 } text-white`}
               >
-                {isFileUploading ? 'Enviando...' : isFileSavingMetadata ? 'Salvando...' : 'Fazer Upload'}
+                {isFileUploading ? 'Enviando...' : isFileSavingMetadata ? 'Salvando...' : 'Enviar'}
               </button>
             </div>
             {fileUploadError && (

@@ -268,7 +268,7 @@ export default function NewTaskPage() {
                   value={formData.dueDate}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
+                  className="mt-1 block text-gray-700 w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2"
                 />
               </div>
 
